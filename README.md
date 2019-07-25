@@ -9,7 +9,7 @@ This creates a docker container to build an Ubuntu 19.10 server image for a Rasp
 
 Start by building a container that will act as package build environment:
 
-    docker build -t docker-rpi-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
+    docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
 In this example the target is Ubuntu 19.10 but you can create and
 modify `Dockerfile-nnn` to match your target environment.
@@ -33,8 +33,8 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
     mkdir output
 
     # build package from source directory
-    # ./build-image -i docker-rpi-imagebuilder:19.10 -o output ~/directory_with_the_scripts
-    ./build-image -i docker-rpi-imagebuilder:19.10 -o output .
+    # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
+    ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
 
 
 
