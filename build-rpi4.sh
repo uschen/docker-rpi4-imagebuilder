@@ -62,9 +62,11 @@ cd ..
 echo "Copying compiled ${KERNEL_VERSION} kernel to image."
 cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
 cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz /mnt/boot/vmlinuz-${KERNEL_VERSION}
-cp -avf rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
+cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+cp rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
-cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/etc/flash-kernel/dtbs
+cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo /mnt/boot/firmware/overlays/
+cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/etc/flash-kernel/dtbs/
 sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
 
 echo "Downloading RPI4 armstub8-gic source"
@@ -105,8 +107,9 @@ echo "unmounting modified image"
 umount /mnt/boot/firmware
 umount /mnt
 kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
+now=%(date +"%m_%d_%Y_%H%M")
 echo "Compressing image quickly with lz4."
-lz4 eoan-preinstalled-server-arm64+raspi4.img
+lz4 eoan-preinstalled-server-arm64+raspi4.img eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}-${now}.img.lz4
 pwd
 
 # Copy packages to output dir with user's permissions
