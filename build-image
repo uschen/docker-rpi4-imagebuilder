@@ -5,7 +5,7 @@ PROG_DIR=$(dirname $0)
 
 function usage {
     cat <<EOF 1>&2
-usage: $PROG [options...] SOURCEDIR
+usage: $PROG [options...] SOURCEDIR_for_scripts
 Options:
   -i IMAGE  Name of the docker image (including tag) to use as package build environment.
   -o DIR    Destination directory to store packages to.
@@ -56,7 +56,7 @@ docker_args="-it "
 [[ !    "$outdir"        ]] && fatal "output directory was not given (-o DIR)"
 [[ ! -d "$outdir"        ]] && fatal "output directory does not exist: $outdir"
 [[ !    "$srcdir"        ]] && fatal "source directory not given"
-[[ ! -r "$srcdir/debian" ]] && fatal "source direcotry does not contain debian sub directory"
+#[[ ! -r "$srcdir/debian" ]] && fatal "source direcotry does not contain debian sub directory"
 [[ !    "$image"         ]] && fatal "docker image name not given (-i IMAGE)"
 
 # Check that optional parameters are valid
@@ -65,7 +65,7 @@ if [[ "$depdir" ]]; then
     docker_args+="-v $(abspath "$depdir"):/dependencies:ro "
 fi
 
-docker_args+="-v $(abspath "$srcdir"):/source-ro:ro -v $(abspath "$outdir"):/output -v $(cd $PROG_DIR; pwd)/build-helper.sh:/build-helper.sh:ro "
+docker_args+="-v $(abspath "$srcdir"):/source-ro:ro -v $(abspath "$outdir"):/output -v $(cd $PROG_DIR; pwd)/build-rpi4.sh:/build-rpi4.sh:ro "
 
 # Pass current UID and GID to container, so that it can change the
 # ownership of output files which are otherwise writen to outdir as
@@ -76,7 +76,10 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 # for debugging
 docker_args+="--rm "
 
-cmd="docker run -it $docker_args $image /build-helper.sh"
+# Needed for loopback to work inside container.
+docker_args+="-v /dev:/dev --privileged"
+
+cmd="docker run -it $docker_args $image /build-rpi4.sh"
 
 echo "Running docker:"
 echo "$cmd"
