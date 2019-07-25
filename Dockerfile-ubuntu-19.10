@@ -27,6 +27,6 @@ RUN set -ex \
                patch \
                wget \
                xz-utils \         
-    && apt-get build-dep -y linux-image-raspi2
+    && apt-get build-dep -y linux-image-raspi2 \
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
