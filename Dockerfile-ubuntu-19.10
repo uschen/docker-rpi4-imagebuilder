@@ -14,6 +14,11 @@ RUN set -ex \
                git \
                gcc-aarch64-linux-gnu \
                cpp-aarch64-linux-gnu \
-               patch
+               g++-aarch64-linux-gnu \
+               cmake \
+               patch \
+               kpartx \
+               xz-utils \
+               lz4
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
