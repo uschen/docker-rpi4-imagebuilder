@@ -20,5 +20,6 @@ RUN set -ex \
                kpartx \
                xz-utils \
                lz4 \
+               wget \
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
