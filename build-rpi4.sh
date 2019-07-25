@@ -11,6 +11,9 @@
 #   apt-get to install those afterwards
 [[ -d /dependencies ]] && dpkg -i /dependencies/*.deb || apt-get -f install -y --no-install-recommends
 
+#Time Stamp
+now=%(date +"%m_%d_%Y_%H%M")
+
 export PATH=/usr/lib/ccache:$PATH
 # Make read-write copy of source code
 mkdir -p /build
@@ -107,7 +110,6 @@ echo "unmounting modified image"
 umount /mnt/boot/firmware
 umount /mnt
 kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
-now=%(date +"%m_%d_%Y_%H%M")
 echo "Compressing image quickly with lz4."
 lz4 eoan-preinstalled-server-arm64+raspi4.img eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4
 pwd
