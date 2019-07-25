@@ -13,7 +13,8 @@ RUN set -ex \
                dkms \
                equivs \
                fakeroot \
-               flex \            
+               flex \
+               gawk \
                gcc-aarch64-linux-gnu \
                cpp-aarch64-linux-gnu \
                g++-aarch64-linux-gnu \
