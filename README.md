@@ -1,11 +1,12 @@
 
-# Creating a RPI4 boot image in a Docker container
+# Creating a RPI4 boot image in a Docker container from a current Ubuntu RPI3 boot image
 
 (Largely adapted from project at https://github.com/tsaarni/docker-deb-builder )
 
 ## Overview
 
 This creates a docker container to build an Ubuntu 19.10 server image for a Raspberry Pi 4B using unstable/current software.
+A new kernel is compiled, and current firmware is copied into the container.
 
 ## Create build environment
 
