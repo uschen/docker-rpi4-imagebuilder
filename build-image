@@ -79,8 +79,10 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 # for debugging
 docker_args+="--rm "
 
+if [ ! -f $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
 echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
 wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz -O $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz
+fi
 docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz"
 
 #cmd="docker run -it $docker_args $image /build-rpi4.sh"
