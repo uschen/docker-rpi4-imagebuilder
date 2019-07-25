@@ -23,7 +23,6 @@ RUN set -ex \
                libelf-dev \
                libncurses-dev \
                libssl-dev \
-               openssl-dev \
                patch \
                wget \
                xz-utils \         
