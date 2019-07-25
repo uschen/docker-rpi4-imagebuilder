@@ -19,6 +19,6 @@ RUN set -ex \
                patch \
                kpartx \
                xz-utils \
-               lz4
+               lz4 \
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
