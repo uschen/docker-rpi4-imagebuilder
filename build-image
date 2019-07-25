@@ -59,6 +59,9 @@ docker_args="-it "
 #[[ ! -r "$srcdir/debian" ]] && fatal "source direcotry does not contain debian sub directory"
 [[ !    "$image"         ]] && fatal "docker image name not given (-i IMAGE)"
 
+# Needed for loopback to work inside container.
+docker_args+="-v /dev:/dev --privileged"
+
 # Check that optional parameters are valid
 if [[ "$depdir" ]]; then
     [[ ! -d "$depdir" ]] && fatal "dependency directory given but does not exist: $depdir"
@@ -76,11 +79,12 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 # for debugging
 docker_args+="--rm "
 
-# Needed for loopback to work inside container.
-#docker_args+="-v /dev:/dev --privileged"
+echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
+wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz -O $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz
+docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz"
 
 #cmd="docker run -it $docker_args $image /build-rpi4.sh"
-cmd="docker run -it -v /dev:/dev --privileged $docker_args $image /build-rpi4.sh"
+cmd="docker run -it  $docker_args $image /build-rpi4.sh"
 
 
 echo "Running docker:"
