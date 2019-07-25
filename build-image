@@ -77,7 +77,7 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 
 # Comment following out if you want to keep container after execution
 # for debugging
-docker_args+="--rm "
+#docker_args+="--rm "
 
 if [ ! -f $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
 echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
