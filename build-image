@@ -60,7 +60,7 @@ docker_args="-it "
 [[ !    "$image"         ]] && fatal "docker image name not given (-i IMAGE)"
 
 # Needed for loopback to work inside container.
-docker_args+="-v /dev:/dev --privileged"
+docker_args+="-v /dev:/dev --privileged "
 
 # Check that optional parameters are valid
 if [[ "$depdir" ]]; then
