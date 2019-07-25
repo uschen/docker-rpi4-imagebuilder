@@ -25,14 +25,14 @@ cd /build/source
 if [ ! -f /eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
 echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
 wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz
-echo "Extracting image"
+echo "Extracting image."
 xzcat eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
 else
-echo "Extracting image"
+echo "Extracting image."
 xzcat /eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
 fi
 
-"Mounting image"
+echo "Mounting image."
 kpartx -av eoan-preinstalled-server-arm64+raspi4.img
 mount /dev/mapper/loop0p2 /mnt
 mount /dev/mapper/loop0p1 /mnt/boot/firmware
