@@ -66,7 +66,7 @@ echo "Copying compiled ${KERNEL_VERSION} kernel to image."
 cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
 cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz /mnt/boot/vmlinuz-${KERNEL_VERSION}
 cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
-cp rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
+cp -r rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo /mnt/boot/firmware/overlays/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/etc/flash-kernel/dtbs/
