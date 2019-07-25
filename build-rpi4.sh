@@ -59,14 +59,14 @@ mkdir kernel-build
 make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  bcm2711_defconfig
 make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 export KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` 
-make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- DEPMOD=echo MODLIB=./kernel-install/lib/modules/${KERNEL_VERSION} INSTALL_FW_PATH=./kernel-install/lib/firmware modules_install
+make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- DEPMOD=echo  INSTALL_MOD_PATH=/mnt/usr/ modules_install
 cd ..
 
 echo "Copying compiled ${KERNEL_VERSION} kernel to image."
 cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
 cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz /mnt/boot/vmlinuz-${KERNEL_VERSION}
 cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
-cp -r rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
+#cp -r rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo /mnt/boot/firmware/overlays/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/etc/flash-kernel/dtbs/
