@@ -83,14 +83,17 @@ if [ ! -f $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz ]; t
 echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
 wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz -O $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz
 fi
-docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz"
+docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz "
 
-cmd="docker run -e CCACHE_DIR=/ccache --volumes-from ccache -it  $docker_args $image /build-rpi4.sh"
+# For ccache
+docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
+
+cmd="docker run -it  $docker_args $image /build-rpi4.sh"
 
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
-# docker volume create --name ccache
-docker create -v /mnt/ccache:/ccache --name ccache $image
+docker volume create --name ccache
+# docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
 
