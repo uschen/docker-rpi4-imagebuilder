@@ -56,7 +56,12 @@ git clone --depth=1 -b $branch https://github.com/raspberrypi/linux.git rpi-linu
 cd rpi-linux
 #git checkout origin/rpi-4.19.y # change the branch name for newer versions
 mkdir kernel-build
+
 make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  bcm2711_defconfig
+cd kernel-build
+/build/source/conform_config.sh
+cd ..
+
 make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 export KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` 
 make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- DEPMOD=echo  INSTALL_MOD_PATH=/mnt/usr/ modules_install
