@@ -17,7 +17,7 @@ cp -a /source-ro /build/source
 cd /build/source
 
 # Install build dependencies
-mk-build-deps -ir -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
+#mk-build-deps -ir -t "apt-get -o Debug::pkgProblemResolver=yes -y --no-install-recommends"
 
 # Build packages
 #debuild -b -uc -us
