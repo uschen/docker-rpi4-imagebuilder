@@ -86,7 +86,8 @@ fi
 docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz "
 
 # For ccache
-docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
+#docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
+docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 cmd="docker run -it  $docker_args $image /build-rpi4.sh"
 
