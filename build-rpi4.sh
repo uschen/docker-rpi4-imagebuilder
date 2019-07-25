@@ -109,7 +109,7 @@ umount /mnt
 kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
 now=%(date +"%m_%d_%Y_%H%M")
 echo "Compressing image quickly with lz4."
-lz4 eoan-preinstalled-server-arm64+raspi4.img eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}-${now}.img.lz4
+lz4 eoan-preinstalled-server-arm64+raspi4.img eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4
 pwd
 
 # Copy packages to output dir with user's permissions
