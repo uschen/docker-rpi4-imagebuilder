@@ -38,7 +38,7 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
 
 
-After successful build you will find the `image.lz4` file in the `output`
+After successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img.lz4` file in the `output`
 directory.
 
 ## Installing image to sd card
