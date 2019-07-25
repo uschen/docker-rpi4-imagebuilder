@@ -111,5 +111,5 @@ pwd
 # Copy packages to output dir with user's permissions
 chown -R $USER:$GROUP /build
 echo "Copying image out of container."
-cp -a /build/*.lz4 /output/
+cp -a /build/source/*.lz4 /output/
 ls -l /output
