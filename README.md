@@ -52,6 +52,15 @@ Example: ```lz4cat ~/Downloads/eoan-preinstalled-server-arm64+raspi4.img.lz4 | s
 
 Note that you want to replace instances of "xzcat" with "lzcat" since this setup uses the much faster lz4 to compress the images created in the docker container.
 
+## 1st Login
+The **default login for this image is unchanged** from the ubuntu server default image: **ubuntu/ubuntu**.
+Note also that the **RPI4 SHOULD Be connected to ethernet for first login**, as the ubuntu startup cloud sequence wants a connection.
+After the network starts, you should be able to ssh to the IP of the RPI with username ubuntu, where you will be prompted to change the password.
+
+Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata```. You can also use ```nmtui``` to configure the wireless network after doing ```sudo apt install network-manager```.
+
+
+
 ## Notes:
 
 The Dockerfile-ubuntu-19.10 Dockerfile assumes that the remaining requirements to build the software are a subset of the requirements for building the ubuntu package linux-image-raspi2. If that package is removed at some point or there is a new package that supersedes that, that "apt-get build-dep -y linux-image-raspi2" line in the Dockerfile should be replaced or modified accordingly.
