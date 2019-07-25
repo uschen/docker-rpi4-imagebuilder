@@ -11,9 +11,9 @@ required build tools and how to use it to build packages.
 
 Start by building a container that will act as package build environment:
 
-    docker build -t docker-deb-builder:17.04 -f Dockerfile-ubuntu-17.04 .
+    docker build -t docker-deb-builder:19.10 -f Dockerfile-ubuntu-19.10 .
 
-In this example the target is Ubuntu 17.04 but you can create and
+In this example the target is Ubuntu 19.10 but you can create and
 modify `Dockerfile-nnn` to match your target environment.
 
 ## Building packages
@@ -45,7 +45,7 @@ To build Debian packages run following commands:
     mkdir output
 
     # build package from source directory
-    ./build -i docker-deb-builder:17.04 -o output ~/my-package-source
+    ./build -i docker-deb-builder:19.10 -o output ~/my-package-source
 
 After successful build you will find the `.deb` files in `output`
 directory.
