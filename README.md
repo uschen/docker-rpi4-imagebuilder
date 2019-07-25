@@ -1,11 +1,9 @@
 
-# Creating Debian packages in Docker container
+# Creating a RPI4 boot image in a Docker container
 
 ## Overview
 
-Docker can be used to set up a clean build environment for Debian
-packaging.  This tutorial shows how to create a container with
-required build tools and how to use it to build packages.
+This creates a docker container to build an Ubuntu 19.10 server image for a Raspberry Pi 4B using unstable/current software.
 
 ## Create build environment
 
@@ -18,36 +16,18 @@ modify `Dockerfile-nnn` to match your target environment.
 
 ## Building packages
 
-First download or git clone the source code of the package you are
-building:
-
-    git clone ... ~/my-package-source
-
-The source code should contain subdirectory called `debian` with at
-least a minimum set of packaging files: `control`, `copyright`,
-`changelog` and `rules`.
-
 Clone the
-[docker-deb-builder](https://github.com/tsaarni/docker-deb-builder)
+[docker-rpi4-imagebuilder](https://github.com/satmandu/docker-rpi4-imagebuilder)
 (the repository you are reading now) and run the build script to see
 usage:
 
-    $ ./build
+    $ ./build-image
     usage: build [options...] SOURCEDIR
     Options:
       -i IMAGE  Name of the docker image (including tag) to use as package build environment.
-      -o DIR    Destination directory to store packages to.
-      -d DIR    Directory that contains other deb packages that need to be installed before build.
+      -o DIR    Destination directory to store output compressed image to.
 
-To build Debian packages run following commands:
-
-    # create destination directory to store the build results
-    mkdir output
-
-    # build package from source directory
-    ./build -i docker-rpi-imagebuilder:19.10 -o output ~/my-package-source
-
-To build Eoan rpi4 image run following commands:
+To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
     # create destination directory to store the build results
     mkdir output
@@ -58,24 +38,15 @@ To build Eoan rpi4 image run following commands:
 
 
 
-After successful build you will find the `.deb` files in `output`
+After successful build you will find the `image.lz4` file in the `output`
 directory.
 
-Sometimes build might require dependencies that cannot be installed with
-`apt-get build-dep`.  You can install them into the build environment
-by passing option `-d DIR` where DIR is a directory with `*.deb` files
-in it.
+## Installing image to sd card
 
-    ./build -i docker-rpi-imagebuilder:19.10 -o output -d dependencies ~/my-package-source
+Use the instructions here: https://ubuntu.com/download/iot/installation-media
 
-## Integrating with CI
+Note that you want to replace instances of "xzcat" with "lzcat" since this setup uses the much faster lz4 to compress the images created in the docker container.
 
-In this tutorial all package-specific build dependencies are installed
-from scratch each time build is executed in the container.  The
-benefit is that the container is generic and reusable for building any
-package but the installation of build-time dependencies can add up to
-considerable overhead, both in time and bandwidth.  This overhead may
-not be acceptable when building packages as part of continuous
-integration pipeline.  One possible solution to reduce overhead is to
-install package-specific build dependencies into build environment
-container.
+## Notes:
+
+The Dockerfile-ubuntu-19.10 Dockerfile assumes that the remaining requirements to build the software are a subset of the requirements for building the ubuntu package linux-image-raspi2. If that package is removed at some point or there is a new package that supersedes that, that "apt-get build-dep -y linux-image-raspi2" line in the Dockerfile should be replaced or modified accordingly.
