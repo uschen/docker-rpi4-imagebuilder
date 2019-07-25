@@ -11,7 +11,7 @@ required build tools and how to use it to build packages.
 
 Start by building a container that will act as package build environment:
 
-    docker build -t docker-deb-builder:19.10 -f Dockerfile-ubuntu-19.10 .
+    docker build -t docker-rpi-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
 In this example the target is Ubuntu 19.10 but you can create and
 modify `Dockerfile-nnn` to match your target environment.
@@ -45,7 +45,7 @@ To build Debian packages run following commands:
     mkdir output
 
     # build package from source directory
-    ./build -i docker-deb-builder:19.10 -o output ~/my-package-source
+    ./build -i docker-rpi-imagebuilder:19.10 -o output ~/my-package-source
 
 To build Eoan rpi4 image run following commands:
 
@@ -53,8 +53,8 @@ To build Eoan rpi4 image run following commands:
     mkdir output
 
     # build package from source directory
-    # ./build-image -i docker-deb-builder:19.10 -o output ~/directory_with_the_scripts
-    ./build-image -i docker-deb-builder:19.10 -o output .
+    # ./build-image -i docker-rpi-imagebuilder:19.10 -o output ~/directory_with_the_scripts
+    ./build-image -i docker-rpi-imagebuilder:19.10 -o output .
 
 
 
@@ -66,7 +66,7 @@ Sometimes build might require dependencies that cannot be installed with
 by passing option `-d DIR` where DIR is a directory with `*.deb` files
 in it.
 
-    ./build -i docker-deb-builder:17.04 -o output -d dependencies ~/my-package-source
+    ./build -i docker-rpi-imagebuilder:19.10 -o output -d dependencies ~/my-package-source
 
 ## Integrating with CI
 
