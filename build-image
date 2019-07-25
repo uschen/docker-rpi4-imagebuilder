@@ -77,9 +77,11 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 docker_args+="--rm "
 
 # Needed for loopback to work inside container.
-docker_args+="-v /dev:/dev --privileged"
+#docker_args+="-v /dev:/dev --privileged"
 
-cmd="docker run -it $docker_args $image /build-rpi4.sh"
+#cmd="docker run -it $docker_args $image /build-rpi4.sh"
+cmd="docker run -it -v /dev:/dev --privileged $docker_args $image /build-rpi4.sh"
+
 
 echo "Running docker:"
 echo "$cmd"
