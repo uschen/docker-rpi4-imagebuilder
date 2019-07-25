@@ -46,8 +46,9 @@ cp rpi-firmware/*.dat /mnt/boot/firmware/
 cp rpi-firmware/*.dtb /mnt/boot/firmware/
 cp rpi-firmware/overlays/*.dtbo /mnt/boot/firmware/overlays/
 
-echo "Downloading curent RPI kernel source."
-git clone --depth=1 -b rpi-4.19.y https://github.com/raspberrypi/linux.git rpi-linux
+branch=rpi-4.19.y
+echo "Downloading $branch RPI kernel source."
+git clone --depth=1 -b $branch https://github.com/raspberrypi/linux.git rpi-linux
 cd rpi-linux
 #git checkout origin/rpi-4.19.y # change the branch name for newer versions
 mkdir kernel-build
