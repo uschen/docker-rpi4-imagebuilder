@@ -5,22 +5,28 @@ RUN set -ex \
     && apt-get update \
     && apt-get install -y --no-install-recommends \
                build-essential \
+               bc \
+               bison \
                cdbs \
+               cmake \
                devscripts \
+               dkms \
                equivs \
                fakeroot \
-               bison \
-               flex \
-               git \
+               flex \            
                gcc-aarch64-linux-gnu \
                cpp-aarch64-linux-gnu \
                g++-aarch64-linux-gnu \
-               cmake \
-               patch \
+               git \
                kpartx \
-               xz-utils \
                lz4 \
-               wget \
+               libelf-dev \
+               libncurses-dev \
                libssl-dev \
+               openssl-dev \
+               patch \
+               wget \
+               xz-utils \         
+    && apt-get build-dep -y linux-image-raspi2
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
