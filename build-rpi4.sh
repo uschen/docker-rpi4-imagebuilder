@@ -60,6 +60,7 @@ mkdir kernel-build
 make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  bcm2711_defconfig
 cd kernel-build
 /build/source/conform_config.sh
+make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-  olddefconfig
 cd ..
 
 make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
@@ -112,7 +113,7 @@ echo "Modifying wireless firmware."
 if ! grep -qs 'boardflags3=0x44200100' /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt ; then sed -i -r 's/0x48200100/0x44200100/' /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt ; fi
 
 echo "Creating first start cleanup script"
-echo -e '#!/bin/sh -e\n# 1st Boot Cleanup Script\n#\n# Print the IP address\n_IP=$(hostname -I) || true\nif [ "$_IP" ]; then\n  printf "My IP address is %s\n" "$_IP"\nfi\n#\n/usr/bin/apt update && /usr/bin/apt remove linux-image-raspi2 linux-raspi2 flash-kernel initramfs-tools -y\n/usr/bin/apt install wireless-tools wireless-regdb crda -y\nrm /etc/rc.local\n\nexit 0' > /mnt/etc/rc.local
+echo -e '#!/bin/sh -e\n# 1st Boot Cleanup Script\n#\n# Print the IP address\n_IP=$(hostname -I) || true\nif [ "$_IP" ]; then\n  printf "My IP address is %s\n" "$_IP"\nfi\n#\nsleep 30; /usr/bin/apt update && /usr/bin/apt remove linux-image-raspi2 linux-raspi2 flash-kernel initramfs-tools -y\n/usr/bin/apt install wireless-tools wireless-regdb crda -y\nrm /etc/rc.local\n\nexit 0' > /mnt/etc/rc.local
 chmod +x /mnt/etc/rc.local
 
 echo "unmounting modified image"
