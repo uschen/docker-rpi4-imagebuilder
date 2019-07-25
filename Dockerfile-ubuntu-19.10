@@ -25,6 +25,7 @@ RUN set -ex \
                libncurses-dev \
                libssl-dev \
                patch \
+               sudo \
                wget \
                xz-utils \         
     && apt-get build-dep -y linux-image-raspi2 \
