@@ -9,7 +9,6 @@ usage: $PROG [options...] SOURCEDIR_for_scripts
 Options:
   -i IMAGE  Name of the docker image (including tag) to use as package build environment.
   -o DIR    Destination directory to store packages to.
-  -d DIR    Directory that contains other deb packages that need to be installed before build.
 EOF
     exit 1
 }
@@ -28,7 +27,7 @@ function abspath {
 
 [[ $# -eq 0 ]] && usage
 
-while getopts "i:o:d:h" opt; do
+while getopts "i:o:h" opt; do
     case $opt in
         i)
             image="$OPTARG"
