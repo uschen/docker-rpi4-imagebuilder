@@ -106,6 +106,7 @@ umount /mnt
 kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
 echo "Compressing image quickly with lz4."
 lz4 eoan-preinstalled-server-arm64+raspi4.img
+pwd
 
 # Copy packages to output dir with user's permissions
 chown -R $USER:$GROUP /build
