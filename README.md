@@ -47,6 +47,17 @@ To build Debian packages run following commands:
     # build package from source directory
     ./build -i docker-deb-builder:19.10 -o output ~/my-package-source
 
+To build Eoan rpi4 image run following commands:
+
+    # create destination directory to store the build results
+    mkdir output
+
+    # build package from source directory
+    # ./build-image -i docker-deb-builder:19.10 -o output ~/directory_with_the_scripts
+    ./build-image -i docker-deb-builder:19.10 -o output .
+
+
+
 After successful build you will find the `.deb` files in `output`
 directory.
 
