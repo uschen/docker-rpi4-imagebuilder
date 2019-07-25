@@ -11,6 +11,7 @@
 #   apt-get to install those afterwards
 [[ -d /dependencies ]] && dpkg -i /dependencies/*.deb || apt-get -f install -y --no-install-recommends
 
+export PATH=/usr/lib/ccache:$PATH
 # Make read-write copy of source code
 mkdir -p /build
 cp -a /source-ro /build/source
