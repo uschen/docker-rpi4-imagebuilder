@@ -119,3 +119,4 @@ chown -R $USER:$GROUP /build
 echo "Copying image out of container."
 cp -a /build/source/*.lz4 /output/
 ls -l /output
+read -p "Press [Enter] key to quit and delete container"
