@@ -89,7 +89,7 @@ cmd="docker run -e CCACHE_DIR=/ccache --volumes-from ccache -it  $docker_args $i
 
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
-docker volume create --name ccache
+# docker volume create --name ccache
 docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
