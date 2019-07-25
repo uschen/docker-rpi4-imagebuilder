@@ -12,7 +12,7 @@
 [[ -d /dependencies ]] && dpkg -i /dependencies/*.deb || apt-get -f install -y --no-install-recommends
 
 #Time Stamp
-now=%(date +"%m_%d_%Y_%H%M")
+now=`date +"%m_%d_%Y_%H%M"`
 
 export PATH=/usr/lib/ccache:$PATH
 # Make read-write copy of source code
