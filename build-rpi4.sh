@@ -28,7 +28,8 @@ cd /build/source
 
 
 branch=rpi-4.19.y
-ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz"
+ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
+ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
 
 
 
@@ -36,17 +37,14 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 
 checkfor_and_download_ubuntu_image () {
     cd /build/source
-    if [ ! -f /eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
+    if [ ! -f /$ubuntu_image ]; then
         echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
-        wget $ubuntu_image_url
-        echo "Extracting image."
-        xzcat eoan-preinstalled-server-arm64+raspi3.img.xz > \
-        eoan-preinstalled-server-arm64+raspi4.img
+        wget $ubuntu_image_url -O $ubuntu_image
     else
-        echo "Extracting image."
-        xzcat /eoan-preinstalled-server-arm64+raspi3.img.xz > \
-        eoan-preinstalled-server-arm64+raspi4.img
+        ln -s /$ubuntu_image /build/source/$ubuntu_image
     fi
+    echo "Extracting image."
+    xzcat /$ubuntu_image > eoan-preinstalled-server-arm64+raspi4.img
     }
 
 mount_image () {
