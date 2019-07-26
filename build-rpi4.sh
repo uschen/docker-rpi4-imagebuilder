@@ -5,20 +5,6 @@
 # mounted as docker volumes to allow files to be exchanged between the host and 
 # the container.
 
-echo 1
-# Logging Setup
-#TMPLOG=/tmp/build.log
-#touch $TMPLOG
-#exec 3>&1 4>&2
-#trap 'exec 2>&4 1>&3' 0 1 2 3
-#exec 1>$TMPLOG 2>&1
-
-echo 2
-# Set Time Stamp
-now=`date +"%m_%d_%Y_%H%M"`
-
-echo 3
-
 branch=rpi-4.19.y
 # This should be the image we want to modify.
 ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
@@ -26,7 +12,16 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 
-## Other Setup
+# Set Time Stamp
+now=`date +"%m_%d_%Y_%H%M"`
+
+# Logging Setup
+TMPLOG=/tmp/build.log
+touch $TMPLOG
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>$TMPLOG 2>&1
+
 # Use ccache
 PATH=/usr/lib/ccache:$PATH
 # Create work directory
@@ -221,10 +216,10 @@ unmount_image () {
 }
 
 export_compressed_image () {
-    echo "Compressing ${new_image} with lz4 and exporting 
+    echo "Compressing ${new_image} with lz4 and exporting"
     echo "out of container to:"
     echo "${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
-    cd /build/source 
+    cd /build/source
     chown -R $USER:$GROUP /build
     compresscmd="lz4 ${new_image}.img \
     /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
