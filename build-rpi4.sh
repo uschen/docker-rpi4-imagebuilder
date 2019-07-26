@@ -12,14 +12,11 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>$TMPLOG 2>&1
 
-
-
-
 ## Setup
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
 # Use ccache
-export PATH=/usr/lib/ccache:$PATH
+PATH=/usr/lib/ccache:$PATH
 # Make read-write copy of source folder
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
@@ -28,8 +25,10 @@ cd /build/source
 
 
 branch=rpi-4.19.y
+# This should be the image we want to modify.
 ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
+# This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 
 
@@ -37,14 +36,15 @@ new_image="eoan-preinstalled-server-arm64+raspi4"
 
 
 checkfor_and_download_ubuntu_image () {
+    echo "Checking for downloaded ${ubuntu_image}"
     cd /build/source
     if [ ! -f /${ubuntu_image} ]; then
-        echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
+        echo "Downloading ${ubuntu_image}"
         wget $ubuntu_image_url -O $ubuntu_image
     else
         ln -s /$ubuntu_image /build/source/
     fi
-    echo "Extracting: ${ubuntu_image} to ${new_image}"
+    echo "Extracting: ${ubuntu_image} to ${new_image}.img"
     xzcat /$ubuntu_image > $new_image
     }
 
