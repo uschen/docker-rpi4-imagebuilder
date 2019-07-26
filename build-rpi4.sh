@@ -37,7 +37,7 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 
 checkfor_and_download_ubuntu_image () {
     cd /build/source
-    if [ ! -f /$ubuntu_image ]; then
+    if [ ! -f /${ubuntu_image} ]; then
         echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
         wget $ubuntu_image_url -O $ubuntu_image
     else
