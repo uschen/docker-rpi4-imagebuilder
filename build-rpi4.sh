@@ -70,12 +70,13 @@ get_rpi_firmware () {
 }
 
 get_kernel_src () {
-    cd /build/source
     echo "Downloading $branch RPI kernel source."
+    cd /build/source
     git clone --depth=1 -b $branch https://github.com/raspberrypi/linux.git rpi-linux
 }
 
 build_kernel () {
+    echo "Building $branch kernel."
     cd /build/source/rpi-linux
     #git checkout origin/rpi-4.19.y # change the branch name for newer versions
     mkdir kernel-build
@@ -98,8 +99,8 @@ build_kernel () {
 }
 
 install_kernel () {
-    cd /build/source/rpi-linux
     echo "Copying compiled ${KERNEL_VERSION} kernel to image."
+    cd /build/source
     # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4.
     # Replacee uBoot with kernel.
     cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
