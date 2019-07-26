@@ -12,15 +12,9 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>$TMPLOG 2>&1
 
-## Setup
+
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
-# Use ccache
-PATH=/usr/lib/ccache:$PATH
-# Make read-write copy of source folder
-mkdir -p /build/source
-#cp -a /source-ro/ /build/source
-cd /build/source
 
 
 
@@ -31,6 +25,13 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 
+## Other Setup
+# Use ccache
+PATH=/usr/lib/ccache:$PATH
+# Create work directory
+mkdir -p /build/source
+#cp -a /source-ro/ /build/source
+#cd /build/source
 
 
 
