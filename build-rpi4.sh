@@ -127,8 +127,8 @@ echo "Creating first start cleanup script"
 echo -e '#!/bin/sh -e\n# 1st Boot Cleanup Script\n#\n# Print the IP address\n_IP=$(hostname -I) || true\nif [ "$_IP" ]; then\n  printf "My IP address is %s\n" "$_IP"\nfi\n#\nsleep 30; /usr/bin/apt update && /usr/bin/apt remove linux-image-raspi2 linux-raspi2 flash-kernel initramfs-tools -y\n/usr/bin/apt install wireless-tools wireless-regdb crda -y\nrm /etc/rc.local\n\nexit 0' > /mnt/etc/rc.local
 chmod +x /mnt/etc/rc.local
 
-echo "Copying Build Log to image"
-cp $TMPLOG /mnt/boot/firmware/image-build-${now}.log
+#echo "Copying Build Log to image"
+#cp $TMPLOG /mnt/boot/firmware/image-build-${now}.log
 
 
 echo "unmounting modified image"
@@ -143,5 +143,6 @@ pwd
 chown -R $USER:$GROUP /build
 echo "Copying image out of container."
 cp -a /build/source/*.lz4 /output/
+cp $TMPLOG /output/build-log-${KERNEL_VERSION}_${now}.log
 ls -l /output
 #read -p "Press [Enter] key to quit and delete container"
