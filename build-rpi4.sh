@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # This script is executed within the container as root. The resulting image &
 # logs are written to /output after a succesful build.  These directories are 
