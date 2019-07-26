@@ -31,23 +31,7 @@ branch=rpi-4.19.y
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz"
 
 
-checkfor_and_download_ubuntu_image 
-mount_image
-get_rpi_firmware
-get_kernel_src
-# KERNEL_VERSION is set here:
-build_kernel
-install_kernel
-install_armstub8-gic
-install_non-free_firmware
-configure_rpi_config_txt
-install_rpi_userland
-modify_wifi_firmware 
-install_first_start_cleanup_script
-unmount_image
-export_compressed_image
-export_log
-ls -l /output
+
 
 
 checkfor_and_download_ubuntu_image () {
@@ -255,4 +239,22 @@ export_log () {
 }
 
 
+
+checkfor_and_download_ubuntu_image 
+mount_image
+get_rpi_firmware
+get_kernel_src
+# KERNEL_VERSION is set here:
+build_kernel
+install_kernel
+install_armstub8-gic
+install_non-free_firmware
+configure_rpi_config_txt
+install_rpi_userland
+modify_wifi_firmware 
+install_first_start_cleanup_script
+unmount_image
+export_compressed_image
+export_log
+ls -l /output
 #read -p "Press [Enter] key to quit and delete container"
