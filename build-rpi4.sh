@@ -138,6 +138,13 @@ install_kernel () {
     fi
 }
 
+install_kernel_headers () {
+    mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
+    cp /build/source/rpi-linux/kernel-build/kernel-install/ \
+    Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+}
+
 install_armstub8-gic () {
     echo "Installing RPI4 armstub8-gic source"
     cd /build/source
