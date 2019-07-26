@@ -30,6 +30,7 @@ cd /build/source
 branch=rpi-4.19.y
 ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
+new_image="eoan-preinstalled-server-arm64+raspi4"
 
 
 
@@ -43,14 +44,14 @@ checkfor_and_download_ubuntu_image () {
     else
         ln -s /$ubuntu_image /build/source/
     fi
-    echo "Extracting: ${ubuntu_image}"
-    xzcat /$ubuntu_image > eoan-preinstalled-server-arm64+raspi4.img
+    echo "Extracting: ${ubuntu_image} to ${new_image}"
+    xzcat /$ubuntu_image > $new_image
     }
 
 mount_image () {
     cd /build/source
-    echo "Mounting image."
-    kpartx -av eoan-preinstalled-server-arm64+raspi4.img
+    echo "Mounting: ${new_image}.img"
+    kpartx -av ${new_image}.img
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
 }
@@ -210,22 +211,24 @@ install_first_start_cleanup_script () {
 }
 
 unmount_image () {
-    echo "unmounting modified image"
+    echo "Unmounting modified ${new_image}.img"
     cd /build/source
     umount /mnt/boot/firmware
     umount /mnt
-    kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
+    kpartx -dv ${new_image}.img
 }
 
 export_compressed_image () {
-    echo "Compressing image with lz4 & copying out of container."
+    echo "Compressing ${new_image} with lz4 and exporting 
+    echo "out of container to:"
+    echo "${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     cd /build/source 
     chown -R $USER:$GROUP /build
-    compresscmd="lz4 eoan-preinstalled-server-arm64+raspi4.img \
-    /output/eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4"
+    compresscmd="lz4 ${new_image}.img \
+    /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     echo $compresscmd
-    lz4 eoan-preinstalled-server-arm64+raspi4.img \
-    /output/eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4
+    lz4 ${new_image}.img \
+    /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4
 }
 
 
@@ -238,6 +241,7 @@ export_compressed_image () {
 # }
 
 export_log () {
+    echo "Build log at build-log-${KERNEL_VERSION}_${now}.log"
     cp $TMPLOG /output/build-log-${KERNEL_VERSION}_${now}.log
 }
 
