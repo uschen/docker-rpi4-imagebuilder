@@ -105,5 +105,7 @@ echo "Running docker:"
 echo "$cmd"
 $cmd
 read build_cid <$cidfile
+echo $build_cid
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
+echo $tail_log_cmd
 exec $tail_log_cmd
