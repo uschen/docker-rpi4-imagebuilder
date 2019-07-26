@@ -88,13 +88,11 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 cmd="docker run $docker_args $image /build-rpi4.sh"
 
-
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
 docker volume create --name ccache
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
 $cmd
-sleep 2
-tail_log_cmd="docker exec -it $build_container_name tail -f /output/build.log"
+tail_log_cmd="docker exec -it $build_container_name tail -F /tmp/build.log"
 exec $tail_log_cmd
