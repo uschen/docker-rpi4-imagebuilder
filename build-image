@@ -88,14 +88,15 @@ docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.
 docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 # Export container id
-cidfile="$(cd $PROG_DIR; pwd)/build.cid"
-rm -f $cidfile
-docker_args+="--cidfile=$cidfile "
+#cidfile="$(cd $PROG_DIR; pwd)/build.cid"
+#rm -f $cidfile
+#docker_args+="--cidfile=$cidfile "
 
 
 cmd="docker run $docker_args $image /build-rpi4.sh"
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
+echo "Creating docker ccache volume if it does not exist."
 docker volume create --name ccache
 
 #Remove existing build container if it exists.
@@ -106,7 +107,7 @@ echo "Running docker:"
 echo "$cmd"
 build_cid=`$cmd`
 #read build_cid <$cidfile
-echo $build_cid
+#echo $build_cid
 echo "Tailing docker log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
