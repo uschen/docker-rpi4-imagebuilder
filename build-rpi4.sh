@@ -43,7 +43,7 @@ checkfor_and_download_ubuntu_image () {
     else
         ln -s /$ubuntu_image /build/source/
     fi
-    echo "Extracting ${ubuntu_image}."
+    echo "Extracting: ${ubuntu_image}"
     xzcat /$ubuntu_image > eoan-preinstalled-server-arm64+raspi4.img
     }
 
