@@ -87,7 +87,7 @@ build_kernel () {
     #make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     #cd ..
 
-    make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     mkdir /build/source/rpi-linux/kernel-build/kernel-install
