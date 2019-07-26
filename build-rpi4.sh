@@ -264,6 +264,7 @@ get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
+install_kernel_headers 
 install_armstub8-gic
 install_non-free_firmware
 configure_rpi_config_txt
