@@ -7,11 +7,11 @@
 
 echo 1
 # Logging Setup
-TMPLOG=/tmp/build.log
-touch $TMPLOG
-exec 3>&1 4>&2
-trap 'exec 2>&4 1>&3' 0 1 2 3
-exec 1>$TMPLOG 2>&1
+#TMPLOG=/tmp/build.log
+#touch $TMPLOG
+#exec 3>&1 4>&2
+#trap 'exec 2>&4 1>&3' 0 1 2 3
+#exec 1>$TMPLOG 2>&1
 
 echo 2
 # Set Time Stamp
