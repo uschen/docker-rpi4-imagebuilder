@@ -42,7 +42,7 @@ checkfor_and_download_ubuntu_image () {
         ln -s /$ubuntu_image /build/source/
     fi
     echo "Extracting: ${ubuntu_image} to ${new_image}.img"
-    xzcat /$ubuntu_image > $new_image
+    xzcat /$ubuntu_image > $new_image.img
     }
 
 mount_image () {
