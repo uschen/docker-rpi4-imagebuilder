@@ -96,5 +96,5 @@ echo "Running docker:"
 echo "$cmd"
 $cmd
 sleep 2
-tail_log_cmd="docker exec -it $build_container_name sh -c 'tail -f /output/build.log'"
+tail_log_cmd="docker exec -it $build_container_name tail -f /output/build.log"
 exec $tail_log_cmd
