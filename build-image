@@ -49,7 +49,7 @@ srcdir=$1
 #docker_args="-it "
 docker_args="-d "
 #build_container_name="rpi4-image-build"
-#docker_args= --name $build_container_name "
+#docker_args="--name $build_container_name "
 
 # Check that mandatory parameters are valid
 [[ !    "$outdir"        ]] && fatal "output directory was not given (-o DIR)"
@@ -106,7 +106,8 @@ echo "Running docker:"
 echo "$cmd"
 $cmd
 read build_cid <$cidfile
-#echo $build_cid
+echo $build_cid
+echo "Tailing docker log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
 exec $tail_log_cmd
