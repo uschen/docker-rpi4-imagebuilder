@@ -21,8 +21,8 @@ now=`date +"%m_%d_%Y_%H%M"`
 # Use ccache
 export PATH=/usr/lib/ccache:$PATH
 # Make read-write copy of source folder
-mkdir -p /build
-cp -a /source-ro /build/source
+mkdir -p /build/source
+#cp -a /source-ro/ /build/source
 cd /build/source
 
 
