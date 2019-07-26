@@ -85,9 +85,9 @@ build_kernel () {
     cd kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
-    /build/source/conform_config.sh
-    make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
-    cd ..
+    #/build/source/conform_config.sh
+    #make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    #cd ..
 
     make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | \
