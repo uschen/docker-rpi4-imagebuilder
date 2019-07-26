@@ -46,7 +46,9 @@ done
 
 shift $(($OPTIND - 1))
 srcdir=$1
-docker_args="-it "
+#docker_args="-it "
+build_container_name="rpi4-image-build"
+docker_args="--name $build_container_name "
 
 # Check that mandatory parameters are valid
 [[ !    "$outdir"        ]] && fatal "output directory was not given (-o DIR)"
@@ -84,7 +86,7 @@ docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.
 #docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
 docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
-cmd="docker run -it  $docker_args $image /build-rpi4.sh"
+cmd="docker run $docker_args $image /build-rpi4.sh"
 
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
@@ -92,5 +94,7 @@ docker volume create --name ccache
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
-
-exec $cmd
+$cmd
+sleep 2
+tail_log_cmd="docker exec -it $build_container_name sh -c 'tail -f /output/build.log'"
+exec $tail_log_cmd
