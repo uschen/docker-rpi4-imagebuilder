@@ -41,9 +41,9 @@ checkfor_and_download_ubuntu_image () {
         echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
         wget $ubuntu_image_url -O $ubuntu_image
     else
-        ln -s /$ubuntu_image /build/source/$ubuntu_image
+        ln -s /$ubuntu_image /build/source/
     fi
-    echo "Extracting image."
+    echo "Extracting ${ubuntu_image}."
     xzcat /$ubuntu_image > eoan-preinstalled-server-arm64+raspi4.img
     }
 
