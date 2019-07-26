@@ -75,29 +75,30 @@ build_kernel () {
     echo "Building $branch kernel."
     cd /build/source/rpi-linux
     #git checkout origin/rpi-4.19.y # change the branch name for newer versions
-    mkdir kernel-build
+    mkdir /build/source/kernel-build
     
 
-    make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
+    make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
-    cd kernel-build
+    #cd kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
     #/build/source/conform_config.sh
     #make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     #cd ..
 
-    make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
-    KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | \
+    make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
-    mkdir /build/source/rpi-linux/kernel-build/kernel-install
-    sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    DEPMOD=echo  INSTALL_MOD_PATH=./kernel-install/ modules_install
     
-    mkdir /build/source/rpi-linux/kernel-build/kernel-headers
-    sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    INSTALL_HDR_PATH=./kernel-headers/ headers_install
-    cd ..
+    mkdir /build/source/rpi-linux/kernel-build/kernel-install
+    sudo make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    DEPMOD=echo  INSTALL_MOD_PATH=/build/source/rpi-linux/kernel-build/kernel-install/ modules_install
+    
+ #   mkdir /build/source/rpi-linux/kernel-build/kernel-headers
+ #   sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+ #   INSTALL_HDR_PATH=./kernel-headers/ headers_install
+ #   cd ..
 }
 
 install_kernel () {
@@ -105,17 +106,17 @@ install_kernel () {
     cd /build/source
     # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4.
     # Replacee uBoot with kernel.
-    cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
+    cp /build/source/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
     # Once uBoot works, it should be able to use the standard raspberry pi boot
     # script to boot the compressed kernel on arm64, so we copy this in anyways.
-    cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz \
+    cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/vmlinuz-${KERNEL_VERSION}
-    cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz \
+    cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/firmware/vmlinuz
-    cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+    cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
     echo "Copying compiled ${KERNEL_VERSION} modules to image."
-    cp -avr /build/source/rpi-linux/kernel-build/kernel-install/lib/modules/* \
+    cp -avr /build/source/kernel-build/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
     #mv -f /build/source/rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION}/build \
@@ -127,10 +128,10 @@ install_kernel () {
 
     cd /build/source
     echo "Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
-    cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
-    cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
+    cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
+    cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
-    cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
+    cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/
     if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
         then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
