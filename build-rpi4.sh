@@ -124,6 +124,7 @@ install_kernel () {
     ln -s ../../../linux-headers-${KERNEL_VERSION} build
 
     cd /build/source
+    echo "Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
     cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
     cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
@@ -261,4 +262,4 @@ unmount_image
 export_compressed_image
 export_log
 ls -l /output
-#read -p "Press [Enter] key to quit and delete container"
+read -p "Press [Enter] key to quit and delete container"
