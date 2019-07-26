@@ -34,6 +34,8 @@ cd /build/source
 # Build packages
 #debuild -b -uc -us
 
+checkfor_and_download_ubuntu_image () {
+
 if [ ! -f /eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
     echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
     wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz
@@ -43,12 +45,16 @@ else
     echo "Extracting image."
     xzcat /eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
 fi
+}
 
+mount_image () {
 echo "Mounting image."
 kpartx -av eoan-preinstalled-server-arm64+raspi4.img
 mount /dev/mapper/loop0p2 /mnt
 mount /dev/mapper/loop0p1 /mnt/boot/firmware
+}
 
+get_rpi_firmware () {
 echo "Downloading current RPI firmware."
 git clone --depth=1 https://github.com/Hexxeh/rpi-firmware
 cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
@@ -57,6 +63,7 @@ cp rpi-firmware/*.dat /mnt/boot/firmware/
 cp rpi-firmware/*.dat /mnt/boot/firmware/
 cp rpi-firmware/*.dtb /mnt/boot/firmware/
 cp rpi-firmware/overlays/*.dtbo /mnt/boot/firmware/overlays/
+}
 
 branch=rpi-4.19.y
 echo "Downloading $branch RPI kernel source."
@@ -141,6 +148,12 @@ kpartx -dv eoan-preinstalled-server-arm64+raspi4.img
 echo "Compressing image quickly with lz4."
 lz4 eoan-preinstalled-server-arm64+raspi4.img eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4
 pwd
+
+
+checkfor_and_download_ubuntu_image 
+mount_image
+get_rpi_firmware
+
 
 # Copy packages to output dir with user's permissions
 chown -R $USER:$GROUP /build
