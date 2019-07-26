@@ -88,6 +88,7 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
+rm -f $cidfile
 docker_args+="--cidfile=$cidfile "
 
 
