@@ -27,13 +27,13 @@ cd /build/source
 #debuild -b -uc -us
 
 if [ ! -f /eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
-echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
-wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz
-echo "Extracting image."
-xzcat eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
+    echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
+    wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz
+    echo "Extracting image."
+    xzcat eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
 else
-echo "Extracting image."
-xzcat /eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
+    echo "Extracting image."
+    xzcat /eoan-preinstalled-server-arm64+raspi3.img.xz > eoan-preinstalled-server-arm64+raspi4.img
 fi
 
 echo "Mounting image."
@@ -65,14 +65,14 @@ cd ..
 
 make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
 export KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` 
-make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- DEPMOD=echo  INSTALL_MOD_PATH=/mnt/usr/ modules_install
+sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- DEPMOD=echo  INSTALL_MOD_PATH=./kernel-install/ modules_install
 cd ..
 
 echo "Copying compiled ${KERNEL_VERSION} kernel to image."
 cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
 cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz /mnt/boot/vmlinuz-${KERNEL_VERSION}
 cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
-#cp -r rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
+cp -avr rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
 mv /mnt/usr/lib/modules/${KERNEL_VERSION}/build /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 cd /mnt/usr/lib/modules/${KERNEL_VERSION}/
 ln -s ../../../linux-headers-${KERNEL_VERSION} build
