@@ -5,6 +5,7 @@
 # mounted as docker volumes to allow files to be exchanged between the host and 
 # the container.
 
+echo 1
 # Logging Setup
 TMPLOG=/tmp/build.log
 touch $TMPLOG
@@ -12,11 +13,11 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>$TMPLOG 2>&1
 
-
+echo 2
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
 
-
+echo 3
 
 branch=rpi-4.19.y
 # This should be the image we want to modify.
