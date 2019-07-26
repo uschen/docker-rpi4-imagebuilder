@@ -91,9 +91,9 @@ build_kernel () {
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     
-    mkdir /build/source/rpi-linux/kernel-build/kernel-install
+    mkdir /build/source/kernel-install
     sudo make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    DEPMOD=echo  INSTALL_MOD_PATH=/build/source/rpi-linux/kernel-build/kernel-install/ modules_install
+    DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
     
  #   mkdir /build/source/rpi-linux/kernel-build/kernel-headers
  #   sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
@@ -141,8 +141,7 @@ install_kernel () {
 install_kernel_headers () {
     mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    cp /build/source/rpi-linux/kernel-build/kernel-install/ \
-    Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp /build/source/kernel-install/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
 install_armstub8-gic () {
