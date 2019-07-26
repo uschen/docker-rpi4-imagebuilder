@@ -87,7 +87,8 @@ docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.
 docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 # Export container id
-docker_args+="--cidfile=$(cd $PROG_DIR; pwd)/build.cid "
+cidfile="$(cd $PROG_DIR; pwd)/build.cid"
+docker_args+="--cidfile=$cidfile "
 
 
 cmd="docker run $docker_args $image /build-rpi4.sh"
@@ -102,6 +103,6 @@ docker volume create --name ccache
 echo "Running docker:"
 echo "$cmd"
 $cmd
-cid=`cat $(cd $PROG_DIR; pwd)/build.cid`
-tail_log_cmd="docker exec -it $cid tail -F /tmp/build.log"
+read build_cid <$cidfile
+tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 exec $tail_log_cmd
