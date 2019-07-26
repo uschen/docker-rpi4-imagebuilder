@@ -6,6 +6,11 @@
 # succesful build.  These directories are mounted as docker volumes to
 # allow files to be exchanged between the host and the container.
 
+TMPLOG=`mktemp /tmp/XXXXX`
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1>$TMPLOG 2>&1
+
 # Install extra dependencies that were provided for the build (if any)
 #   Note: dpkg can fail due to dependencies, ignore errors, and use
 #   apt-get to install those afterwards
@@ -121,6 +126,10 @@ if ! grep -qs 'boardflags3=0x44200100' /mnt/usr/lib/firmware/brcm/brcmfmac43455-
 echo "Creating first start cleanup script"
 echo -e '#!/bin/sh -e\n# 1st Boot Cleanup Script\n#\n# Print the IP address\n_IP=$(hostname -I) || true\nif [ "$_IP" ]; then\n  printf "My IP address is %s\n" "$_IP"\nfi\n#\nsleep 30; /usr/bin/apt update && /usr/bin/apt remove linux-image-raspi2 linux-raspi2 flash-kernel initramfs-tools -y\n/usr/bin/apt install wireless-tools wireless-regdb crda -y\nrm /etc/rc.local\n\nexit 0' > /mnt/etc/rc.local
 chmod +x /mnt/etc/rc.local
+
+echo "Copying Build Log to image"
+cp $TMPLOG /mnt/boot/firmware/image-build-${now}.log
+
 
 echo "unmounting modified image"
 umount /mnt/boot/firmware
