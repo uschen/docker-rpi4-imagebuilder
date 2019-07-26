@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # This script is executed within the container as root. The resulting image &
 # logs are written to /output after a succesful build.  These directories are 
@@ -76,6 +76,7 @@ build_kernel () {
     cd /build/source/rpi-linux
     #git checkout origin/rpi-4.19.y # change the branch name for newer versions
     mkdir kernel-build
+    
 
     make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
@@ -89,8 +90,13 @@ build_kernel () {
     make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     KERNEL_VERSION=`cat ./kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
+    mkdir /build/source/rpi-linux/kernel-build/kernel-install
     sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=./kernel-install/ modules_install
+    
+    mkdir /build/source/rpi-linux/kernel-build/kernel-headers
+    sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    INSTALL_HDR_PATH=./kernel-headers/ headers_install
     cd ..
 }
 
@@ -109,15 +115,15 @@ install_kernel () {
     cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
     echo "Copying compiled ${KERNEL_VERSION} modules to image."
-    cp -avr rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} \
+    cp -avr /build/source/rpi-linux/kernel-build/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
-    mv -f rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION}/build \
-    /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-    cd /mnt/usr/src
-    ln -s ../lib/modules/${KERNEL_VERSION} linux-headers-${KERNEL_VERSION}
+    #mv -f /build/source/rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION}/build \
+    #/mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    #cd /mnt/usr/src
+    #ln -s ../lib/modules/${KERNEL_VERSION} linux-headers-${KERNEL_VERSION}
     cd /mnt/usr/lib/modules/${KERNEL_VERSION}/
-    ln -s ../../../linux-headers-${KERNEL_VERSION} build
+    #ln -s ../../../linux-headers-${KERNEL_VERSION} build
 
     cd /build/source
     echo "Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
