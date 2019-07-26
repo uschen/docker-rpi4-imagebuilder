@@ -72,10 +72,15 @@ echo "Copying compiled ${KERNEL_VERSION} kernel to image."
 cp rpi-linux/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
 cp rpi-linux/kernel-build/arch/arm64/boot/Image.gz /mnt/boot/vmlinuz-${KERNEL_VERSION}
 cp rpi-linux/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+
+echo "Copying compiled ${KERNEL_VERSION} modules to image."
 cp -avr rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION} /mnt/usr/lib/modules/
-mv /mnt/usr/lib/modules/${KERNEL_VERSION}/build /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
+mv -f rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION}/build /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+ln -s ../lib/modules/${KERNEL_VERSION} linux-headers-${KERNEL_VERSION}
 cd /mnt/usr/lib/modules/${KERNEL_VERSION}/
 ln -s ../../../linux-headers-${KERNEL_VERSION} build
+
 cd /build/source
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
 cp rpi-linux/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo /mnt/boot/firmware/overlays/
