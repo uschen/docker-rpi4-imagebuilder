@@ -104,8 +104,8 @@ docker volume create --name ccache
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
-$cmd
-read build_cid <$cidfile
+build_cid=`$cmd`
+#read build_cid <$cidfile
 echo $build_cid
 echo "Tailing docker log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
