@@ -6,7 +6,9 @@
 # succesful build.  These directories are mounted as docker volumes to
 # allow files to be exchanged between the host and the container.
 
-TMPLOG=`mktemp /tmp/XXXXX`
+#TMPLOG=`mktemp /tmp/XXXXX`
+TMPLOG=/output/build.log
+rm $TMPLOG && touch $TMPLOG
 exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>$TMPLOG 2>&1
