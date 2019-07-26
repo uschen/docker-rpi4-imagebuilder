@@ -265,3 +265,4 @@ export_compressed_image
 export_log
 ls -l /output
 read -p "Press [Enter] key to quit and delete container"
+sleep 6000
