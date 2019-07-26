@@ -222,6 +222,9 @@ export_compressed_image () {
     echo "Compressing image with lz4 & copying out of container."
     cd /build/source 
     chown -R $USER:$GROUP /build
+    compresscmd="lz4 eoan-preinstalled-server-arm64+raspi4.img \
+    /output/eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4"
+    echo $compresscmd
     lz4 eoan-preinstalled-server-arm64+raspi4.img \
     /output/eoan-preinstalled-server-arm64+raspi4-${KERNEL_VERSION}_${now}.img.lz4
 }
