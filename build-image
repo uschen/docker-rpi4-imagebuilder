@@ -48,7 +48,7 @@ shift $(($OPTIND - 1))
 srcdir=$1
 #docker_args="-it "
 build_container_name="rpi4-image-build"
-docker_args="--name $build_container_name "
+docker_args="-d --name $build_container_name "
 
 # Check that mandatory parameters are valid
 [[ !    "$outdir"        ]] && fatal "output directory was not given (-o DIR)"
@@ -74,7 +74,7 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 
 # Comment following out if you want to keep container after execution
 # for debugging
-#docker_args+="--rm "
+docker_args+="--rm "
 
 if [ ! -f $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
 echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
