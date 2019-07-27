@@ -335,6 +335,7 @@ unmount_image () {
     umount /mnt/boot/firmware
     umount /mnt
     kpartx -dv ${new_image}.img
+    losetup -d /dev/loop0
 }
 
 export_compressed_image () {
