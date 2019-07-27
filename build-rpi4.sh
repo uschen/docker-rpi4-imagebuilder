@@ -55,6 +55,22 @@ mount_image () {
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
 }
 
+setup_arm64_chroot () {
+    echo "Setup arm64 chroot"
+    cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    remove linux-image-raspi2 linux-raspi2 \
+    linux-headers-raspi2 flash-kernel initramfs-tools -y"
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -d gcc make -y
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    install gcc make -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoclean -y"   
+}
+
 get_rpi_firmware () {
     cd /build/source
     echo "Downloading current RPI firmware."
@@ -134,6 +150,9 @@ install_kernel () {
 
 install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
+    mkdir -p /mnt/mnt
+    mount -o bind /build/source/rpi-linux     /mnt/mnt
+    chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
@@ -245,15 +264,21 @@ cleanup_image () {
     #mount -t sysfs sys     /mnt/sys/
     #mount -o bind /dev     /mnt/dev/
     #mount -o bind /dev/pts /mnt/dev/pts
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove linux-image-raspi2 linux-raspi2 \
-    flash-kernel initramfs-tools -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #remove linux-image-raspi2 linux-raspi2 \
+    #flash-kernel initramfs-tools -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoremove -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #update"
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #update
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    remove gcc -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoremove -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoclean -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -d install wireless-tools wireless-regdb crda -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
@@ -285,11 +310,17 @@ cleanup_image () {
     #-o dir::cache::archives=/build/src/apt/archives \
     #-o dir::state::lists=/build/src/apt/lists \
     #autoclean -y
-    rm /mnt/usr/bin/qemu-aarch64-static
+    
     #umount /mnt/proc
     #umount /mnt/sys
     #umount /mnt/dev/pts
     #umount /mnt/dev
+}
+
+remove_chroot () {
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoclean -y"
+    rm /mnt/usr/bin/qemu-aarch64-static
 }
 
 unmount_image () {
@@ -322,6 +353,7 @@ export_log () {
 
 checkfor_and_download_ubuntu_image 
 mount_image
+setup_arm64_chroot
 get_rpi_firmware
 get_kernel_src
 # KERNEL_VERSION is set here:
@@ -334,7 +366,8 @@ configure_rpi_config_txt
 install_rpi_userland
 modify_wifi_firmware 
 install_first_start_cleanup_script
-cleanup_image_packages
+cleanup_image
+remove_chroot
 unmount_image
 export_compressed_image
 export_log
