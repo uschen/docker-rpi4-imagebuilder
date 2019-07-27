@@ -161,8 +161,7 @@ install_kernel_headers () {
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
     
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
