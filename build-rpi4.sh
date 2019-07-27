@@ -170,6 +170,7 @@ install_kernel_headers () {
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j`nproc` O=/build/source/kernel-build mrproper"
     cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j`nproc` O=/build/source/kernel-build modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
