@@ -89,9 +89,9 @@ docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.
 docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 # Export container id
-#cidfile="$(cd $PROG_DIR; pwd)/build.cid"
-#rm -f $cidfile
-#docker_args+="--cidfile=$cidfile "
+cidfile="$(cd $PROG_DIR; pwd)/build.cid"
+rm -f $cidfile
+docker_args+="--cidfile=$cidfile "
 
 # If the build script fails, the log is still copied out.
 startcmd="/build-rpi4.sh || (cp /tmp/build.log /output/build_fail.log ; echo 'Build Failed.')"
@@ -110,9 +110,10 @@ docker volume create --name ccache
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
 echo "$cmd"
-build_cid=`$cmd`
-#read build_cid <$cidfile
-#echo $build_cid
+$cmd
+#build_cid=`$cmd`
+read build_cid <$cidfile
+echo $build_cid
 echo "Tailing docker log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
