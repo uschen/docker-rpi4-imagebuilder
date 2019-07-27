@@ -92,7 +92,7 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 #rm -f $cidfile
 #docker_args+="--cidfile=$cidfile "
 
-startcmd="sh -c '/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log'
+startcmd="sh -c '/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log'"
 #cmd="docker run $docker_args $image /build-rpi4.sh"
 cmd="docker run $docker_args $image $startcmd"
 
