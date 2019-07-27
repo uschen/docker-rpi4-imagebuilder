@@ -94,7 +94,7 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 #docker_args+="--cidfile=$cidfile "
 
 # If the build script fails, the log is still copied out.
-startcmd="/bin/sh -c \"/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log\""
+startcmd=$"/bin/sh -c \"/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log\""
 # Clear old build failure log file.
 rm -f $outdir/build_fail.log
 
