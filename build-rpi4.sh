@@ -219,6 +219,17 @@ modify_wifi_firmware () {
     fi
 }
 
+cleanup_image_packages () {
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    remove linux-image-raspi2 linux-raspi2 \
+    flash-kernel initramfs-tools -y
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    install wireless-tools wireless-regdb crda lz4 git -y
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    upgrade -y
+}
+
 install_first_start_cleanup_script () {
     echo "Creating first start cleanup script."
     echo -e '#!/bin/sh -e\n\
@@ -229,12 +240,12 @@ install_first_start_cleanup_script () {
       printf "My IP address is %s\n" "$_IP"\n\
     fi\n\
     #\n\
-    sleep 30\n\
-    /usr/bin/apt update && \
-    /usr/bin/apt remove linux-image-raspi2 linux-raspi2 \
-    flash-kernel initramfs-tools -y\n\
-    /usr/bin/apt install wireless-tools wireless-regdb crda lz4 git -y\n\
-    /usr/bin/apt upgrade -y\n\
+    #sleep 30\n\
+    #/usr/bin/apt update && \
+    #/usr/bin/apt remove linux-image-raspi2 linux-raspi2 \
+    #flash-kernel initramfs-tools -y\n\
+    #/usr/bin/apt install wireless-tools wireless-regdb crda lz4 git -y\n\
+    #/usr/bin/apt upgrade -y\n\
     #cd /usr/src \n\
     #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
     #linux-headers-${KERNEL_VERSION}\n\
@@ -285,7 +296,8 @@ install_non-free_firmware
 configure_rpi_config_txt
 install_rpi_userland
 modify_wifi_firmware 
-install_first_start_cleanup_script 
+install_first_start_cleanup_script
+cleanup_image_packages
 unmount_image
 export_compressed_image
 export_log
