@@ -133,12 +133,11 @@ install_kernel () {
 install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
-    mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-   mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    files=("scripts/recordmcount" "scripts/mod/modpost" ".config" \
         "scripts/basic/fixdep" "Module.symvers")
     for i in "${files[@]}"
@@ -146,6 +145,7 @@ install_kernel_headers () {
      mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
      cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
+    mv /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
    # cd /build/root
