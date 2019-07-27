@@ -34,6 +34,7 @@ mkdir -p /build/source
 
 
 
+
 checkfor_and_download_ubuntu_image () {
     echo "Checking for downloaded ${ubuntu_image}"
     cd /build/source
@@ -48,6 +49,10 @@ checkfor_and_download_ubuntu_image () {
     }
 
 mount_image () {
+    echo "Clearing existing loopback mounts."
+    losetup -d /dev/loop0
+    dmsetup remove_all
+    losetup -a
     cd /build/source
     echo "Mounting: ${new_image}.img"
     kpartx -av ${new_image}.img
