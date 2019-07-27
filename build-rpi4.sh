@@ -64,8 +64,9 @@ setup_arm64_chroot () {
     echo "Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove linux-image-raspi2 \
-    linux-headers-raspi2 flash-kernel initramfs-tools -y"
+    flash-kernel initramfs-tools -y"
+    #remove linux-image-raspi2 \
+    #linux-headers-raspi2 flash-kernel initramfs-tools -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
