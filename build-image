@@ -94,12 +94,11 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 #docker_args+="--cidfile=$cidfile "
 
 # If the build script fails, the log is still copied out.
-startcmd=$"/bin/sh -c \"/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log\""
+startcmd="/build-rpi4.sh || cp /tmp/build.log /output/build_fail.log"
 # Clear old build failure log file.
 rm -f $outdir/build_fail.log
 
-#cmd="docker run $docker_args $image /build-rpi4.sh"
-cmd="docker run $docker_args $image $startcmd"
+cmd="docker run $docker_args $image /bin/bash -c $startcmd"
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
 echo "Creating docker ccache volume if it does not exist."
