@@ -266,8 +266,8 @@ export_compressed_image () {
 
 export_log () {
     echo "Build log at: build-log-${KERNEL_VERSION}_${now}.log"
-    chown $USER:$GROUP $TMPLOG
     cat $TMPLOG > /output/build-log-${KERNEL_VERSION}_${now}.log
+    chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${now}.log
 }
 
 
