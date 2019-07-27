@@ -238,7 +238,7 @@ install_first_start_cleanup_script () {
     chmod +x /mnt/etc/rc.local
 }
 
-cleanup_image_packages () {
+cleanup_image () {
     echo "Cleaning up installed packages in image."
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount -t proc proc     /mnt/proc/
@@ -258,6 +258,8 @@ cleanup_image_packages () {
     -d install wireless-tools wireless-regdb crda -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install wireless-tools wireless-regdb crda -y"
+    chroot /mnt /bin/bash -c "ln -s /usr/src/linux-headers-${KERNEL_VERSION} \
+    /usr/lib/modules/${KERNEL_VERSION}/build"
     #mkdir -p /build/src/apt/archives
     #mkdir -p /build/src/apt/lists
     #dpkg --add-architecture arm64
