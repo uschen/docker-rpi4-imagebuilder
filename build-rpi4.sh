@@ -64,9 +64,9 @@ setup_arm64_chroot () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    install -d gcc make -y
+    install -d gcc make flex bison -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    install gcc make -y"
+    install gcc make flex bison -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"   
 }
@@ -152,20 +152,32 @@ install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
     mkdir -p /mnt/mnt
     mount -o bind /build/source/rpi-linux     /mnt/mnt
+    cp /build/source/kernel-build/.config /build/source/rpi-linux/
+    cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
+    # Cross-compilation of kernel wreaks havoc with building out of kernel modules
+    # later, so let's fix this with natively compiled module tools.
     chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
+    # Compilation tools no longer needed in image, so let's take them out.
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    remove gcc -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoremove -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoclean -y"
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-   files=("scripts/recordmcount" "scripts/mod/modpost" ".config" \
-        "scripts/basic/fixdep" "Module.symvers")
-    for i in "${files[@]}"
-    do
-     mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-     cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
-    done
+   #files=("scripts/recordmcount" "scripts/mod/modpost" \
+   #     "scripts/basic/fixdep")
+   # for i in "${files[@]}"
+   # do
+   #  mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
+   #  cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+   # done
+   # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
     cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
@@ -273,12 +285,6 @@ cleanup_image () {
     #update"
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     #update
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove gcc -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoremove -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoclean -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -d install wireless-tools wireless-regdb crda -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
