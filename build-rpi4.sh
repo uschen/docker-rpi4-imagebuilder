@@ -146,7 +146,7 @@ install_kernel_headers_postinstall () {
    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
    mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-   files=("scripts/recordmcount" "scripts/mod/modpost" ".config"\
+   files=("scripts/recordmcount" "scripts/mod/modpost" ".config" \
         "scripts/basic/fixdep" "Module.symvers")
     for i in "${files[@]}"
     do
@@ -290,4 +290,3 @@ export_compressed_image
 export_log
 rm $TMPLOG
 ls -l /output
-sleep 6000
