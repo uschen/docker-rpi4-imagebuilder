@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # This script is executed within the container as root. The resulting image &
 # logs are written to /output after a succesful build.  These directories are 
@@ -66,7 +66,7 @@ get_rpi_firmware () {
 }
 
 get_kernel_src () {
-    echo "Downloading $branch RPI kernel source."
+    echo "Downloading $branch kernel source."
     cd /build/source
     git clone --depth=1 -b $branch https://github.com/raspberrypi/linux.git rpi-linux
 }
@@ -80,13 +80,14 @@ build_kernel () {
 
     make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
-    #cd kernel-build
+    #cd /build/source/kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
     #/build/source/conform_config.sh
-    #make O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    #make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     #cd ..
 
+    cd /build/source/rpi-linux
     make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
@@ -94,11 +95,6 @@ build_kernel () {
     mkdir /build/source/kernel-install
     sudo make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
-    
- #   mkdir /build/source/rpi-linux/kernel-build/kernel-headers
- #   sudo make -j4 O=./kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
- #   INSTALL_HDR_PATH=./kernel-headers/ headers_install
- #   cd ..
 }
 
 install_kernel () {
@@ -116,17 +112,10 @@ install_kernel () {
     cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
     echo "Copying compiled ${KERNEL_VERSION} modules to image."
-    cp -avr /build/source/kernel-build/kernel-install/lib/modules/* \
+    cp -avr /build/source/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
-    #mv -f /build/source/rpi-linux/kernel-build/kernel-install/lib/modules/${KERNEL_VERSION}/build \
-    #/mnt/usr/src/linux-headers-${KERNEL_VERSION}
-    #cd /mnt/usr/src
-    #ln -s ../lib/modules/${KERNEL_VERSION} linux-headers-${KERNEL_VERSION}
-    cd /mnt/usr/lib/modules/${KERNEL_VERSION}/
-    #ln -s ../../../linux-headers-${KERNEL_VERSION} build
 
-    cd /build/source
     echo "Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
     cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
@@ -139,13 +128,14 @@ install_kernel () {
 }
 
 install_kernel_headers () {
+    echo "Installing ${KERNEL_VERSION} kernel headers."
     mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    cp /build/source/kernel-install/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
 install_armstub8-gic () {
-    echo "Installing RPI4 armstub8-gic source"
+    echo "Installing RPI4 armstub8-gic source."
     cd /build/source
     git clone --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
     cd rpi-tools/armstubs
@@ -155,7 +145,7 @@ install_armstub8-gic () {
 }
 
 install_non-free_firmware () {
-    echo "Installing non-free firmware.."
+    echo "Installing non-free firmware."
     cd /build/source
     git clone --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
     cp -avf firmware-nonfree/* /mnt/usr/lib/firmware
@@ -201,7 +191,7 @@ modify_wifi_firmware () {
 }
 
 install_first_start_cleanup_script () {
-    echo "Creating first start cleanup script"
+    echo "Creating first start cleanup script."
     echo -e '#!/bin/sh -e\n\
     # 1st Boot Cleanup Script\n#\n\
     # Print the IP address\n\
@@ -241,17 +231,8 @@ export_compressed_image () {
     /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4
 }
 
-
-
-# copy_image_out () {
-#     # Copy packages to output dir with user's permissions
-#     chown -R $USER:$GROUP /build
-#     echo "Copying image out of container."
-#     cp -a /build/source/*.lz4 /output/
-# }
-
 export_log () {
-    echo "Build log at build-log-${KERNEL_VERSION}_${now}.log"
+    echo "Build log at: build-log-${KERNEL_VERSION}_${now}.log"
     cp $TMPLOG /output/build-log-${KERNEL_VERSION}_${now}.log
 }
 
@@ -275,5 +256,3 @@ unmount_image
 export_compressed_image
 export_log
 ls -l /output
-read -p "Press [Enter] key to quit and delete container"
-sleep 6000
