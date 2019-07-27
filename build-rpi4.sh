@@ -345,6 +345,7 @@ unmount_image () {
     umount /mnt
     kpartx -dv ${new_image}.img
     losetup -d /dev/loop0
+    dmsetup remove_all
 }
 
 export_compressed_image () {
