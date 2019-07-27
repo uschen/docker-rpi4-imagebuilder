@@ -109,14 +109,15 @@ docker volume create --name ccache
 #docker rm -v $build_container_name
 
 # docker create -v /mnt/ccache:/ccache --name ccache $image
-echo "Running docker:"
+echo "Running build in docker:"
 echo "docker run $docker_args $image /bin/bash -c \"$startcmd\""
 docker run $docker_args $image /bin/bash -c "$startcmd"
 build_cid=`cat $cidfile`
 # Following does not work.
 # read build_cid <$cidfile
 # echo $build_cid
-echo "Tailing docker log:"
+echo "\nTailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
+echo "\n"
 exec $tail_log_cmd
