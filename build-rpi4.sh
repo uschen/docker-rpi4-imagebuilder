@@ -241,19 +241,22 @@ install_first_start_cleanup_script () {
 cleanup_image_packages () {
     echo "Cleaning up installed packages in image."
     mkdir -p /build/src/apt/archives
-    mkdir -p /build/src/apt/lists
+    #mkdir -p /build/src/apt/lists
+    dpkg --add-architecture arm64
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/build/src/apt/archives \
-    -o dir::state::lists=/build/src/apt/lists \
     update
+    #-o dir::state::lists=/build/src/apt/lists \
+    #update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/build/src/apt/archives \
-    -o dir::state::lists=/build/src/apt/lists \
     install wireless-tools wireless-regdb crda -y
+    #-o dir::state::lists=/build/src/apt/lists \
+    #install wireless-tools wireless-regdb crda -y
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     #-o dir::cache::archives=/build/src/apt/archives \
     #-o dir::state::lists=/build/src/apt/lists \
