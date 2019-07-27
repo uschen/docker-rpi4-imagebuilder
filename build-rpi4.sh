@@ -157,9 +157,9 @@ install_kernel_headers () {
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
     chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
-    # Compilation tools no longer needed in image, so let's take them out.
+    # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove gcc -y"
+    remove gcc bison flex -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoremove -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
