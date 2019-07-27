@@ -25,6 +25,7 @@ RUN set -ex \
                libelf-dev \
                libncurses-dev \
                libssl-dev \
+               qemu-user-static \
                patch \
                sudo \
                wget \
