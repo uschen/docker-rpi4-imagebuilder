@@ -276,3 +276,4 @@ export_compressed_image
 export_log
 rm $TMPLOG
 ls -l /output
+sleep 6000
