@@ -6,11 +6,13 @@
 # the container.
 
 branch=rpi-4.19.y
+kernelgitrepo="https://github.com/raspberrypi/linux.git"
 # This should be the image we want to modify.
 ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
+
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
@@ -68,7 +70,8 @@ get_rpi_firmware () {
 get_kernel_src () {
     echo "Downloading $branch kernel source."
     cd /build/source
-    git clone --depth=1 -b $branch https://github.com/raspberrypi/linux.git rpi-linux
+    git clone --depth=1 -b $branch $kernelgitrepo rpi-linux
+    kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
 }
 
 build_kernel () {
@@ -128,6 +131,7 @@ install_kernel () {
 }
 
 install_kernel_headers () {
+    #This isn't used. There isn't enough space in the disk image without resizing.
     echo "Installing ${KERNEL_VERSION} kernel headers."
     mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
@@ -135,18 +139,27 @@ install_kernel_headers () {
 }
 
 install_kernel_headers_postinstall () {
-    echo "Packaging ${KERNEL_VERSION} kernel headers."
+    echo "Copying partial ${KERNEL_VERSION} kernel headers."
    # mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
-   cp /build/source/kernel-build/.config /build/source/rpi-linux/
-   cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-   mkdir -p /build/root/usr/src
-   mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
-   cd /build/root
-   tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
+   # cp /build/source/kernel-build/.config /build/source/rpi-linux/
+   # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
+   mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+   files=("scripts/recordmcount" "scripts/mod/modpost" ".config"\
+        "scripts/basic/fixdep" "Module.symvers")
+    for i in "${files[@]}"
+    do
+    cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+    done
+
+   # The rest is pulled down via git after first reboot.
+   #
+   # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
+   # cd /build/root
+   # tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
    # Don't fire error if this fails.
-   cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
+   # cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
 }
 
 
@@ -220,10 +233,11 @@ install_first_start_cleanup_script () {
     /usr/bin/apt update && \
     /usr/bin/apt remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y\n\
-    /usr/bin/apt install wireless-tools wireless-regdb crda lz4 -y\n\
-    cd /\n\
-    lz4cat kernel-headers.tar.lz4 | tar xf - \n\
-    rm -f /kernel-headers.tar.lz4 \n\
+    /usr/bin/apt install wireless-tools wireless-regdb crda lz4 git -y\n\
+    cd /usr/src \n\
+    git clone --depth=1 -b $branch $kernelgitrepo \
+    linux-headers-${KERNEL_VERSION}\n\
+    git checkout $kernelrev\n\
     rm /etc/rc.local\n\n\
     exit 0' > /mnt/etc/rc.local
     chmod +x /mnt/etc/rc.local
@@ -264,13 +278,13 @@ get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
+install_kernel_headers_postinstall
 install_armstub8-gic
 install_non-free_firmware
 configure_rpi_config_txt
 install_rpi_userland
 modify_wifi_firmware 
-install_first_start_cleanup_script
-install_kernel_headers_postinstall 
+install_first_start_cleanup_script 
 unmount_image
 export_compressed_image
 export_log
