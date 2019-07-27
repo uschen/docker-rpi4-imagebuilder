@@ -241,7 +241,7 @@ cleanup_image_packages () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     install wireless-tools wireless-regdb crda lz4 git -y
