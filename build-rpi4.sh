@@ -248,8 +248,8 @@ cleanup_image () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoremove -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #autoremove -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #update"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
