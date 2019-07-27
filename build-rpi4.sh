@@ -240,21 +240,35 @@ install_first_start_cleanup_script () {
 
 cleanup_image_packages () {
     echo "Cleaning up installed packages in image."
-    mkdir -p /build/src/apt/archives
-    #mkdir -p /build/src/apt/lists
-    dpkg --add-architecture arm64
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
+    mount -t proc proc     /mnt/proc/
+    mount -t sysfs sys     /mnt/sys/
+    mount -o bind /dev     /mnt/dev/
+    mount -o bind /dev/pts /mnt/dev/pts
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
-    flash-kernel initramfs-tools -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
-    update
+    flash-kernel initramfs-tools -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    autoclean -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    update"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    install wireless-tools wireless-regdb crda -y"
+    #mkdir -p /build/src/apt/archives
+    #mkdir -p /build/src/apt/lists
+    #dpkg --add-architecture arm64
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #remove linux-image-raspi2 linux-raspi2 \
+    #flash-kernel initramfs-tools -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #update
     #-o dir::state::lists=/build/src/apt/lists \
     #update
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
-    install wireless-tools wireless-regdb crda -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #install wireless-tools wireless-regdb crda -y
     #-o dir::state::lists=/build/src/apt/lists \
     #install wireless-tools wireless-regdb crda -y
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
@@ -265,6 +279,11 @@ cleanup_image_packages () {
     #-o dir::cache::archives=/build/src/apt/archives \
     #-o dir::state::lists=/build/src/apt/lists \
     #autoclean -y
+    rm /mnt/usr/bin/qemu-aarch64-static
+    umount /mnt/proc
+    umount /mnt/sys
+    umount /mnt/dev/pts
+    umount /mnt/dev
 }
 
 unmount_image () {
