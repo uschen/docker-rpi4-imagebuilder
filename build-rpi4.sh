@@ -64,7 +64,7 @@ setup_arm64_chroot () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -d gcc make -y
+    install -d gcc make -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install gcc make -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
