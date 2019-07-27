@@ -131,8 +131,23 @@ install_kernel_headers () {
     echo "Installing ${KERNEL_VERSION} kernel headers."
     mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
 }
+
+install_kernel_headers_postinstall () {
+    echo "Packaging ${KERNEL_VERSION} kernel headers."
+   # mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+   # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
+   # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
+   cp /build/source/kernel-build/.config /build/source/rpi-linux/
+   cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
+   mkdir -p /build/root/usr/src
+   mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
+   cd /build/root
+   tar tar cvf - root | lz4 > kernel-headers.tar.lz4
+   cp kernel-headers.tar.lz4 /mnt/
+}
+
 
 install_armstub8-gic () {
     echo "Installing RPI4 armstub8-gic source."
@@ -204,7 +219,10 @@ install_first_start_cleanup_script () {
     /usr/bin/apt update && \
     /usr/bin/apt remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y\n\
-    /usr/bin/apt install wireless-tools wireless-regdb crda -y\n\
+    /usr/bin/apt install wireless-tools wireless-regdb crda lz4 -y\n\
+    cd /\n\
+    lz4cat kernel-headers.tar.lz4 | tar xf - \n\
+    rm -f /kernel-headers.tar.lz4 \n\
     rm /etc/rc.local\n\n\
     exit 0' > /mnt/etc/rc.local
     chmod +x /mnt/etc/rc.local
@@ -227,8 +245,7 @@ export_compressed_image () {
     compresscmd="lz4 ${new_image}.img \
     /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     echo $compresscmd
-    lz4 ${new_image}.img \
-    /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4
+    $compresscmd
 }
 
 export_log () {
@@ -246,7 +263,7 @@ get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
-install_kernel_headers 
+install_kernel_headers_postinstall 
 install_armstub8-gic
 install_non-free_firmware
 configure_rpi_config_txt
