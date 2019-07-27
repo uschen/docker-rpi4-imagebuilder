@@ -180,6 +180,9 @@ install_kernel_headers () {
     make -j`nproc` O=/build/source/kernel-build modules_prepare || true"
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j`nproc` O=/build/source/kernel-build scripts_basic"
+    # Otherwise we get make mrproper error
+    rm /build/source/kernel-build/.config
+    sleep 6000
     chroot /mnt /bin/bash -c "cd /build/source/kernel-build ; \
     make -j`nproc` O=/build/source/kernel-build scripts/recordmcount || true"
     chroot /mnt /bin/bash -c "cd /build/source/kernel-build ; \
