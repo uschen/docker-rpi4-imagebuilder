@@ -152,8 +152,13 @@ install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
     mkdir -p /mnt/build
     mount -o bind /build     /mnt/build
+    mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
+    cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
+    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+
+    
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
@@ -163,7 +168,8 @@ install_kernel_headers () {
      rm /build/source/kernel-build/$i
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j`nproc` O=/build/source/kernel-build mrproper \
+    make -j`nproc` O=/build/source/kernel-build mrproper"
+    cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
     make -j`nproc` O=/build/source/kernel-build modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
