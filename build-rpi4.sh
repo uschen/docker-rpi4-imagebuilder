@@ -150,7 +150,8 @@ install_kernel_headers_postinstall () {
         "scripts/basic/fixdep" "Module.symvers")
     for i in "${files[@]}"
     do
-    cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+     mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
+     cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
 
    # The rest is pulled down via git after first reboot.
