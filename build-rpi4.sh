@@ -389,7 +389,6 @@ export_log () {
 
 
 get_kernel_src &
-setup_arm64_chroot &
 checkfor_and_download_ubuntu_image 
 extract_and_mount_image
 setup_arm64_chroot
