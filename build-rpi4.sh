@@ -44,11 +44,11 @@ checkfor_and_download_ubuntu_image () {
     else
         ln -s /$ubuntu_image /build/source/
     fi
-    echo "Extracting: ${ubuntu_image} to ${new_image}.img"
-    xzcat /$ubuntu_image > $new_image.img
-    }
+}
 
-mount_image () {
+extract_and_mount_image () {
+    echo "* Extracting: ${ubuntu_image} to ${new_image}.img"
+    xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
     losetup -d /dev/loop0
     dmsetup remove_all
@@ -388,12 +388,11 @@ export_log () {
 }
 
 
-
+get_kernel_src &
 checkfor_and_download_ubuntu_image 
-mount_image
+extract_and_mount_image
 setup_arm64_chroot
 get_rpi_firmware
-get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
