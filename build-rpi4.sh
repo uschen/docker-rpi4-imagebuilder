@@ -273,4 +273,5 @@ install_first_start_cleanup_script
 unmount_image
 export_compressed_image
 export_log
+rm $TMPLOG
 ls -l /output
