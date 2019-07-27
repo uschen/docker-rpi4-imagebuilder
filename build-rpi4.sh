@@ -155,7 +155,7 @@ install_kernel () {
 }
 
 install_kernel_headers () {
-    echo "* Copying ${KERNEL_VERSION} kernel headers."
+    echo "* Copying ${KERNEL_VERSION} kernel headers to image."
     mkdir -p /mnt/build
     mount -o bind /build     /mnt/build
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
