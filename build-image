@@ -48,7 +48,7 @@ shift $(($OPTIND - 1))
 srcdir=$1
 #docker_args="-it "
 # The bash script & copy log if failure setup doesn't work without the "-dt" docker argument.
-docker_args="-dt --init "
+docker_args="-dt "
 #build_container_name="rpi4-image-build"
 #docker_args="--name $build_container_name "
 
@@ -98,7 +98,7 @@ startcmd="/build-rpi4.sh || (cp /tmp/build.log /output/build_fail.log ; echo 'Bu
 # Clear old build failure log file.
 rm -f $outdir/build_fail.log
 
-cmd="docker run $docker_args $image /bin/bash -c $startcmd"
+#cmd="docker run $docker_args $image /bin/bash -c $startcmd"
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
 echo "Creating docker ccache volume if it does not exist."
@@ -109,8 +109,8 @@ docker volume create --name ccache
 
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running docker:"
-echo "$cmd"
-$cmd
+echo "docker run $docker_args $image /bin/bash -c \"$startcmd\""
+docker run $docker_args $image /bin/bash -c "$startcmd"
 #build_cid=`$cmd`
 read build_cid <$cidfile
 echo $build_cid
