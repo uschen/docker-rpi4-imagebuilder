@@ -49,7 +49,7 @@ checkfor_and_download_ubuntu_image () {
     }
 
 mount_image () {
-    echo "Clearing existing loopback mounts."
+    echo "* Clearing existing loopback mounts."
     losetup -d /dev/loop0
     dmsetup remove_all
     losetup -a
@@ -61,7 +61,7 @@ mount_image () {
 }
 
 setup_arm64_chroot () {
-    echo "Setup arm64 chroot"
+    echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove flash-kernel initramfs-tools -y"
@@ -79,7 +79,7 @@ setup_arm64_chroot () {
 
 get_rpi_firmware () {
     cd /build/source
-    echo "Downloading current RPI firmware."
+    echo "* Downloading current RPI firmware."
     git clone --depth=1 https://github.com/Hexxeh/rpi-firmware
     cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
     cp rpi-firmware/*.elf /mnt/boot/firmware/
@@ -90,14 +90,14 @@ get_rpi_firmware () {
 }
 
 get_kernel_src () {
-    echo "Downloading $branch kernel source."
+    echo "* Downloading $branch kernel source."
     cd /build/source
     git clone --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
 }
 
 build_kernel () {
-    echo "Building $branch kernel."
+    echo "* Building $branch kernel."
     cd /build/source/rpi-linux
     #git checkout origin/rpi-4.19.y # change the branch name for newer versions
     mkdir /build/source/kernel-build
@@ -123,7 +123,7 @@ build_kernel () {
 }
 
 install_kernel () {
-    echo "Copying compiled ${KERNEL_VERSION} kernel to image."
+    echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
     df -h
     cd /build/source
     # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4.
@@ -137,13 +137,13 @@ install_kernel () {
     /mnt/boot/firmware/vmlinuz
     cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
-    echo "Copying compiled ${KERNEL_VERSION} modules to image."
+    echo "* Copying compiled ${KERNEL_VERSION} modules to image."
     rm  -rf /build/source/kernel-install/lib/modules/build
     cp -avr /build/source/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
 
-    echo "Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
+    echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
     cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
@@ -155,7 +155,7 @@ install_kernel () {
 }
 
 install_kernel_headers () {
-    echo "Copying ${KERNEL_VERSION} kernel headers."
+    echo "* Copying ${KERNEL_VERSION} kernel headers."
     mkdir -p /mnt/build
     mount -o bind /build     /mnt/build
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
@@ -163,7 +163,7 @@ install_kernel_headers () {
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
     cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
-    
+    echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
@@ -209,7 +209,7 @@ install_kernel_headers () {
 
 
 install_armstub8-gic () {
-    echo "Installing RPI4 armstub8-gic source."
+    echo "* Installing RPI4 armstub8-gic source."
     cd /build/source
     git clone --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
     cd rpi-tools/armstubs
@@ -219,7 +219,7 @@ install_armstub8-gic () {
 }
 
 install_non-free_firmware () {
-    echo "Installing non-free firmware."
+    echo "* Installing non-free firmware."
     cd /build/source
     git clone --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
     cp -avf firmware-nonfree/* /mnt/usr/lib/firmware
@@ -227,7 +227,7 @@ install_non-free_firmware () {
 
 
 configure_rpi_config_txt () {
-    echo "Making /boot/firmware/config.txt modifications."
+    echo "* Making /boot/firmware/config.txt modifications."
     echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
@@ -236,7 +236,7 @@ configure_rpi_config_txt () {
 }
 
 install_rpi_userland () {
-    echo "Installing Raspberry Pi userland source."
+    echo "* Installing Raspberry Pi userland source."
     cd /build/source
     git clone --depth=1 https://github.com/raspberrypi/userland
     mkdir -p /mnt/opt/vc
@@ -255,7 +255,7 @@ install_rpi_userland () {
 }
 
 modify_wifi_firmware () {
-    echo "Modifying wireless firmware."
+    echo "* Modifying wireless firmware."
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
     if ! grep -qs 'boardflags3=0x44200100' \
     /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt
@@ -265,7 +265,7 @@ modify_wifi_firmware () {
 }
 
 install_first_start_cleanup_script () {
-    echo "Creating first start cleanup script."
+    echo "* Creating first start cleanup script."
     echo -e '#!/bin/sh -e\n\
     # 1st Boot Cleanup Script\n#\n\
     # Print the IP address\n\
@@ -290,7 +290,7 @@ install_first_start_cleanup_script () {
 }
 
 cleanup_image () {
-    echo "Cleaning up installed packages in image."
+    echo "* Finishing image setup."
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     #mount -t proc proc     /mnt/proc/
     #mount -t sysfs sys     /mnt/sys/
@@ -352,7 +352,7 @@ remove_chroot () {
 }
 
 unmount_image () {
-    echo "Unmounting modified ${new_image}.img"
+    echo "* Unmounting modified ${new_image}.img"
     cd /build/source
     umount /mnt/boot/firmware
     umount /mnt
@@ -362,8 +362,8 @@ unmount_image () {
 }
 
 export_compressed_image () {
-    echo "Compressing ${new_image} with lz4 and exporting"
-    echo "out of container to:"
+    echo "* Compressing ${new_image} with lz4 and exporting"
+    echo "  out of container to:"
     echo "${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     cd /build/source
     chown -R $USER:$GROUP /build
@@ -374,7 +374,7 @@ export_compressed_image () {
 }
 
 export_log () {
-    echo "Build log at: build-log-${KERNEL_VERSION}_${now}.log"
+    echo "* Build log at: build-log-${KERNEL_VERSION}_${now}.log"
     cat $TMPLOG > /output/build-log-${KERNEL_VERSION}_${now}.log
     chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${now}.log
 }
