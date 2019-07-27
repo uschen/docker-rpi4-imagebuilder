@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 
 # This script is executed within the container as root. The resulting image &
 # logs are written to /output after a succesful build.  These directories are 
@@ -173,29 +173,31 @@ install_kernel_headers () {
     for i in "${files[@]}"
     do
      rm /build/source/kernel-build/$i
+     rm /build/source/rpi-linux/$i
     done
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     #make -j`nproc` O=/build/source/kernel-build mrproper"
     # cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
     # This step is expected to fail, but it does what is needed before it fails.
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j`nproc` O=/build/source/kernel-build modules_prepare || true"
-    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j`nproc` O=/build/source/kernel-build scripts_basic"
+    make -j`nproc` modules_prepare || true"
+    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    #make -j`nproc` scripts_basic; \
+    #make -j`nproc` scripts/mod/modpost"
     # Otherwise we get make mrproper error
-    rm /build/source/kernel-build/.config
-    sleep 6000
-    chroot /mnt /bin/bash -c "cd /build/source/kernel-build ; \
-    make -j`nproc` O=/build/source/kernel-build scripts/recordmcount || true"
-    chroot /mnt /bin/bash -c "cd /build/source/kernel-build ; \
-    make -j`nproc` O=/build/source/kernel-build scripts/mod/modpost || true"
+    #rm /build/source/kernel-build/.config
+    #sleep 6000
+    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux/scripts ; \
+    #make recordmcount "
+    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    #make -j`nproc` scripts/mod/modpost || true"
     # Compilation tools no longer needed in image, so let's take them out to save space.
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove gcc bison flex make libssl-dev -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoremove -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoclean -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #remove gcc bison flex make libssl-dev -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #autoremove -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #autoclean -y"
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
@@ -207,10 +209,11 @@ install_kernel_headers () {
     for i in "${files[@]}"
     do
      mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-     cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+     cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-    cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+   sleep 6000
+   cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
    # cd /build/root
