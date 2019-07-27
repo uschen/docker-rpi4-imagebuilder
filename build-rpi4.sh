@@ -159,7 +159,7 @@ install_kernel_headers () {
     chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove gcc bison flex -y"
+    remove gcc bison flex make -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoremove -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
