@@ -49,6 +49,8 @@ checkfor_and_download_ubuntu_image () {
 extract_and_mount_image () {
     echo "* Extracting: ${ubuntu_image} to ${new_image}.img"
     xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
+    #echo "* Increasing image size by 200M"
+    #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
     losetup -d /dev/loop0
     dmsetup remove_all
