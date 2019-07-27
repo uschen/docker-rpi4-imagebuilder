@@ -48,7 +48,7 @@ shift $(($OPTIND - 1))
 srcdir=$1
 #docker_args="-it "
 # The bash script & copy log if failure setup doesn't work without the "-dt" docker argument.
-docker_args="-dt "
+docker_args="-dt --init "
 #build_container_name="rpi4-image-build"
 #docker_args="--name $build_container_name "
 
@@ -95,6 +95,9 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
 # If the build script fails, the log is still copied out.
 startcmd="/bin/sh -c \"/build-rpi4.sh ; cp /tmp/build.log /output/build_fail.log\""
+# Clear old build failure log file.
+rm -f $outdir/build_fail.log
+
 #cmd="docker run $docker_args $image /build-rpi4.sh"
 cmd="docker run $docker_args $image $startcmd"
 
