@@ -107,12 +107,12 @@ build_kernel () {
     #cd ..
 
     cd /build/source/rpi-linux
-    make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    make -j`nproc` O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     
     mkdir /build/source/kernel-install
-    sudo make -j4 O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    sudo make -j`nproc` O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
 }
 
@@ -150,8 +150,8 @@ install_kernel () {
 
 install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
-    mkdir -p /mnt/mnt
-    mount -o bind /build/source/kernel-build     /mnt/mnt
+    mkdir -p /mnt/build
+    mount -o bind /build     /mnt/build
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
     cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
@@ -162,7 +162,8 @@ install_kernel_headers () {
     do
      rm /build/source/kernel-build/$i
     done
-    chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    make -j`nproc` O=/build/source/kernel-build modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove gcc bison flex make libssl-dev -y"
@@ -332,6 +333,8 @@ cleanup_image () {
 remove_chroot () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"
+    umount /mnt/build
+    rm -f /mnt/build
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
