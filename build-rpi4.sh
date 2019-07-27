@@ -140,7 +140,8 @@ install_kernel_headers () {
 
 install_kernel_headers_postinstall () {
     echo "Copying partial ${KERNEL_VERSION} kernel headers."
-   # mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
+    mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
@@ -154,8 +155,6 @@ install_kernel_headers_postinstall () {
      cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
 
-   # The rest is pulled down via git after first reboot.
-   #
    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
    # cd /build/root
    # tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
