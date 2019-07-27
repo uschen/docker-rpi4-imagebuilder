@@ -156,6 +156,12 @@ install_kernel_headers () {
     cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
+    files=("scripts/recordmcount" "scripts/mod/modpost" \
+        "scripts/basic/fixdep")
+    for i in "${files[@]}"
+    do
+     rm /build/source/kernel-build/$i
+    done
     chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
@@ -175,7 +181,7 @@ install_kernel_headers () {
     for i in "${files[@]}"
     do
      mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-     cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+     cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
     cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
