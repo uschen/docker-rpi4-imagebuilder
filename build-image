@@ -116,8 +116,9 @@ build_cid=`cat $cidfile`
 # Following does not work.
 # read build_cid <$cidfile
 # echo $build_cid
-echo "\nTailing build log:"
+echo ""
+echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
-echo "\n"
+echo ""
 exec $tail_log_cmd
