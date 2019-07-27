@@ -64,9 +64,9 @@ setup_arm64_chroot () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    install -d gcc make flex bison -y
+    install -d gcc make flex bison libssl-dev -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    install gcc make flex bison -y"
+    install gcc make flex bison libssl-dev -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"   
 }
@@ -151,7 +151,7 @@ install_kernel () {
 install_kernel_headers () {
     echo "Copying ${KERNEL_VERSION} kernel headers."
     mkdir -p /mnt/mnt
-    mount -o bind /build/source/rpi-linux     /mnt/mnt
+    mount -o bind /build/source/kernel-build     /mnt/mnt
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
     cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
@@ -159,7 +159,7 @@ install_kernel_headers () {
     chroot /mnt /bin/bash -c "cd /mnt ; make modules_prepare"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove gcc bison flex make -y"
+    remove gcc bison flex make libssl-dev -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoremove -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
@@ -170,13 +170,13 @@ install_kernel_headers () {
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-   #files=("scripts/recordmcount" "scripts/mod/modpost" \
-   #     "scripts/basic/fixdep")
-   # for i in "${files[@]}"
-   # do
-   #  mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-   #  cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
-   # done
+   files=("scripts/recordmcount" "scripts/mod/modpost" \
+        "scripts/basic/fixdep")
+    for i in "${files[@]}"
+    do
+     mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
+     cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+    done
    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
     cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
