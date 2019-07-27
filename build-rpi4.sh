@@ -144,8 +144,9 @@ install_kernel_headers_postinstall () {
    mkdir -p /build/root/usr/src
    mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
    cd /build/root
-   tar tar cvf - root | lz4 > kernel-headers.tar.lz4
-   cp kernel-headers.tar.lz4 /mnt/
+   tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
+   # Don't fire error if this fails.
+   cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
 }
 
 
@@ -263,13 +264,13 @@ get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
-install_kernel_headers_postinstall 
 install_armstub8-gic
 install_non-free_firmware
 configure_rpi_config_txt
 install_rpi_userland
 modify_wifi_firmware 
 install_first_start_cleanup_script
+install_kernel_headers_postinstall 
 unmount_image
 export_compressed_image
 export_log
