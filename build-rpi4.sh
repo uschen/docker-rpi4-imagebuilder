@@ -235,10 +235,10 @@ install_first_start_cleanup_script () {
     flash-kernel initramfs-tools -y\n\
     /usr/bin/apt install wireless-tools wireless-regdb crda lz4 git -y\n\
     /usr/bin/apt upgrade -y\n\
-    cd /usr/src \n\
-    /usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
-    linux-headers-${KERNEL_VERSION}\n\
-    /usr/bin/git checkout $kernelrev\n\
+    #cd /usr/src \n\
+    #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
+    #linux-headers-${KERNEL_VERSION}\n\
+    #/usr/bin/git checkout $kernelrev\n\
     rm /etc/rc.local\n\n\
     exit 0' > /mnt/etc/rc.local
     chmod +x /mnt/etc/rc.local
