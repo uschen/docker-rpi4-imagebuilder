@@ -131,15 +131,7 @@ install_kernel () {
 }
 
 install_kernel_headers () {
-    #This isn't used. There isn't enough space in the disk image without resizing.
-    echo "Installing ${KERNEL_VERSION} kernel headers."
-    mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-    cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
-}
-
-install_kernel_headers_postinstall () {
-    echo "Copying partial ${KERNEL_VERSION} kernel headers."
+    echo "Copying ${KERNEL_VERSION} kernel headers."
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
     mv /build/source/rpi-linux /mnt/usr/src/linux-headers-${KERNEL_VERSION}
    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
@@ -219,17 +211,6 @@ modify_wifi_firmware () {
     fi
 }
 
-cleanup_image_packages () {
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    remove linux-image-raspi2 linux-raspi2 \
-    flash-kernel initramfs-tools -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    install wireless-tools wireless-regdb crda lz4 git -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    upgrade -y
-}
-
 install_first_start_cleanup_script () {
     echo "Creating first start cleanup script."
     echo -e '#!/bin/sh -e\n\
@@ -253,6 +234,19 @@ install_first_start_cleanup_script () {
     rm /etc/rc.local\n\n\
     exit 0' > /mnt/etc/rc.local
     chmod +x /mnt/etc/rc.local
+}
+
+cleanup_image_packages () {
+    echo "Cleaning up installed packages in image."
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    remove linux-image-raspi2 linux-raspi2 \
+    flash-kernel initramfs-tools -y
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    install wireless-tools wireless-regdb crda lz4 git -y
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    upgrade -y
 }
 
 unmount_image () {
@@ -290,7 +284,7 @@ get_kernel_src
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
-install_kernel_headers_postinstall
+install_kernel_headers
 install_armstub8-gic
 install_non-free_firmware
 configure_rpi_config_txt
