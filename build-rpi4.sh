@@ -238,15 +238,28 @@ install_first_start_cleanup_script () {
 
 cleanup_image_packages () {
     echo "Cleaning up installed packages in image."
+    mkdir -p /build/src/apt/archives
+    mkdir -p /build/src/apt/lists
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    install wireless-tools wireless-regdb crda lz4 git -y
+    -o dir::cache::archives=/build/src/apt/archives \
+    -o dir::state::lists=/build/src/apt/lists \
+    update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    upgrade -y
+    -o dir::cache::archives=/build/src/apt/archives \
+    -o dir::state::lists=/build/src/apt/lists \
+    install wireless-tools wireless-regdb crda -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #-o dir::state::lists=/build/src/apt/lists \
+    #upgrade -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #-o dir::state::lists=/build/src/apt/lists \
+    #autoclean -y
 }
 
 unmount_image () {
