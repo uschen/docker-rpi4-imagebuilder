@@ -351,6 +351,7 @@ cleanup_image () {
 }
 
 remove_chroot () {
+    echo "* Cleaning up arm64 chroot"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"
     umount /mnt/build
@@ -360,10 +361,10 @@ remove_chroot () {
 
 unmount_image () {
     echo "* Unmounting modified ${new_image}.img"
-    cd /build/source
+    sync
     umount /mnt/boot/firmware
     umount /mnt
-    kpartx -dv ${new_image}.img
+    kpartx -dv /build/source/${new_image}.img
     losetup -d /dev/loop0
     dmsetup remove_all
 }
