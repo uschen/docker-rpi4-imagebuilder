@@ -47,7 +47,7 @@ done
 shift $(($OPTIND - 1))
 srcdir=$1
 #docker_args="-it "
-docker_args="-d "
+docker_args="-d --init "
 #build_container_name="rpi4-image-build"
 #docker_args="--name $build_container_name "
 
