@@ -183,7 +183,7 @@ install_kernel_headers () {
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     #make -j`nproc` O=/build/source/kernel-build scripts/recordmcount"
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j`nproc` O=/build/source/kernel-build scripts/mod/modpost"
+    make -j`nproc` O=/build/source/kernel-build scripts/mod/modpost || true"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove gcc bison flex make libssl-dev -y"
