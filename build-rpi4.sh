@@ -147,7 +147,7 @@ install_kernel_headers () {
      mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
      cp /build/source/kernel-build/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     done
-    mv /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
    # cd /build/root
