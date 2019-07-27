@@ -397,13 +397,13 @@ get_rpi_firmware
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
-install_kernel_headers
-install_armstub8-gic
-install_non-free_firmware
-configure_rpi_config_txt
-install_rpi_userland
-modify_wifi_firmware 
-install_first_start_cleanup_script
+install_armstub8-gic &
+install_non-free_firmware &
+configure_rpi_config_txt &
+install_rpi_userland &
+modify_wifi_firmware &
+install_first_start_cleanup_script &
+install_kernel_headers 
 cleanup_image
 remove_chroot
 unmount_image
