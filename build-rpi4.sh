@@ -178,6 +178,12 @@ install_kernel_headers () {
     # This step is expected to fail, but it does what is needed before it fails.
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j`nproc` O=/build/source/kernel-build modules_prepare || true"
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    make -j`nproc` O=/build/source/kernel-build scripts_basic"
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    make -j`nproc` O=/build/source/kernel-build scripts/recordmcount"
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    make -j`nproc` O=/build/source/kernel-build scripts/mod/modpost"
     # Compilation tools no longer needed in image, so let's take them out to save space.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove gcc bison flex make libssl-dev -y"
