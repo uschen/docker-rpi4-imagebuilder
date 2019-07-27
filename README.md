@@ -37,7 +37,9 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
     # build package from source directory
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
-    ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
+    time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
+    
+    # This takes less than ten minutes on my system.
 
 
 
@@ -55,7 +57,7 @@ Note that you want to replace instances of "xzcat" with "lzcat" since this setup
 ## 1st Login
 The **default login for this image is unchanged** from the ubuntu server default image: **ubuntu/ubuntu**.
 Note also that the **RPI4 SHOULD Be connected to ethernet for first login**, as the ubuntu startup cloud sequence wants a connection.
-After the network starts, you should be able to ssh to the IP of the RPI with username ubuntu, where you will be prompted to change the password.
+After the network starts, you should be able to ssh to the IP of the RPI with username ubuntu, where you will be prompted to change the password. Note that this also pulls down the linux kernel source at boot to populate /usr/src/linux-headers-  so that might take a little time in the background.
 
 Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata```. You can also use ```nmtui``` to configure the wireless network after doing ```sudo apt install network-manager```.
 
