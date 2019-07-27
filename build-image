@@ -59,7 +59,7 @@ docker_args="-dt "
 [[ !    "$image"         ]] && fatal "docker image name not given (-i IMAGE)"
 
 # Needed for loopback to work inside container.
-docker_args+="--capability=CAP_MKNOD --device-cgroup-rule=\"b 7:* rmw\" "
+docker_args+="--cap-add=CAP_MKNOD --device-cgroup-rule=\"b 7:* rmw\" "
 #docker_args+="-v /dev:/dev --privileged "
 
 # Check that optional parameters are valid
