@@ -249,9 +249,13 @@ cleanup_image_packages () {
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoclean -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    update"
+    autoremove -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #update"
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -d install wireless-tools wireless-regdb crda -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install wireless-tools wireless-regdb crda -y"
     #mkdir -p /build/src/apt/archives
