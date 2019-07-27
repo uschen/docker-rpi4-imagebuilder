@@ -241,10 +241,10 @@ install_first_start_cleanup_script () {
 cleanup_image () {
     echo "Cleaning up installed packages in image."
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
-    mount -t proc proc     /mnt/proc/
-    mount -t sysfs sys     /mnt/sys/
-    mount -o bind /dev     /mnt/dev/
-    mount -o bind /dev/pts /mnt/dev/pts
+    #mount -t proc proc     /mnt/proc/
+    #mount -t sysfs sys     /mnt/sys/
+    #mount -o bind /dev     /mnt/dev/
+    #mount -o bind /dev/pts /mnt/dev/pts
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove linux-image-raspi2 linux-raspi2 \
     flash-kernel initramfs-tools -y"
@@ -286,10 +286,10 @@ cleanup_image () {
     #-o dir::state::lists=/build/src/apt/lists \
     #autoclean -y
     rm /mnt/usr/bin/qemu-aarch64-static
-    umount /mnt/proc
-    umount /mnt/sys
-    umount /mnt/dev/pts
-    umount /mnt/dev
+    #umount /mnt/proc
+    #umount /mnt/sys
+    #umount /mnt/dev/pts
+    #umount /mnt/dev
 }
 
 unmount_image () {
