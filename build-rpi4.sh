@@ -70,6 +70,8 @@ setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount --bind /run /mnt/run
+    mkdir -p /run/systemd/resolve
+    cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
     # Waiting on this in case this is causing a problem with logins.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
