@@ -89,6 +89,10 @@ docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.
 #docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
 docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 
+# Store apt-cache on ccache volume too
+docker_args+="-v ccache:/apt_cache "
+
+
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
 rm -f $cidfile
