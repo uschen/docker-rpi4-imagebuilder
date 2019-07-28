@@ -165,9 +165,11 @@ install_kernel_headers () {
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} \
+    /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
     echo "* Regenerating broken cross-compile module installation infrastructure."
+    echo "** This takes a while."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
@@ -180,7 +182,6 @@ install_kernel_headers () {
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     #make -j`nproc` O=/build/source/kernel-build mrproper"
     # cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
-    # This step is expected to fail, but it does what is needed before it fails.
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j`nproc` modules_prepare || true"
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
@@ -202,26 +203,25 @@ install_kernel_headers () {
     #autoclean -y"
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-   # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-   # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
-   # cp /build/source/kernel-build/.config /build/source/rpi-linux/
-   # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-   files=("scripts/recordmcount" "scripts/mod/modpost" \
-        "scripts/basic/fixdep")
-    for i in "${files[@]}"
-    do
-     mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-     cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
-    done
-   # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-   sleep 6000
-   cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
+    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
+    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
+    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
+    #files=("scripts/recordmcount" "scripts/mod/modpost" \
+    #     "scripts/basic/fixdep")
+    # for i in "${files[@]}"
+    # do
+    #  mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
+    #  cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
+    # done
+    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
-   # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
-   # cd /build/root
-   # tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
-   # Don't fire error if this fails.
-   # cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
+    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
+    # cd /build/root
+    # tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
+    # Don't fire error if this fails.
+    # cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
 }
 
 
@@ -307,8 +307,8 @@ install_first_start_cleanup_script () {
 }
 
 cleanup_image () {
-    echo "* Finishing image setup."
-    cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
+    #echo "* Finishing image setup."
+    # cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     #mount -t proc proc     /mnt/proc/
     #mount -t sysfs sys     /mnt/sys/
     #mount -o bind /dev     /mnt/dev/
@@ -326,6 +326,7 @@ cleanup_image () {
     -d install wireless-tools wireless-regdb crda -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install wireless-tools wireless-regdb crda -y"
+    rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
     chroot /mnt /bin/bash -c "ln -s /usr/src/linux-headers-${KERNEL_VERSION} \
     /usr/lib/modules/${KERNEL_VERSION}/build"
     #mkdir -p /build/src/apt/archives
@@ -412,8 +413,8 @@ configure_rpi_config_txt &
 install_rpi_userland &
 modify_wifi_firmware &
 install_first_start_cleanup_script &
+cleanup_image &
 install_kernel_headers 
-cleanup_image
 remove_chroot
 unmount_image
 export_compressed_image
