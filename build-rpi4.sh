@@ -407,6 +407,9 @@ cleanup_image () {
     install wireless-tools wireless-regdb crda -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install wireless-tools wireless-regdb crda -y"
+    mkdir -p /mnt/etc/kernel/postinst.d
+    echo -e '#!/bin/sh -e\n\
+    exit 0' > /mnt/etc/kernel/postinst.dzzzz_rpi4_kernel
     
     rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
 }
