@@ -27,6 +27,7 @@ RUN set -ex \
                libssl-dev \
                qemu-user-static \
                patch \
+               rsync \
                sudo \
                wget \
                xz-utils \         
