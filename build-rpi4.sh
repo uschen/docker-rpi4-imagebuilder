@@ -69,6 +69,8 @@ extract_and_mount_image () {
 setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
+    mount --bind /run /mnt/run
+    rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
     # Waiting on this in case this is causing a problem with logins.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove initramfs-tools flash-kernel -y"
@@ -322,8 +324,8 @@ cleanup_image () {
     #flash-kernel initramfs-tools -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoremove -y"
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #update"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    upgrade -y || true"
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     #update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
