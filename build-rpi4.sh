@@ -73,19 +73,34 @@ setup_arm64_chroot () {
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
+    
+    mkdir -p /mnt/build
+    mount -o bind /build /mnt/build
+    mkdir -p /build/src/apt/archives
+    
     # Waiting on this in case this is causing a problem with logins.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove initramfs-tools flash-kernel -y"
+    
     #remove linux-image-raspi2 \
     #linux-headers-raspi2 flash-kernel initramfs-tools -y"
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
+    upgrade -d -y
+    
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    update ; /usr/bin/apt-get -o APT::Architecture=arm64 upgrade -y"
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #install -d gcc make flex bison libssl-dev -y
+    -o dir::cache::archives=/build/src/apt/archives \
+    upgrade -y"
+    
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
+    install -d gcc make flex bison libssl-dev -y
+    
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
     install gcc make flex bison libssl-dev -y"
+    
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoclean -y"   
 }
@@ -177,8 +192,6 @@ install_kernel () {
 
 install_kernel_headers () {
     echo "* Copying ${KERNEL_VERSION} kernel headers to image."
-    mkdir -p /mnt/build
-    mount -o bind /build     /mnt/build
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
@@ -195,6 +208,7 @@ install_kernel_headers () {
     # later, so let's fix this with natively compiled module tools.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
         "scripts/basic/fixdep")
+        
     for i in "${files[@]}"
     do
      rm /build/source/kernel-build/$i
@@ -343,17 +357,23 @@ cleanup_image () {
     #flash-kernel initramfs-tools -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoremove -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    upgrade -y || true"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #upgrade -y || true"
+    
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     #update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
     -d install wireless-tools wireless-regdb crda -y
+    
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
     install wireless-tools wireless-regdb crda -y"
+    
     rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
-    chroot /mnt /bin/bash -c "ln -s /usr/src/linux-headers-${KERNEL_VERSION} \
-    /usr/lib/modules/${KERNEL_VERSION}/build"
+    #chroot /mnt /bin/bash -c "ln -s /usr/src/linux-headers-${KERNEL_VERSION} \
+    #/usr/lib/modules/${KERNEL_VERSION}/build"
+    
     #mkdir -p /build/src/apt/archives
     #mkdir -p /build/src/apt/lists
     #dpkg --add-architecture arm64
@@ -389,6 +409,7 @@ cleanup_image () {
 remove_chroot () {
     echo "* Cleaning up arm64 chroot"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/build/src/apt/archives \
     autoclean -y"
     umount /mnt/build
     umount /mnt/run
