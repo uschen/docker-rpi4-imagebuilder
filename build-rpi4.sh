@@ -201,17 +201,20 @@ build_kernel () {
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
-    make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
+    make O=/build/source/kernel-build ARCH=arm64 \
+    CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
     cd /build/source/kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
     /source-ro/conform_config.sh
-    yes "" | make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    yes "" | make O=./build/source/kernel-build/ \
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     cd ..
 
     cd /build/source/rpi-linux
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build \
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
@@ -228,7 +231,8 @@ build_kernel () {
     # rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare"
+    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) \
+    O=/build/source/kernel-build modules_prepare"
 
     mkdir -p /build/source/kernel-build/tmp/scripts/mod
     mkdir -p /build/source/kernel-build/tmp/scripts/basic
@@ -238,29 +242,32 @@ build_kernel () {
      rm /build/source/kernel-build/$i
      sed -i "/.tmp_quiet_recordmcount$/i TABTMP\$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
      /build/source/rpi-linux/Makefile
-     TAB=$'\t'
-     #sed "s/.*/${TAB}&/g" 
     done
+    TAB=$'\t'
     sed -i "s/TABTMP/${TAB}/g" /build/source/rpi-linux/Makefile
-    # Now we have arm64 binaries installed, so we copy libraries over:
+    
+    # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
+    # in case they are needed during this install.
     cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    
     aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/basic/fixdep.c -o \
     /build/source/kernel-build/tmp/scripts/basic/fixdep
+    
     aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/recordmcount.c -o \
     /build/source/kernel-build/tmp/scripts/recordmount
-    #cp /build/source/kernel-build/scripts/mod/elfconfig.h /build/source/rpi-linux/scripts/mod/
+
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
-    cp /build/source/*.deb /output/
+    cp /build/source/*.deb /output/ 
     #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
     #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
-    sleep 60000
     
     mkdir /build/source/kernel-install
-    sed '/^a.tmp_quiet_recordmcount/i $(Q)cp ' Makefile
+#    sed '/^a.tmp_quiet_recordmcount/i $(Q)cp ' Makefile
     sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=/build/source/kernel-build DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install \
+    O=/build/source/kernel-build DEPMOD=echo \
+    INSTALL_MOD_PATH=/build/source/kernel-install \
     modules_install
 }
 
@@ -296,27 +303,21 @@ install_kernel () {
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/
     
-    if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
-        then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
-    fi
-    
-    if ! grep -qs 'initramfs' /mnt/boot/firmware/config.txt
-        then echo "initramfs initrd.img followkernel" >> /mnt/boot/firmware/config.txt
-    fi
+
 }
 
 install_kernel_headers () {
-    echo "* Copying ${KERNEL_VERSION} kernel headers to image."
-    mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-
-    cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
-    rm .config"
-    
-    
-    rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
-    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+#     echo "* Copying ${KERNEL_VERSION} kernel headers to image."
+#     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+# 
+#     cp /build/source/kernel-build/.config /build/source/rpi-linux/
+#     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+#     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
+#     rm .config"
+#     
+#     
+#     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
+#     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
 
@@ -344,6 +345,13 @@ configure_rpi_config_txt () {
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
         then echo "arm_64bit=1" >> /mnt/boot/firmware/config.txt
+    fi
+    if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
+        then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
+    fi
+    
+    if ! grep -qs 'initramfs' /mnt/boot/firmware/config.txt
+        then echo "initramfs initrd.img followkernel" >> /mnt/boot/firmware/config.txt
     fi
 }
 
@@ -386,12 +394,8 @@ install_first_start_cleanup_script () {
       printf "My IP address is %s\n" "$_IP"\n\
     fi\n\
     #\n\
-    #sleep 30\n\
-    #/usr/bin/apt update && \
-    #/usr/bin/apt remove linux-image-raspi2 linux-raspi2 \
-    #flash-kernel initramfs-tools -y\n\
-    #/usr/bin/apt install wireless-tools wireless-regdb crda lz4 git -y\n\
-    #/usr/bin/apt upgrade -y\n\
+    /usr/bin/dpkg -i /var/cache/apt/archive/*.deb\n\
+    /usr/bin/apt remove linux-image-raspi2 -y\n\
     #cd /usr/src \n\
     #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
     #linux-headers-${KERNEL_VERSION}\n\
@@ -441,15 +445,20 @@ cleanup_image () {
 
 remove_chroot () {
     echo "* Cleaning up arm64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     autoclean -y"
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #autoclean -y"
+    
+    # Copy in kernel debs generated earlier to be installed at
+    # first boot.
+    cp /build/source/*.deb /var/cache/apt/archives/
+    
     umount /mnt/build
     umount /mnt/run
-    umount /var/cache/apt
     umount /mnt/ccache
     rmdir /mnt/ccache
+    umount /var/cache/apt
+
+    # This is no longer needed.
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
@@ -492,11 +501,12 @@ build_kernel
 ##install_kernel
 ##install_armstub8-gic #&
 ##install_non-free_firmware #&
-##configure_rpi_config_txt #&
+configure_rpi_config_txt #&
 ##install_rpi_userland #&
 ##modify_wifi_firmware #&
 ##install_first_start_cleanup_script #&
 ##cleanup_image #&
+make_kernel_install_scripts
 install_kernel_headers 
 sleep 60000
 remove_chroot
