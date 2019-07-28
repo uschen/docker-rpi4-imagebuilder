@@ -428,13 +428,14 @@ EOF
     # This allows flash-kernel to copy ther kernel so that it can 
     # be copied to the boot partition.
     mkdir -p /mnt/etc/flash-kernel/
+    
     cat <<- EOF > /mnt/etc/flash-kernel/db
 #
 # Raspberry Pi 4 Model B Rev 1.1
-DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb\n\
-Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb\n\
-Boot-Kernel-Path: /boot/firmware/vmlinuz\n\
-Boot-Initrd-Path: /boot/firmware/initrd.img\n\
+DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
+Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
+Boot-Kernel-Path: /boot/firmware/vmlinuz
+Boot-Initrd-Path: /boot/firmware/initrd.img
 EOF
 
 }
