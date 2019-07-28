@@ -366,7 +366,7 @@ remove_chroot () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"
     umount /mnt/build
-    rm -f /mnt/build
+    #rm -f /mnt/build
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
@@ -376,7 +376,7 @@ unmount_image () {
     umount /mnt/boot/firmware
     umount /mnt
     kpartx -dv /build/source/${new_image}.img
-    losetup -d /dev/loop0
+    #losetup -d /dev/loop0
     dmsetup remove_all
 }
 
@@ -420,4 +420,4 @@ unmount_image
 export_compressed_image
 export_log
 rm $TMPLOG
-ls -l /output
+#ls -l /output
