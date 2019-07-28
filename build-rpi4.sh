@@ -143,14 +143,14 @@ build_kernel () {
     cd ..
 
     cd /build/source/rpi-linux
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bindeb-pkg
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     
     mkdir /build/source/kernel-install
     sudo make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
-    sleep 6000
 }
 
 install_kernel () {
@@ -212,8 +212,9 @@ install_kernel_headers () {
      rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare"
-    
+    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
+    sleep 60000
     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
