@@ -78,8 +78,10 @@ setup_arm64_chroot () {
     remove initramfs-tools flash-kernel -y"
     #remove linux-image-raspi2 \
     #linux-headers-raspi2 flash-kernel initramfs-tools -y"
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #update
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    update ; /usr/bin/apt-get -o APT::Architecture=arm64 upgrade -y"
     #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     #install -d gcc make flex bison libssl-dev -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
@@ -115,7 +117,8 @@ build_kernel () {
     
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
-    -O arch/arm64/configs/bcm2711_defconfig 
+    -O arch/arm64/configs/bcm2711_defconfig
+    
     make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
     cd /build/source/kernel-build
@@ -146,22 +149,27 @@ install_kernel () {
     # script to boot the compressed kernel on arm64, so we copy this in anyways.
     cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/vmlinuz-${KERNEL_VERSION}
+    
     cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/firmware/vmlinuz
+    
     cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
     echo "* Copying compiled ${KERNEL_VERSION} modules to image."
     rm  -rf /build/source/kernel-install/lib/modules/build
     cp -avr /build/source/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
+    
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
 
     echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
     cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
+    
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/
+    
     if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
         then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
     fi
@@ -174,8 +182,12 @@ install_kernel_headers () {
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 
     cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} \
-    /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
+    rm .config"
+    
+    #cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} \
+    #/mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
     echo "* Regenerating broken cross-compile module installation infrastructure."
     echo "** This takes a while."
@@ -192,7 +204,10 @@ install_kernel_headers () {
     #make -j`nproc` O=/build/source/kernel-build mrproper"
     # cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j $(($(nproc) + 1)) modules_prepare || true"
+    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare"
+    
+    rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
+    cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     #make -j`nproc` scripts_basic; \
     #make -j`nproc` scripts/mod/modpost"
@@ -210,9 +225,9 @@ install_kernel_headers () {
     #autoremove -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoclean -y"
-    find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
-    find /build/source/rpi-linux -type f -name "*.o" -exec rm -rf {} \;
-    mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    #find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
+    #find /build/source/rpi-linux -type f -name "*.o" -exec rm -rf {} \;
+    #mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
     # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
     # cp /build/source/kernel-build/.config /build/source/rpi-linux/
@@ -225,7 +240,7 @@ install_kernel_headers () {
     #  cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
     # done
     # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-    cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    #cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 
     # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
     # cd /build/root
