@@ -70,13 +70,14 @@ setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount --bind /run /mnt/run
+    mount --bind /apt-cache /var/cache/apt
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
     
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
-    mkdir -p /build/src/apt/archives
+    #mkdir -p /build/src/apt/archives
     
     # Waiting on this in case this is causing a problem with logins.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
@@ -84,20 +85,22 @@ setup_arm64_chroot () {
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
+    -o dir::cache::archives=/apt-cache \
     upgrade -d -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
     upgrade -y"
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #upgrade -y"
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
+    -o dir::cache::archives=/apt-cache \
     install -d gcc make flex bison libssl-dev -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
     install gcc make flex bison libssl-dev -y"
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #install gcc make flex bison libssl-dev -y"
      
 }
 
@@ -140,13 +143,14 @@ build_kernel () {
     cd ..
 
     cd /build/source/rpi-linux
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bindeb-pkg
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     
     mkdir /build/source/kernel-install
     sudo make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
+    sleep 6000
 }
 
 install_kernel () {
@@ -204,8 +208,8 @@ install_kernel_headers () {
         
     for i in "${files[@]}"
     do
-     rm /build/source/kernel-build/$i
-     rm /build/source/rpi-linux/$i
+     rm /build/source/kernel-build/$i || true
+     rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare"
@@ -299,12 +303,13 @@ install_first_start_cleanup_script () {
 cleanup_image () {
     #echo "* Finishing image setup."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
+    -o dir::cache::archives=/apt-cache \
     -d install wireless-tools wireless-regdb crda -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
     install wireless-tools wireless-regdb crda -y"
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #install wireless-tools wireless-regdb crda -y"
     
     rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
 }
@@ -312,8 +317,9 @@ cleanup_image () {
 remove_chroot () {
     echo "* Cleaning up arm64 chroot"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/build/src/apt/archives \
     autoclean -y"
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #autoclean -y"
     umount /mnt/build
     umount /mnt/run
     rm /mnt/usr/bin/qemu-aarch64-static
