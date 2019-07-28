@@ -202,6 +202,7 @@ install_kernel_headers () {
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     #autoclean -y"
     find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
+    find /build/source/rpi-linux -type f -name "*.o" -exec rm -rf {} \;
     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
     # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
