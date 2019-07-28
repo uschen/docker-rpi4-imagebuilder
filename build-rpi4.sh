@@ -58,6 +58,8 @@ extract_and_mount_image () {
     cd /build/source
     echo "Mounting: ${new_image}.img"
     kpartx -av ${new_image}.img
+    #e2fsck -f /dev/loop0p2
+    #resize2fs /dev/loop0p2
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
 }
