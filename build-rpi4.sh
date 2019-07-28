@@ -87,7 +87,7 @@ setup_arm64_chroot () {
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt-cache \
+    -o dir::cache::archives=/apt_cache \
     upgrade -d -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y"
@@ -95,7 +95,7 @@ setup_arm64_chroot () {
     #upgrade -y"
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt-cache \
+    -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
                build-essential \
                bc \
@@ -373,7 +373,7 @@ install_first_start_cleanup_script () {
 cleanup_image () {
     #echo "* Finishing image setup."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt-cache \
+    -o dir::cache::archives=/apt_cache \
     -d install wireless-tools wireless-regdb crda -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
