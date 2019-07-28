@@ -167,7 +167,7 @@ install_kernel () {
     cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 
     echo "* Copying compiled ${KERNEL_VERSION} modules to image."
-    rm  -rf /build/source/kernel-install/lib/modules/build
+    #rm  -rf /build/source/kernel-install/lib/modules/build
     cp -avr /build/source/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     
@@ -364,6 +364,7 @@ modify_wifi_firmware #&
 install_first_start_cleanup_script #&
 cleanup_image #&
 install_kernel_headers 
+sleep 6000
 remove_chroot
 unmount_image
 export_compressed_image
