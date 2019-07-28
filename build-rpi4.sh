@@ -254,7 +254,7 @@ build_kernel () {
     sed -i "s/TABTMP/${TAB}/g" /build/source/rpi-linux/Makefile
     
     # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
-    # in case they are needed during this install.
+    # from image to build container in case they are needed during this install.
     cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
     
@@ -379,7 +379,7 @@ PATH="/opt/vc/bin:/opt/vc/sbin"
 ROOTPATH="/opt/vc/bin:/opt/vc/sbin"
 LDPATH="/opt/vc/lib"
 EOF
-    # /mnt/etc/environment.d/10-vcgencmd.conf
+    chmod +x /mnt/etc/environment.d/10-vcgencmd.conf
     # cd ..
 }
 
@@ -420,7 +420,9 @@ EOF
 make_kernel_install_scripts () {
     # This script allows flash-kernel to create the uncompressed kernel file
     # on the boot partition.
+    echo "* Making kernel install scripts."
     mkdir -p /mnt/etc/kernel/postinst.d
+    echo "Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     cat <<- EOF > /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 #!/bin/sh -eu
 COMMAND="$1"
@@ -435,6 +437,7 @@ EOF
     
     # This allows flash-kernel to copy ther kernel so that it can 
     # be copied to the boot partition.
+    echo "Creating /mnt/etc/flash-kernel/db ."
     mkdir -p /mnt/etc/flash-kernel/
     
     cat <<- EOF > /mnt/etc/flash-kernel/db
