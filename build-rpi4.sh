@@ -362,7 +362,7 @@ configure_rpi_config_txt #&
 install_rpi_userland #&
 modify_wifi_firmware #&
 install_first_start_cleanup_script #&
-cleanup_image &
+cleanup_image #&
 install_kernel_headers 
 remove_chroot
 unmount_image
