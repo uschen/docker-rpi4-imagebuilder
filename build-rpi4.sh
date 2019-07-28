@@ -407,9 +407,18 @@ cleanup_image () {
     install wireless-tools wireless-regdb crda -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install wireless-tools wireless-regdb crda -y"
+    
+    # This script allows flash-kernel to create the uncompressed kernel file
+    # on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
-    echo -e '#!/bin/sh -e\n\
-    exit 0' > /mnt/etc/kernel/postinst.dzzzz_rpi4_kernel
+    echo -e '#!/bin/sh -eu\n\
+    COMMAND="$1"\n\
+    KERNEL_VERSION="$2"\n\
+    #BOOT_DIR_ABS="$3"\n\
+    \n\
+    gunzip -c -f $KERNEL_VERSION > /boot/firmware/kernel8.img\n\
+    exit 0' > /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
+    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
     
     rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
 }
