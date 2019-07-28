@@ -348,7 +348,7 @@ export_log () {
 }
 
 
-get_kernel_src &
+get_kernel_src #&
 checkfor_and_download_ubuntu_image 
 extract_and_mount_image
 setup_arm64_chroot
@@ -356,12 +356,12 @@ get_rpi_firmware
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
-install_armstub8-gic &
-install_non-free_firmware &
-configure_rpi_config_txt &
-install_rpi_userland &
-modify_wifi_firmware &
-install_first_start_cleanup_script &
+install_armstub8-gic #&
+install_non-free_firmware #&
+configure_rpi_config_txt #&
+install_rpi_userland #&
+modify_wifi_firmware #&
+install_first_start_cleanup_script #&
 cleanup_image &
 install_kernel_headers 
 remove_chroot
