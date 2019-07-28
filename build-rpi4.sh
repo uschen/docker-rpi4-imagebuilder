@@ -244,9 +244,9 @@ build_kernel () {
     # Now we have arm64 binaries installed, so we copy libraries over:
     cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
-    aarch64-linux-gnu-gcc -static /build/source/kernel-build/scripts/basic/fixdep.c -o \
+    aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/basic/fixdep.c -o \
     /build/source/kernel-build/tmp/scripts/basic/fixdep
-    aarch64-linux-gnu-gcc -static /build/source/kernel-build/scripts/recordmcount.c -o \
+    aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/recordmcount.c -o \
     /build/source/kernel-build/tmp/scripts/recordmount
     #cp /build/source/kernel-build/scripts/mod/elfconfig.h /build/source/rpi-linux/scripts/mod/
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
