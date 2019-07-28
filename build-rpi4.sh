@@ -69,8 +69,7 @@ setup_arm64_chroot () {
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     # Waiting on this in case this is causing a problem with logins.
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove flash-kernel -y"
-    # initramfs-tools -y"
+    remove initramfs-tools flash-kernel -y"
     #remove linux-image-raspi2 \
     #linux-headers-raspi2 flash-kernel initramfs-tools -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
@@ -111,12 +110,12 @@ build_kernel () {
 
     make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
-    #cd /build/source/kernel-build
+    cd /build/source/kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
-    #/build/source/conform_config.sh
-    #make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
-    #cd ..
+    /source-ro/conform_config.sh
+    make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    cd ..
 
     cd /build/source/rpi-linux
     make -j`nproc` O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
