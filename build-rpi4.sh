@@ -80,16 +80,15 @@ setup_arm64_chroot () {
     #mkdir -p /build/src/apt/archives
     
     # Waiting on this in case this is causing a problem with logins.
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    remove initramfs-tools flash-kernel -y"
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #remove initramfs-tools flash-kernel -y"
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt-cache \
     upgrade -d -y
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    upgrade -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
@@ -124,12 +123,9 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils         
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt-cache \ 
-    build-dep -d -y linux-image-raspi2
-    
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+               xz-utils
+    sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
+    chroot /mnt /bin/bash -c "apt update && /usr/bin/apt-get \
     install -y --no-install-recommends \
                build-essential \
                bc \
@@ -160,9 +156,8 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt-cache \ 
-    build-dep -y linux-image-raspi2"
+    chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
+    sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install gcc make flex bison libssl-dev -y"
