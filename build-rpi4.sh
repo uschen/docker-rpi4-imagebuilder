@@ -120,7 +120,7 @@ build_kernel () {
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
     /source-ro/conform_config.sh
-    make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    yes "" | make O=./build/source/kernel-build/ ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     cd ..
 
     cd /build/source/rpi-linux
