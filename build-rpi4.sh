@@ -70,7 +70,8 @@ setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount --bind /run /mnt/run
-    mount --bind /apt-cache /var/cache/apt
+    mount --bind /apt_cache /var/cache/apt
+    mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
@@ -391,7 +392,9 @@ remove_chroot () {
     #autoclean -y"
     umount /mnt/build
     umount /mnt/run
+    umount /var/cache/apt
     umount /mnt/ccache
+    rmdir /mnt/ccache
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
