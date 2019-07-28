@@ -31,7 +31,7 @@ PATH=/usr/lib/ccache:$PATH
 # Create work directory
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
-#cd /build/source
+
 
 
 
@@ -82,8 +82,6 @@ setup_arm64_chroot () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     remove initramfs-tools flash-kernel -y"
     
-    #remove linux-image-raspi2 \
-    #linux-headers-raspi2 flash-kernel initramfs-tools -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/build/src/apt/archives \
@@ -100,9 +98,7 @@ setup_arm64_chroot () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     -o dir::cache::archives=/build/src/apt/archives \
     install gcc make flex bison libssl-dev -y"
-    
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #autoclean -y"   
+     
 }
 
 get_rpi_firmware () {
@@ -199,9 +195,6 @@ install_kernel_headers () {
     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
     rm .config"
     
-    #cp /build/source/kernel-build/{modules.builtin,modules.order,Module.symvers,System.map,.config} \
-    #/mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-
     echo "* Regenerating broken cross-compile module installation infrastructure."
     echo "** This takes a while."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
@@ -214,53 +207,11 @@ install_kernel_headers () {
      rm /build/source/kernel-build/$i
      rm /build/source/rpi-linux/$i
     done
-    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    #make -j`nproc` O=/build/source/kernel-build mrproper"
-    # cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare"
     
     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    #make -j`nproc` scripts_basic; \
-    #make -j`nproc` scripts/mod/modpost"
-    # Otherwise we get make mrproper error
-    #rm /build/source/kernel-build/.config
-    #sleep 6000
-    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux/scripts ; \
-    #make recordmcount "
-    #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    #make -j`nproc` scripts/mod/modpost || true"
-    # Compilation tools no longer needed in image, so let's take them out to save space.
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #remove gcc bison flex make libssl-dev -y"
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #autoremove -y"
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #autoclean -y"
-    #find /build/source/rpi-linux -type f -name "*.c" -exec rm -rf {} \;
-    #find /build/source/rpi-linux -type f -name "*.o" -exec rm -rf {} \;
-    #mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-    # cp /build/source/kernel-build/.config /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config
-    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/  
-    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    # cp /build/source/kernel-build/Module.symvers /build/source/rpi-linux/
-    #files=("scripts/recordmcount" "scripts/mod/modpost" \
-    #     "scripts/basic/fixdep")
-    # for i in "${files[@]}"
-    # do
-    #  mkdir -p `dirname /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i` && \
-    #  cp /build/source/rpi-linux/$i /mnt/usr/src/linux-headers-${KERNEL_VERSION}/$i
-    # done
-    # cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-    #cp -avf /build/source/rpi-linux/* /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-
-    # mv /build/source/rpi-linux /build/root/usr/src/linux-headers-${KERNEL_VERSION}
-    # cd /build/root
-    # tar cvf - usr/ | lz4 -9 -BD - kernel-headers.tar.lz4
-    # Don't fire error if this fails.
-    # cp kernel-headers.tar.lz4 /mnt/ 2>/dev/null || :
 }
 
 
@@ -347,21 +298,6 @@ install_first_start_cleanup_script () {
 
 cleanup_image () {
     #echo "* Finishing image setup."
-    # cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
-    #mount -t proc proc     /mnt/proc/
-    #mount -t sysfs sys     /mnt/sys/
-    #mount -o bind /dev     /mnt/dev/
-    #mount -o bind /dev/pts /mnt/dev/pts
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #remove linux-image-raspi2 linux-raspi2 \
-    #flash-kernel initramfs-tools -y"
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #autoremove -y"
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #upgrade -y || true"
-    
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/build/src/apt/archives \
     -d install wireless-tools wireless-regdb crda -y
@@ -371,39 +307,6 @@ cleanup_image () {
     install wireless-tools wireless-regdb crda -y"
     
     rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
-    #chroot /mnt /bin/bash -c "ln -s /usr/src/linux-headers-${KERNEL_VERSION} \
-    #/usr/lib/modules/${KERNEL_VERSION}/build"
-    
-    #mkdir -p /build/src/apt/archives
-    #mkdir -p /build/src/apt/lists
-    #dpkg --add-architecture arm64
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #remove linux-image-raspi2 linux-raspi2 \
-    #flash-kernel initramfs-tools -y
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 autoclean -y
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #update
-    #-o dir::state::lists=/build/src/apt/lists \
-    #update
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #install wireless-tools wireless-regdb crda -y
-    #-o dir::state::lists=/build/src/apt/lists \
-    #install wireless-tools wireless-regdb crda -y
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #-o dir::state::lists=/build/src/apt/lists \
-    #upgrade -y
-    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #-o dir::state::lists=/build/src/apt/lists \
-    #autoclean -y
-    
-    #umount /mnt/proc
-    #umount /mnt/sys
-    #umount /mnt/dev/pts
-    #umount /mnt/dev
 }
 
 remove_chroot () {
@@ -413,7 +316,6 @@ remove_chroot () {
     autoclean -y"
     umount /mnt/build
     umount /mnt/run
-    #rm -f /mnt/build
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
@@ -466,5 +368,5 @@ remove_chroot
 unmount_image
 export_compressed_image
 export_log
+# This stops the tail process.
 rm $TMPLOG
-#ls -l /output
