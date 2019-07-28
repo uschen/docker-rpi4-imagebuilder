@@ -277,8 +277,10 @@ install_kernel_headers () {
      rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare ;\
     make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
+    #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
+    #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
     sleep 60000
     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
