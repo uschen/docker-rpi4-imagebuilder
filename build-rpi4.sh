@@ -307,7 +307,7 @@ install_kernel () {
 }
 
 install_kernel_headers () {
-#     echo "* Copying ${KERNEL_VERSION} kernel headers to image."
+     echo "* Copying ${KERNEL_VERSION} kernel headers to image."
 #     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
 # 
 #     cp /build/source/kernel-build/.config /build/source/rpi-linux/
@@ -507,7 +507,7 @@ modify_wifi_firmware #&
 install_first_start_cleanup_script #&
 cleanup_image #&
 make_kernel_install_scripts
-install_kernel_headers 
+#install_kernel_headers 
 sleep 60000
 remove_chroot
 unmount_image
