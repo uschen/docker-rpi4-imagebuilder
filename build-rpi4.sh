@@ -70,14 +70,15 @@ setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     
-    mount --bind /run /mnt/run
-    mount --bind /apt_cache /var/cache/apt
-    mount -t proc proc     /mnt/proc/
-    mount -t sysfs sys     /mnt/sys/
-    mount -o bind /dev     /mnt/dev/
-    mount -o bind /dev/pts /mnt/dev/pts
+
+#    mount -t proc proc     /mnt/proc/
+#    mount -t sysfs sys     /mnt/sys/
+#    mount -o bind /dev     /mnt/dev/
+#    mount -o bind /dev/pts /mnt/dev/pts
+    mount --bind /apt_cache /mnt/var/cache/apt
     mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
+    mount --bind /run /mnt/run
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
