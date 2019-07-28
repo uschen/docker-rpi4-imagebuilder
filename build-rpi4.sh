@@ -5,10 +5,10 @@
 # mounted as docker volumes to allow files to be exchanged between the host and 
 # the container.
 
-#branch=rpi-4.19.y
-#kernelgitrepo="https://github.com/raspberrypi/linux.git"
-branch=bcm2711-initial-v5.2
-kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
+branch=rpi-4.19.y
+kernelgitrepo="https://github.com/raspberrypi/linux.git"
+#branch=bcm2711-initial-v5.2
+#kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
 # This should be the image we want to modify.
 ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
