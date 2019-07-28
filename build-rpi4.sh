@@ -126,12 +126,12 @@ build_kernel () {
     cd ..
 
     cd /build/source/rpi-linux
-    make -j`nproc` O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     
     mkdir /build/source/kernel-install
-    sudo make -j`nproc` O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    sudo make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
 }
 
@@ -192,7 +192,7 @@ install_kernel_headers () {
     #make -j`nproc` O=/build/source/kernel-build mrproper"
     # cp /mnt/usr/src/linux-headers-${KERNEL_VERSION}/.config /build/source/kernel-build/
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j`nproc` modules_prepare || true"
+    make -j $(($(nproc) + 1)) modules_prepare || true"
     #chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     #make -j`nproc` scripts_basic; \
     #make -j`nproc` scripts/mod/modpost"
