@@ -71,6 +71,7 @@ setup_arm64_chroot () {
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount --bind /run /mnt/run
     mount --bind /apt-cache /var/cache/apt
+    mount --bind /ccache /ccache
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
@@ -272,8 +273,8 @@ install_kernel_headers () {
      rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare ;\
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
+    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare ;\
+    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
     #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
     #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
     sleep 60000
