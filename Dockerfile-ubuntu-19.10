@@ -7,6 +7,7 @@ RUN set -ex \
                build-essential \
                bc \
                bison \
+               binfmt-support \
                ccache \
                cdbs \
                cmake \
