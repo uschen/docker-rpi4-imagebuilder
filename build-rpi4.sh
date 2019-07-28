@@ -372,6 +372,7 @@ remove_chroot () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     autoclean -y"
     umount /mnt/build
+    umount /mnt/run
     #rm -f /mnt/build
     rm /mnt/usr/bin/qemu-aarch64-static
 }
