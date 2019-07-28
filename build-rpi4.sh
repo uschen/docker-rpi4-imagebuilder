@@ -68,8 +68,9 @@ setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     # Waiting on this in case this is causing a problem with logins.
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #remove flash-kernel initramfs-tools -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    remove flash-kernel -y"
+    # initramfs-tools -y"
     #remove linux-image-raspi2 \
     #linux-headers-raspi2 flash-kernel initramfs-tools -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
@@ -78,8 +79,8 @@ setup_arm64_chroot () {
     install -d gcc make flex bison libssl-dev -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install gcc make flex bison libssl-dev -y"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    autoclean -y"   
+    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    #autoclean -y"   
 }
 
 get_rpi_firmware () {
