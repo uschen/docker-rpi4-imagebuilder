@@ -28,6 +28,7 @@ exec 1>$TMPLOG 2>&1
 
 # Use ccache
 PATH=/usr/lib/ccache:$PATH
+CCACHE_DIR=/ccache
 # Show ccache stats
 ccache -s
 # Create work directory
