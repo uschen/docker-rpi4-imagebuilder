@@ -228,10 +228,14 @@ build_kernel () {
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare"
+    for i in "${files[@]}"
+    do
+     chattr +i /build/source/kernel-build/$i || true
+    done
     
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
-    
+    cp /build/source/*.deb /output/
     #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
     #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
     sleep 60000
