@@ -38,7 +38,7 @@ unset_kernel_config() {
 # Please set modules where possible, rather than building in, and
 # provide a short rationale comment for the changes made
 
-# Enable squashfs
+# Enable squashfs since snap needs it, which causes errors at boot otherwise.
 set_kernel_config CONFIG_SQUASHFS y
 
 # enable basic KVM support; see e.g.
