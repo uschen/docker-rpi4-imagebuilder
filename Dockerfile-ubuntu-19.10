@@ -12,6 +12,7 @@ RUN set -ex \
                cmake \
                devscripts \
                dkms \
+               dpkg-dev \
                equivs \
                fakeroot \
                flex \
