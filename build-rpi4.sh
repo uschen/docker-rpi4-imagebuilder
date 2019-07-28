@@ -395,19 +395,9 @@ install_first_start_cleanup_script () {
     rm /etc/rc.local\n\n\
     exit 0' > /mnt/etc/rc.local
     chmod +x /mnt/etc/rc.local
-}
+} 
 
-cleanup_image () {
-    #echo "* Finishing image setup."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y
-    
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    install wireless-tools wireless-regdb crda -y"
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #install wireless-tools wireless-regdb crda -y"
-    
+make_kernel_install_scripts () {
     # This script allows flash-kernel to create the uncompressed kernel file
     # on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
@@ -430,9 +420,20 @@ cleanup_image () {
     Boot-Kernel-Path: /boot/firmware/vmlinuz\n\
     Boot-Initrd-Path: /boot/firmware/initrd.img\n\
     \n\'  >> /mnt/etc/flash-kernel/db
-    
-    rm -f /mnt/usr/lib/modules/${KERNEL_VERSION}/build
 }
+
+cleanup_image () {
+    #echo "* Finishing image setup."
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/apt_cache \
+    -d install wireless-tools wireless-regdb crda -y
+    
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    install wireless-tools wireless-regdb crda -y"
+    #-o dir::cache::archives=/build/src/apt/archives \
+    #install wireless-tools wireless-regdb crda -y"
+}
+
 
 remove_chroot () {
     echo "* Cleaning up arm64 chroot"
