@@ -39,7 +39,8 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
     time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
-    # This takes less than ten minutes on my system.
+    # A first build of a kernel takes about 30 min on my dual core i3 system.
+    # This takes about ten minutes the second run through due to the use of ccache.
 
 
 
