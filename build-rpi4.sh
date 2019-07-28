@@ -29,6 +29,9 @@ exec 1>$TMPLOG 2>&1
 # Use ccache
 PATH=/usr/lib/ccache:$PATH
 CCACHE_DIR=/ccache
+# Change these settings if you need them to be different.
+ccache -M 0
+ccache -F 0
 # Show ccache stats
 ccache -s
 # Create work directory
@@ -130,6 +133,7 @@ setup_arm64_chroot () {
                libncurses-dev \
                libssl-dev \
                qemu-user-static \
+               binfmt-support \
                patch \
                rsync \
                sudo \
@@ -162,6 +166,7 @@ setup_arm64_chroot () {
                libncurses-dev \
                libssl-dev \
                qemu-user-static \
+               binfmt-support \
                patch \
                rsync \
                sudo \
