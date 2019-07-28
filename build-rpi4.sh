@@ -95,10 +95,75 @@ setup_arm64_chroot () {
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt-cache \
-    install -d gcc make flex bison libssl-dev -y
+    install -d -y --no-install-recommends \
+               build-essential \
+               bc \
+               bison \
+               ccache \
+               cdbs \
+               cmake \
+               cpio \
+               devscripts \
+               dkms \
+               dpkg-dev \
+               equivs \
+               fakeroot \
+               flex \
+               gawk \
+               gcc \
+               cpp \
+               g++  \
+               git \
+               kpartx \
+               lz4 \
+               libelf-dev \
+               libncurses-dev \
+               libssl-dev \
+               qemu-user-static \
+               patch \
+               rsync \
+               sudo \
+               wget \
+               xz-utils         
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/apt-cache \ 
+    build-dep -d -y linux-image-raspi2
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    install gcc make flex bison libssl-dev -y"
+    install -y --no-install-recommends \
+               build-essential \
+               bc \
+               bison \
+               ccache \
+               cdbs \
+               cmake \
+               cpio \
+               devscripts \
+               dkms \
+               dpkg-dev \
+               equivs \
+               fakeroot \
+               flex \
+               gawk \
+               gcc \
+               cpp \
+               g++  \
+               git \
+               kpartx \
+               lz4 \
+               libelf-dev \
+               libncurses-dev \
+               libssl-dev \
+               qemu-user-static \
+               patch \
+               rsync \
+               sudo \
+               wget \
+               xz-utils"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/apt-cache \ 
+    build-dep -y linux-image-raspi2"
+    #install gcc make flex bison libssl-dev -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install gcc make flex bison libssl-dev -y"
      
@@ -371,7 +436,7 @@ modify_wifi_firmware #&
 install_first_start_cleanup_script #&
 cleanup_image #&
 install_kernel_headers 
-sleep 6000
+sleep 60000
 remove_chroot
 unmount_image
 export_compressed_image
