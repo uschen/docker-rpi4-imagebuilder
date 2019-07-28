@@ -69,8 +69,13 @@ extract_and_mount_image () {
 setup_arm64_chroot () {
     echo "* Setup arm64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
+    
     mount --bind /run /mnt/run
     mount --bind /apt_cache /var/cache/apt
+    mount -t proc proc     /mnt/proc/
+    mount -t sysfs sys     /mnt/sys/
+    mount -o bind /dev     /mnt/dev/
+    mount -o bind /dev/pts /mnt/dev/pts
     mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
     mkdir -p /run/systemd/resolve
