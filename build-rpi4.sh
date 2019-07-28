@@ -28,6 +28,8 @@ exec 1>$TMPLOG 2>&1
 
 # Use ccache
 PATH=/usr/lib/ccache:$PATH
+# Show ccache stats
+ccache -s
 # Create work directory
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
@@ -230,7 +232,7 @@ build_kernel () {
      rm /build/source/kernel-build/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) \
+    CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH make -j $(($(nproc) + 1)) \
     O=/build/source/kernel-build modules_prepare"
 
     mkdir -p /build/source/kernel-build/tmp/scripts/mod
