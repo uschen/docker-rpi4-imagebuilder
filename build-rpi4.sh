@@ -235,12 +235,13 @@ build_kernel () {
     for i in "${files[@]}"
     do
      cp /build/source/kernel-build/$i /build/source/kernel-build/tmp/$i
+     rm /build/source/kernel-build/$i
      sed -i "/.tmp_quiet_recordmcount$/i TABTMP\$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
      /build/source/rpi-linux/Makefile
      TAB=$'\t'
      #sed "s/.*/${TAB}&/g" 
-     sed -i "s/TABTMP/${TAB}&/g" /build/source/rpi-linux/Makefile
     done
+    sed -i "s/TABTMP/${TAB}/g" /build/source/rpi-linux/Makefile
     # Now we have arm64 binaries installed, so we copy libraries over:
     cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
