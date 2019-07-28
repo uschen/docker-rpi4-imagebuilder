@@ -33,6 +33,7 @@ CCACHE_DIR=/ccache
 ccache -M 0
 ccache -F 0
 # Show ccache stats
+echo "Build ccache stats:"
 ccache -s
 # Create work directory
 mkdir -p /build/source
