@@ -113,7 +113,9 @@ build_kernel () {
     #git checkout origin/rpi-4.19.y # change the branch name for newer versions
     mkdir /build/source/kernel-build
     
-
+    [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
+    wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
+    -O arch/arm64/configs/bcm2711_defconfig 
     make O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
     cd /build/source/kernel-build
