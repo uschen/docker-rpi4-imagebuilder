@@ -235,9 +235,20 @@ build_kernel () {
     for i in "${files[@]}"
     do
      cp /build/source/kernel-build/$i /build/source/kernel-build/tmp/$i
-     sed -i "/.tmp_quiet_recordmcount$/i \$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
+     sed -i "/.tmp_quiet_recordmcount$/i TABTMP\$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
      /build/source/rpi-linux/Makefile
+     TAB=$'\t'
+     #sed "s/.*/${TAB}&/g" 
+     sed -i "s/TABTMP/${TAB}&/g" /build/source/rpi-linux/Makefile
     done
+    # Now we have arm64 binaries installed, so we copy libraries over:
+    cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
+    cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    aarch64-linux-gnu-gcc -static /build/source/kernel-build/scripts/basic/fixdep.c -o \
+    /build/source/kernel-build/tmp/scripts/basic/fixdep
+    aarch64-linux-gnu-gcc -static /build/source/kernel-build/scripts/recordmcount.c -o \
+    /build/source/kernel-build/tmp/scripts/recordmount
+    #cp /build/source/kernel-build/scripts/mod/elfconfig.h /build/source/rpi-linux/scripts/mod/
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
     cp /build/source/*.deb /output/
