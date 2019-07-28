@@ -229,23 +229,23 @@ build_kernel () {
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare"
+    mkdir -p /build/source/kernel-build/tmp
     for i in "${files[@]}"
     do
-     chattr +i /build/source/kernel-build/$i || true
+     mkdir -p /build/source/kernel-build/tmp
+     cp /build/source/kernel-build/$i /build/source/kernel-build/tmp/$i
+     sed '/^a.tmp_quiet_recordmcount/i \$(Q)cp /build/source/kernel-build/tmp/$i \
+     /build/source/kernel-build/$i' /build/source/rpi-linux/Makefile
     done
-    
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
     cp /build/source/*.deb /output/
-    for i in "${files[@]}"
-    do
-     chattr -i /build/source/kernel-build/$i || true
-    done
     #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
     #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
     sleep 60000
     
     mkdir /build/source/kernel-install
+    sed '/^a.tmp_quiet_recordmcount/i $(Q)cp ' Makefile
     sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install \
     modules_install
