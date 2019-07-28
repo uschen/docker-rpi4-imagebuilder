@@ -71,7 +71,7 @@ setup_arm64_chroot () {
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     mount --bind /run /mnt/run
     mount --bind /apt-cache /var/cache/apt
-    mount --bind /ccache /ccache
+    mount --bind /ccache /mnt/ccache
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
@@ -391,6 +391,7 @@ remove_chroot () {
     #autoclean -y"
     umount /mnt/build
     umount /mnt/run
+    umount /mnt/ccache
     rm /mnt/usr/bin/qemu-aarch64-static
 }
 
