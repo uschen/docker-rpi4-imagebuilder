@@ -208,10 +208,32 @@ build_kernel () {
     
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
+    echo "* Regenerating broken cross-compile module installation infrastructure."
+    echo "** This takes a while."
+    # Cross-compilation of kernel wreaks havoc with building out of kernel modules
+    # later, so let's fix this with natively compiled module tools.
+    files=("scripts/recordmcount" "scripts/mod/modpost" \
+        "scripts/basic/fixdep")
+        
+    for i in "${files[@]}"
+    do
+     rm /build/source/kernel-build/$i || true
+     rm /build/source/rpi-linux/$i || true
+    done
+    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare"
+    
+    make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    O=/build/source/kernel-build bindeb-pkg
+    
+    #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
+    #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
+    sleep 60000
     
     mkdir /build/source/kernel-install
-    sudo make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install modules_install
+    sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    O=/build/source/kernel-build DEPMOD=echo  INSTALL_MOD_PATH=/build/source/kernel-install \
+    modules_install
 }
 
 install_kernel () {
@@ -260,24 +282,7 @@ install_kernel_headers () {
     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
     rm .config"
     
-    echo "* Regenerating broken cross-compile module installation infrastructure."
-    echo "** This takes a while."
-    # Cross-compilation of kernel wreaks havoc with building out of kernel modules
-    # later, so let's fix this with natively compiled module tools.
-    files=("scripts/recordmcount" "scripts/mod/modpost" \
-        "scripts/basic/fixdep")
-        
-    for i in "${files[@]}"
-    do
-     rm /build/source/kernel-build/$i || true
-     rm /build/source/rpi-linux/$i || true
-    done
-    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare ;\
-    CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
-    #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
-    #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
-    sleep 60000
+    
     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
