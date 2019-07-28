@@ -225,17 +225,18 @@ build_kernel () {
     for i in "${files[@]}"
     do
      rm /build/source/kernel-build/$i || true
-     rm /build/source/rpi-linux/$i || true
+    # rm /build/source/rpi-linux/$i || true
     done
     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
     CCACHE_DIR=/ccache  make -j $(($(nproc) + 1)) O=/build/source/kernel-build modules_prepare"
-    mkdir -p /build/source/kernel-build/tmp
+
+    mkdir -p /build/source/kernel-build/tmp/scripts/mod
+    mkdir -p /build/source/kernel-build/tmp/scripts/basic
     for i in "${files[@]}"
     do
-     mkdir -p /build/source/kernel-build/tmp
      cp /build/source/kernel-build/$i /build/source/kernel-build/tmp/$i
-     sed '/^a.tmp_quiet_recordmcount/i \$(Q)cp /build/source/kernel-build/tmp/$i \
-     /build/source/kernel-build/$i' /build/source/rpi-linux/Makefile
+     sed -i "/.tmp_quiet_recordmcount$/i \$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
+     /build/source/rpi-linux/Makefile
     done
     make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
