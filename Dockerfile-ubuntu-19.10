@@ -10,6 +10,7 @@ RUN set -ex \
                ccache \
                cdbs \
                cmake \
+               cpio \
                devscripts \
                dkms \
                dpkg-dev \
