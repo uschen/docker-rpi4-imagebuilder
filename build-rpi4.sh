@@ -80,8 +80,8 @@ setup_arm64_chroot () {
     #linux-headers-raspi2 flash-kernel initramfs-tools -y"
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    install -d gcc make flex bison libssl-dev -y
+    #apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    #install -d gcc make flex bison libssl-dev -y
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
     install gcc make flex bison libssl-dev -y"
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
