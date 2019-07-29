@@ -66,7 +66,7 @@ extract_and_mount_image () {
     #losetup -a
     cd /build/source
     echo "Mounting: ${new_image}.img"
-    #sleep 6000
+
     ##kpartx -av ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
@@ -74,7 +74,7 @@ extract_and_mount_image () {
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
     guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt
     #guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
-    sleep 6000
+
 }
 
 setup_arm64_chroot () {
@@ -83,7 +83,7 @@ setup_arm64_chroot () {
     
 
     mount -t proc proc     /mnt/proc/
-    mount -t sysfs sys     /mnt/sys/
+#    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
 #    mount -o bind /dev/pts /mnt/dev/pts
     mount --bind /apt_cache /mnt/var/cache/apt
@@ -480,7 +480,7 @@ remove_chroot () {
     rmdir /mnt/ccache
     umount /mnt/var/cache/apt
     umount /mnt/proc
-    umount /mnt/sys
+    #umount /mnt/sys
     # This is no longer needed.
     rm /mnt/usr/bin/qemu-aarch64-static
 }
