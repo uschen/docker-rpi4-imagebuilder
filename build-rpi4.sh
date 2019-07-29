@@ -403,9 +403,9 @@ install_first_start_cleanup_script () {
 # 1st Boot Cleanup Script
 #
 # Print the IP address
-_IP=$(hostname -I) || true
-if [ "$_IP" ]; then
- printf "My IP address is %s\n" "$_IP"
+_IP=\$(hostname -I) || true
+if [ "\$_IP" ]; then
+ printf "My IP address is %s\n" "\$_IP"
 fi
 #
 /usr/bin/dpkg -i /var/cache/apt/archive/*.deb
@@ -428,9 +428,9 @@ make_kernel_install_scripts () {
     echo "Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
 #!/bin/sh -eu
-COMMAND="$1"
-KERNEL_VERSION="$2"
-#BOOT_DIR_ABS="$3"
+COMMAND="\$1"
+KERNEL_VERSION="\$2"
+#BOOT_DIR_ABS="\$3"
 
 gunzip -c -f $KERNEL_VERSION > /boot/firmware/kernel8.img
 exit 0
