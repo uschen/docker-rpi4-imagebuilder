@@ -114,6 +114,7 @@ setup_arm64_chroot () {
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
+    echo "* Image is up to date. Now installing more software to image."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
     -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
