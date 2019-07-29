@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 # This script is executed within the container as root. The resulting image &
 # logs are written to /output after a succesful build.  These directories are 
@@ -88,8 +88,7 @@ setup_arm64_chroot () {
 #    mount -o bind /dev/pts /mnt/dev/pts
 #    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
-    chmod -R 777 /apt_cache
-    chmod -R 777 /mnt/var/lib/apt/
+ #   chmod -R 777 /mnt/var/lib/apt/
     setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
     mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
