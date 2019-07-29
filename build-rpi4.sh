@@ -63,8 +63,9 @@ checkfor_base_image () {
         current=${current_output%% *}
         local_line=`sha1sum /${base_image}`
         local=${local_line%% *}
-        [ ! "$local" == "$current" ] && echo "new image available" || echo "current file"
         if [ ! "$local" == "$current" ]; then
+            echo "local: $local"
+            echo "current: $current"
             echo "* New base image available."
             echo "* Looking for current base image"
             download_base_image
