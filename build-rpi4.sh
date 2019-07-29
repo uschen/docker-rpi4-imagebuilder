@@ -178,10 +178,11 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils 2>/dev/null
-    echo "* Downloading wifi software."
+    echo "* Downloading wifi & networking tools."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y 2>/dev/null
+    -d install wireless-tools wireless-regdb crda \
+    net-tools network-manager -y 2>/dev/null
     echo "* Apt upgrade in chroot."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
     echo "* Chroot apt upgrade done."
@@ -217,10 +218,11 @@ setup_arm64_chroot () {
                wget \
                xz-utils $silence_apt_flags"
     echo "* Native kernel build software installed."
-    echo "* Installing wifi software to image."
+    echo "* Installing wifi & networking tools to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    install wireless-tools wireless-regdb crda -y $silence_apt_flags"
-    echo "* Wifi software installed."
+    install wireless-tools wireless-regdb crda \
+    net-tools network-manager -y $silence_apt_flags"
+    echo "* Wifi & networking tools installed."
 }
 
 get_rpi_firmware () {
