@@ -66,11 +66,13 @@ extract_and_mount_image () {
     losetup -a
     cd /build/source
     echo "Mounting: ${new_image}.img"
-    kpartx -av ${new_image}.img
+    ##kpartx -av ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
-    mount /dev/mapper/loop0p2 /mnt
-    mount /dev/mapper/loop0p1 /mnt/boot/firmware
+    ##mount /dev/mapper/loop0p2 /mnt
+    ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
+    guestmount -a ${new_image}.img -m /dev/sda2 --rw /mnt
+    guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
 }
 
 setup_arm64_chroot () {
