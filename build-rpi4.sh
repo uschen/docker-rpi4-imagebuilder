@@ -87,7 +87,7 @@ setup_arm64_chroot () {
 #    mount -o bind /dev     /mnt/dev/
 #    mount -o bind /dev/pts /mnt/dev/pts
     mount --bind /apt_cache /mnt/var/cache/apt
-    chmod -R 666 /apt_cache
+    chmod -R 777 /apt_cache
     mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
     mount --bind /run /mnt/run
