@@ -455,7 +455,7 @@ EOF
 
 }
 
-cleanup_image () {
+cleanup_image_remove_chroot () {
     echo "* Finishing image setup."
 
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
@@ -465,6 +465,11 @@ cleanup_image () {
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     install wireless-tools wireless-regdb crda -y"
     
+    
+    echo "* Cleaning up arm64 chroot"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    autoclean -y"
+    
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
@@ -472,18 +477,12 @@ cleanup_image () {
     -o dir::cache::archives=/mnt/var/cache/apt \
     -d install binfmt-support -y
         
-}
 
-
-remove_chroot () {
-    echo "* Cleaning up arm64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    autoclean -y"
     
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
     cp /build/source/*.deb /var/cache/apt/archives/
-    
+    sync
     umount /mnt/build
     umount /mnt/run
     umount /mnt/ccache
@@ -541,11 +540,10 @@ configure_rpi_config_txt &
 install_rpi_userland &
 modify_wifi_firmware &
 install_first_start_cleanup_script &
-cleanup_image &
 make_kernel_install_scripts &
 install_kernel
 #install_kernel_headers 
-remove_chroot
+cleanup_image_remove_chroot
 unmount_image
 export_compressed_image
 export_log
