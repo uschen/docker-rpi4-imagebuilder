@@ -29,6 +29,8 @@ RUN set -ex \
                libguestfs-tools \
                libncurses-dev \
                libssl-dev \
+               linux-image-5.2.0-8-generic \
+               linux-modules-5.2.0-8-generic \
                qemu-user-static \
                patch \
                rsync \
