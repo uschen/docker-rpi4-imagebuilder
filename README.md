@@ -24,7 +24,10 @@ Clone the
 (the repository you are reading now) and run the build script to see
 usage:
 
-    $ ./build-image
+
+    git clone https://github.com/satmandu/docker-rpi4-imagebuilder
+    cd docker-rpi4-imagebuilder
+    ./build-image
     usage: build [options...] SOURCEDIR
     Options:
       -i IMAGE  Name of the docker image (including tag) to use as package build environment.
@@ -34,36 +37,47 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
     # create destination directory to store the build results
     mkdir output
+    
+    
+
+    # MAKE SURE YOU HAVE ALREADY MADE YOUR BUILD ENVIRONMENT CONTAINER like thus:
+    docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
     # build package from source directory
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
     time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
-    # A first build of a kernel takes about 30 min on my dual core i3 system.
-    # This takes about ten minutes the second run through due to the use of ccache.
+A first build takes about 30 min on my Skylake build machine.
+
+This takes about ten minutes the second time through due to the use of ccache.
+The build will be even faster if you disable xz compression in the list of 
+image compressors used at the top of the build-rpi4.sh file.
 
 
 
-After successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img.lz4` file in the `output`
-directory.
+After a successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img___kernel___timestamp.lz4` 
+file in your specified `output` directory. (Failure will lead to a build_fail.log in that folder.)
 
 ## Installing image to sd card
 
 Use the instructions here: https://ubuntu.com/download/iot/installation-media
 
-Example: ```lz4cat ~/Downloads/eoan-preinstalled-server-arm64+raspi4.img.lz4 | sudo dd of=< drive address > bs=32M ```
+Example: 
+
+```lz4cat ~/Downloads/eoan-preinstalled-server-arm64+raspi4.img.lz4 | sudo dd of=< drive address > bs=32M ```
+
+or
+
+```xzcat ~/Downloads/eoan-preinstalled-server-arm64+raspi4.img.xz | sudo dd of=< drive address > bs=32M ```
 
 Note that you want to replace instances of "xzcat" with "lzcat" since this setup uses the much faster lz4 to compress the images created in the docker container.
 
 ## 1st Login
 The **default login for this image is unchanged** from the ubuntu server default image: **ubuntu/ubuntu**.
 Note also that the **RPI4 SHOULD Be connected to ethernet for first login**, as the ubuntu startup cloud sequence wants a connection.
-After the network starts, you should be able to ssh to the IP of the RPI with username ubuntu, where you will be prompted to change the password. Note that this also pulls down the linux kernel source at boot to populate /usr/src/linux-headers-  so that might take a little time in the background.
+After the network starts, you should be able to ssh to the IP of the RPI with username ubuntu, where you will be prompted to change the password. As the ubuntu cloud setup is not disabled, you have to wait about five minutes for login to be available.
 
 Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata```. You can also use ```nmtui``` to configure the wireless network after doing ```sudo apt install network-manager```.
 
-
-
-## Notes:
-
-The Dockerfile-ubuntu-19.10 Dockerfile assumes that the remaining requirements to build the software are a subset of the requirements for building the ubuntu package linux-image-raspi2. If that package is removed at some point or there is a new package that supersedes that, that "apt-get build-dep -y linux-image-raspi2" line in the Dockerfile should be replaced or modified accordingly.
+## Note that running this repeatedly will create much container cruft.
+Do run ```docker container prune``` to reclaim unused space.
