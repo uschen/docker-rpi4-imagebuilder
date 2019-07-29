@@ -477,7 +477,8 @@ remove_chroot () {
     umount /mnt/ccache
     rmdir /mnt/ccache
     umount /mnt/var/cache/apt
-
+    umount /mnt/proc
+    umount /mnt/sys
     # This is no longer needed.
     rm /mnt/usr/bin/qemu-aarch64-static
 }
@@ -485,6 +486,7 @@ remove_chroot () {
 unmount_image () {
     echo "* Unmounting modified ${new_image}.img"
     sync
+    
     umount /mnt/boot/firmware
     umount /mnt
     kpartx -dv /build/source/${new_image}.img
