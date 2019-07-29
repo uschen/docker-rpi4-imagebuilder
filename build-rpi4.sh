@@ -57,7 +57,7 @@ checkfor_and_download_ubuntu_image () {
 
 extract_and_mount_image () {
     echo "* Extracting: ${ubuntu_image} to ${new_image}.img"
-    xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
+     xz -d -k -v /build/source/$ubuntu_image > /build/source/$new_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -533,7 +533,7 @@ export_compressed_image () {
     echo "${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     cd /build/source
     chown -R $USER:$GROUP /build
-    compresscmd="lz4 ${new_image}.img \
+    compresscmd="lz4 -v ${new_image}.img \
     /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
     echo $compresscmd
     $compresscmd
