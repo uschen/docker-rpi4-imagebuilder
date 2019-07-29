@@ -111,8 +111,6 @@ setup_arm64_chroot () {
     #-o Dir::State=/mnt/var/lib/apt \
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null"
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #upgrade -y"
     
     echo "* Image is up to date. Now installing more software to image."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
@@ -146,7 +144,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils -qq > /dev/null
+               xz-utils -qq < /dev/null > /dev/null
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
     chroot /mnt /bin/bash -c "apt update && /usr/bin/apt-get \
     install -y --no-install-recommends \
