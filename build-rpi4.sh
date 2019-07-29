@@ -72,8 +72,8 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     ##mount /dev/mapper/loop0p2 /mnt
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    guestmount -a ${new_image}.img -m /dev/sda2 --rw /mnt
-    guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
+    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt
+    #guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
 }
 
 setup_arm64_chroot () {
@@ -488,9 +488,10 @@ unmount_image () {
     echo "* Unmounting modified ${new_image}.img"
     sync
     
-    umount /mnt/boot/firmware
-    umount /mnt
-    kpartx -dv /build/source/${new_image}.img
+    guestunmount /mnt
+
+    
+    #kpartx -dv /build/source/${new_image}.img
     #losetup -d /dev/loop0
     dmsetup remove_all
 }
