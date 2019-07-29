@@ -45,8 +45,12 @@ while getopts "i:o:h" opt; do
 done
 
 shift $(($OPTIND - 1))
+
+# This should be the image we want to modify.
+base_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/"
 base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
-base_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${base_image}"
+base_image_url="${base_url}/${base_image}"
+
 srcdir=$1
 #docker_args="-it "
 # The bash script & copy log if failure setup doesn't work without the "-dt" docker argument.
@@ -87,13 +91,42 @@ docker_args+="--rm "
 download_base_image () {
         echo "* Downloading ${base_image} ."
         wget_fail=0
+        mv $(abspath "$srcdir")/$base_image $(abspath "$srcdir")/$base_image.bak || true
         wget $base_image_url -O $(abspath "$srcdir")/$base_image || wget_fail=1
-        echo "* Downloaded ${base_image} ."
+        if [ "$wget_fail" ]; then 
+            mv $(abspath "$srcdir")/$base_image.bak $(abspath "$srcdir")/$base_image
+        else
+            echo "* Downloaded ${base_image} ."
+        fi
 }
+
+check_for_current_image () {
+    current_output=`curl --silent ${base_url}/SHA1SUMS`
+    current=${current_output%% *}
+    local_line=`sha1sum /${base_image}`
+    local=${local_line%% *}
+    if [ ! "$local" == "$current" ]; then
+        echo "Local base image sha1sum is:"
+        echo $local
+        echo "Remote base image shasum is:"
+        echo $current
+        echo "* New base image available."
+        echo "* Trying to get current base image."
+            download_base_image
+            [ "$wget_fail" ] && "* Download failed. Using existing image." || \
+            echo ""
+        else
+            echo "* Base image file is current."
+        fi
+}
+
 
 if [ ! -f $(abspath "$srcdir")/$base_image ]; then
         download_base_image
+    else
+        check_for_current_image
 fi
+
 docker_args+="-v $(abspath "$srcdir")/$base_image:/$base_image "
 
 # For ccache

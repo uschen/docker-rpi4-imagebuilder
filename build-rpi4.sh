@@ -60,23 +60,24 @@ checkfor_base_image () {
         download_base_image
     else
         echo "* Downloaded ${base_image} exists."
-        current_output=`curl --silent ${base_url}/SHA1SUMS`
-        current=${current_output%% *}
-        local_line=`sha1sum /${base_image}`
-        local=${local_line%% *}
-        if [ ! "$local" == "$current" ]; then
-            echo "local: $local"
-            echo "current_output: $current_output"
-            echo "current: $current"
-            echo "* New base image available."
-            echo "* Looking for current base image"
-            download_base_image
-            [ "$wget_fail" ] && "* Download failed. Using existing image" || \
-            echo ""
-        else
-            echo "* Base image file is current"
-        fi
     fi
+#         current_output=`curl --silent ${base_url}/SHA1SUMS`
+#         current=${current_output%% *}
+#         local_line=`sha1sum /${base_image}`
+#         local=${local_line%% *}
+#         if [ ! "$local" == "$current" ]; then
+#             echo "local: $local"
+#             echo "current_output: $current_output"
+#             echo "current: $current"
+#             echo "* New base image available."
+#             echo "* Looking for current base image"
+#             download_base_image
+#             [ "$wget_fail" ] && "* Download failed. Using existing image" || \
+#             echo ""
+#         else
+#             echo "* Base image file is current"
+#         fi
+#     fi
     # Symlink existing image
     if [ ! -f /build/source/${base_image} ]; then 
         ln -s /$base_image /build/source/
