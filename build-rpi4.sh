@@ -577,6 +577,7 @@ export_compressed_image () {
      echo $compresscmd
      $compresscmd
      chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i
+     echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i created."
     done
 }
 
