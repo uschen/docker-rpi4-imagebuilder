@@ -456,13 +456,20 @@ EOF
 
 cleanup_image () {
     echo "* Finishing image setup."
+
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -d install wireless-tools wireless-regdb crda -y
+    
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    install wireless-tools wireless-regdb crda -y"
+    
+    # binfmt-support wreaks havoc with container, so let it get 
+    # installed at first boot.
     umount /mnt/var/cache/apt
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt \
-    -d install wireless-tools wireless-regdb crda binfmt-support -y
-    
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    #install wireless-tools wireless-regdb crda -y"
+    -d install binfmt-support -y
+        
 }
 
 
@@ -479,7 +486,8 @@ remove_chroot () {
     umount /mnt/run
     umount /mnt/ccache
     rmdir /mnt/ccache
-    umount /mnt/var/cache/apt
+    # This happens in cleanup_image.
+    #umount /mnt/var/cache/apt
     umount /mnt/proc
     #umount /mnt/sys
     # This is no longer needed.
