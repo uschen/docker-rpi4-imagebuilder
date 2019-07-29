@@ -137,7 +137,7 @@ setup_arm64_chroot () {
     echo "Downloading software for apt upgrade."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    upgrade 2>/dev/null
+    upgrade -d -y 2>/dev/null
     echo "Apt upgrade download done."
     #echo "* Starting chroot apt update."
     #chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
