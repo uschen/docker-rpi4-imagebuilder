@@ -49,12 +49,14 @@ mkdir -p /build/source
 
 
 checkfor_and_download_ubuntu_image () {
-    echo "* Checking for downloaded ${ubuntu_image}"
+    echo "* Checking for downloaded ${ubuntu_image} ."
     cd /build/source
     if [ ! -f /${ubuntu_image} ]; then
-        echo "Downloading ${ubuntu_image}"
+        echo "* Downloading ${ubuntu_image} ."
         wget $ubuntu_image_url -O $ubuntu_image
+        echo "* Downloaded ${ubuntu_image} ."
     else
+        echo "* Downloaded ${ubuntu_image} exists."
         ln -s /$ubuntu_image /build/source/
     fi
 }
