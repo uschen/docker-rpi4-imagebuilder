@@ -9,7 +9,7 @@ This creates a docker container to build an Ubuntu 19.10 server image for a Rasp
 A new kernel is compiled, and current firmware is copied into the container.
 
 ## Note that this container runs in PRIVILEGED MODE.
-Feel free to offer suggestions on how to make this safer without being an order of magnitude slower. :/
+Feel free to offer suggestions on how to make this setup safer without making the build an order of magnitude slower. :/
 
 ## Create build environment
 
