@@ -15,6 +15,7 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 # Comment out the following if apt is throwing errors silently.
+# Note that these only work for the chroot commands.
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
 silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 
@@ -484,7 +485,7 @@ cleanup_image_remove_chroot () {
 
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y $silence_apt_flags
+    -d install wireless-tools wireless-regdb crda -y 2>/dev/null
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
     install wireless-tools wireless-regdb crda -y $silence_apt_flags"
@@ -499,7 +500,7 @@ cleanup_image_remove_chroot () {
     umount /mnt/var/cache/apt
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
-    -d install binfmt-support -y $silence_apt_flags
+    -d install binfmt-support -y 2>/dev/null
         
 
     
