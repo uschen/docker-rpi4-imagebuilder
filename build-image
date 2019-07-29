@@ -103,7 +103,7 @@ download_base_image () {
 check_for_current_image () {
     current_output=`curl --silent ${base_url}/SHA1SUMS`
     current=${current_output%% *}
-    local_line=`sha1sum /${base_image}`
+    local_line=`sha1sum $(abspath "$srcdir")/${base_image}`
     local=${local_line%% *}
     if [ ! "$local" == "$current" ]; then
         echo "Local base image sha1sum is:"
