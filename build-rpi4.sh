@@ -78,8 +78,8 @@ setup_arm64_chroot () {
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     
 
-#    mount -t proc proc     /mnt/proc/
-#    mount -t sysfs sys     /mnt/sys/
+    mount -t proc proc     /mnt/proc/
+    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
 #    mount -o bind /dev/pts /mnt/dev/pts
     mount --bind /apt_cache /mnt/var/cache/apt
