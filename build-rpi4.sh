@@ -189,7 +189,7 @@ setup_arm64_chroot () {
 get_rpi_firmware () {
     cd /build/source
     echo "* Downloading current RPI firmware."
-    git clone --depth=1 https://github.com/Hexxeh/rpi-firmware
+    git clone --quiet --depth=1 https://github.com/Hexxeh/rpi-firmware
     cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
     cp rpi-firmware/*.elf /mnt/boot/firmware/
     cp rpi-firmware/*.dat /mnt/boot/firmware/
@@ -337,7 +337,7 @@ install_kernel_headers () {
 install_armstub8-gic () {
     echo "* Installing RPI4 armstub8-gic source."
     cd /build/source
-    git clone --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
+    git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
     cd rpi-tools/armstubs
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- armstub8-gic.bin
     cd ../..
@@ -347,7 +347,7 @@ install_armstub8-gic () {
 install_non-free_firmware () {
     echo "* Installing non-free firmware."
     cd /build/source
-    git clone --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
+    git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
     cp -avf firmware-nonfree/* /mnt/usr/lib/firmware
 }
 
@@ -371,7 +371,7 @@ configure_rpi_config_txt () {
 install_rpi_userland () {
     echo "* Installing Raspberry Pi userland source."
     cd /build/source
-    git clone --depth=1 https://github.com/raspberrypi/userland
+    git clone --quiet --depth=1 https://github.com/raspberrypi/userland
     mkdir -p /mnt/opt/vc
     cd userland/
     CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt
