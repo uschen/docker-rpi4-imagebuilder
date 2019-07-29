@@ -104,7 +104,7 @@ setup_arm64_chroot () {
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
    
-    
+    echo "* Starting first apt update."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update $silence_apt_update_flags
     echo "* First apt update done."
