@@ -107,6 +107,7 @@ setup_arm64_chroot () {
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update $silence_apt_update_flags
+    echo "* First apt update done."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade $silence_apt_flags
@@ -147,8 +148,9 @@ setup_arm64_chroot () {
                wget \
                xz-utils $silence_apt_flags
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    chroot /mnt /bin/bash -c "/usr/bin/apt update $silence_apt_update_flags && \
-    /usr/bin/apt-get install -y --no-install-recommends \
+    chroot /mnt /bin/bash -c "/usr/bin/apt update $silence_apt_update_flags"
+    echo "* Second apt update done."
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
                bc \
                bison \
