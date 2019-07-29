@@ -87,7 +87,7 @@ setup_arm64_chroot () {
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
     mount -o bind /dev/pts /mnt/dev/pts
-    mknod -m 0666 /mnt/dev/null c 1 3
+#    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
@@ -110,7 +110,7 @@ setup_arm64_chroot () {
     #-o Acquire::GzipIndexes=false \
     #-o Dir::State=/mnt/var/lib/apt \
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq -o Dpkg::Use-Pty=0 > /dev/null"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null"
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
@@ -178,7 +178,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils -qq -o Dpkg::Use-Pty=0 > /dev/null"
+               xz-utils -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null"
     #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
     #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
