@@ -38,7 +38,8 @@ unset_kernel_config() {
 # Please set modules where possible, rather than building in, and
 # provide a short rationale comment for the changes made
 
-# Enable squashfs since snap needs it, which causes errors at boot otherwise.
+# Enable squashfs since snap needs it, which causes errors at boot on the eoan 
+# image otherwise which disallows logins.
 set_kernel_config CONFIG_SQUASHFS y
 
 # enable basic KVM support; see e.g.
@@ -62,8 +63,8 @@ set_kernel_config CONFIG_SQUASHFS y
 # https://groups.google.com/forum/#!topic/linux.gentoo.user/_2aSc_ztGpA
 # https://github.com/torvalds/linux/blob/master/init/Kconfig#L848
 # Enables BPF syscall for systemd-journald firewalling
-# set_kernel_config CONFIG_BPF_SYSCALL y
-# set_kernel_config CONFIG_CGROUP_BPF y
+set_kernel_config CONFIG_BPF_SYSCALL y
+set_kernel_config CONFIG_CGROUP_BPF y
 
 #See https://github.com/raspberrypi/linux/issues/2177#issuecomment-354647406
 # Netfilter kernel support

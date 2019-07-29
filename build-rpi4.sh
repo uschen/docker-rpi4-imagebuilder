@@ -239,6 +239,9 @@ build_kernel () {
     cd /build/source/kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
+    # This is needed to enable squashfs - which snapd requires, since otherwise
+    # login at boot fails on the ubuntu server image.
+    # This also enables the BPF syscall for systemd-journald firewalling
     /source-ro/conform_config.sh
     yes "" | make O=./build/source/kernel-build/ \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
@@ -462,6 +465,7 @@ fi
 #
 /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
 /usr/bin/apt remove linux-image-raspi2 -y
+/usr/bin/apt update && /usr/bin/apt upgrade -y
 #cd /usr/src
 #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
 #linux-headers-${KERNEL_VERSION}
@@ -569,10 +573,9 @@ export_compressed_image () {
      echo "* Compressing ${new_image} with $i and exporting"
      echo "  out of container to:"
      echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i"
-     compresscmd="$i -c ${new_image}.img > \
-    /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     compresscmd="$i -c ${new_image}.img > /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
      echo $compresscmd
-     time $compresscmd
+     $compresscmd
      chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i
     done
 }
