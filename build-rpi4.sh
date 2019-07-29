@@ -487,8 +487,6 @@ cleanup_image_remove_chroot () {
     umount /mnt/run
     umount /mnt/ccache
     rmdir /mnt/ccache
-    # This happens in cleanup_image.
-    #umount /mnt/var/cache/apt
     umount /mnt/proc
     #umount /mnt/sys
     # This is no longer needed.
