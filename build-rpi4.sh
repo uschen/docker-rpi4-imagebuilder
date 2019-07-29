@@ -102,9 +102,9 @@ setup_arm64_chroot () {
     mount -o bind /build /mnt/build
    
     
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
     update -qq > /dev/null
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0  \
     -o dir::cache::archives=/apt_cache \
     upgrade -d -y -qq > /dev/null
     #-o Acquire::GzipIndexes=false \
@@ -114,7 +114,7 @@ setup_arm64_chroot () {
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
     -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
                build-essential \
@@ -177,7 +177,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils -qq > /dev/null"
+               xz-utils -qq -o Dpkg::Use-Pty=0 > /dev/null"
     #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
     #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
@@ -476,22 +476,22 @@ EOF
 cleanup_image_remove_chroot () {
     echo "* Finishing image setup."
 
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
     -o dir::cache::archives=/apt_cache \
     -d install wireless-tools wireless-regdb crda -y -qq > /dev/null
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o Dpkg::Use-Pty=0 \
     install wireless-tools wireless-regdb crda -y -qq > /dev/null"
     
     
     echo "* Cleaning up ARM64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o Dpkg::Use-Pty=0 \
     autoclean -y -qq > /dev/null"
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
     -o dir::cache::archives=/mnt/var/cache/apt \
     -d install binfmt-support -y -qq > /dev/null
         
