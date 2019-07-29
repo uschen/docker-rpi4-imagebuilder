@@ -86,7 +86,7 @@ setup_arm64_chroot () {
     mount -t proc proc     /mnt/proc/
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
-#    mount -o bind /dev/pts /mnt/dev/pts
+    mount -o bind /dev/pts /mnt/dev/pts
 #    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
@@ -506,6 +506,7 @@ cleanup_image_remove_chroot () {
     umount /mnt/ccache
     rmdir /mnt/ccache
     umount /mnt/proc
+    umount /mnt/dev/pts
     #umount /mnt/sys
     # This is no longer needed.
     rm /mnt/usr/bin/qemu-aarch64-static
