@@ -331,21 +331,29 @@ install_kernel_headers () {
 #     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
+get_armstub8-gic () {
+    echo "* Get RPI4 armstub8-gic source."
+    cd /build/source
+    git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
+}
 
 install_armstub8-gic () {
     echo "* Installing RPI4 armstub8-gic source."
-    cd /build/source
-    git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
-    cd rpi-tools/armstubs
+    cd /build/source/rpi-tools/armstubs
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- armstub8-gic.bin
     cd ../..
     cp rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
 }
 
+get_non-free_firmware () {
+    echo "* Getting non-free firmware."
+    cd /build/source
+    git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
+}
+
 install_non-free_firmware () {
     echo "* Installing non-free firmware."
     cd /build/source
-    git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
     cp -avf firmware-nonfree/* /mnt/usr/lib/firmware
 }
 
@@ -366,10 +374,15 @@ configure_rpi_config_txt () {
     fi
 }
 
+get_rpi_userland () {
+    echo "* Getting Raspberry Pi userland source."
+    cd /build/source
+    git clone --quiet --depth=1 https://github.com/raspberrypi/userland
+}
+
 install_rpi_userland () {
     echo "* Installing Raspberry Pi userland source."
     cd /build/source
-    git clone --quiet --depth=1 https://github.com/raspberrypi/userland
     mkdir -p /mnt/opt/vc
     cd userland/
     CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt
@@ -523,18 +536,20 @@ export_log () {
     chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${now}.log
 }
 
-
-get_kernel_src &
 checkfor_and_download_ubuntu_image 
+get_kernel_src &
+get_rpi_firmware &
+get_armstub8-gic &
+get_non-free_firmware &
+get_rpi_userland &
 extract_and_mount_image
 setup_arm64_chroot
-get_rpi_firmware &
 # KERNEL_VERSION is set here:
 build_kernel
-install_armstub8-gic &
-install_non-free_firmware &
+install_armstub8-gic
+install_non-free_firmware
 configure_rpi_config_txt &
-install_rpi_userland &
+install_rpi_userland
 modify_wifi_firmware &
 install_first_start_cleanup_script &
 make_kernel_install_scripts &
