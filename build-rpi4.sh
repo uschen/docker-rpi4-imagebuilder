@@ -74,6 +74,7 @@ extract_and_mount_image () {
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
     guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt
     #guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
+    sleep 6000
 }
 
 setup_arm64_chroot () {
