@@ -201,7 +201,7 @@ get_rpi_firmware () {
 get_kernel_src () {
     echo "* Downloading $branch kernel source."
     cd /build/source
-    git clone --depth=1 -b $branch $kernelgitrepo rpi-linux
+    git clone -quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
 }
 
@@ -529,7 +529,7 @@ export_log () {
 }
 
 
-get_kernel_src #&
+get_kernel_src &
 checkfor_and_download_ubuntu_image 
 extract_and_mount_image
 setup_arm64_chroot
