@@ -188,7 +188,7 @@ echo "Using sudo to renice build container to lowest priority:"
 echo "(Some renices are expected to fail.)"
 sudo renice -n 20 -p $PID_LIST &> /dev/null || true
 echo "Tailing build log:"
-tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
+tail_log_cmd="(docker exec -it $build_cid tail -F /tmp/build.log) || tail $outdir/build_fail.log"
 echo $tail_log_cmd
 echo ""
 exec $tail_log_cmd

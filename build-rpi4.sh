@@ -595,7 +595,7 @@ export_compressed_image () {
      echo "* Compressing ${new_image} with $i and exporting"
      echo "  out of container to:"
      echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i"
-     compresscmd="$i -v -k ${new_image}.img
+     compresscmd="$i -v -k ${new_image}.img"
      cpcmd="cp /build/source/${new_image}.img.$i \
      /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
      echo $compresscmd
