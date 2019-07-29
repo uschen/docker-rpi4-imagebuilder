@@ -452,7 +452,7 @@ COMMAND="\$1"
 KERNEL_VERSION="\$2"
 #BOOT_DIR_ABS="\$3"
 
-gunzip -c -f \mis$KERNEL_VERSION > /boot/firmware/kernel8.img
+gunzip -c -f \$KERNEL_VERSION > /boot/firmware/kernel8.img
 exit 0
 EOF
     
