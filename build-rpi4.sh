@@ -90,7 +90,6 @@ setup_arm64_chroot () {
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
     mount -o bind /dev/pts /mnt/dev/pts
-#    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
@@ -106,13 +105,14 @@ setup_arm64_chroot () {
    
     echo "* Starting first apt update."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update < /dev/null > /dev/null 
+    update 2>/dev/null | grep packages | cut -d '.' -f 1 
     echo "* First apt update done."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    upgrade $silence_apt_flags
+    upgrade 2>/dev/null
     echo "* Starting chroot apt update."
-    chroot /mnt /bin/bash -c "/usr/bin/apt update $silence_apt_update_flags"
+    chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
+    | grep packages | cut -d '.' -f 1"
     echo "* Chroot apt update done, doing chroot apt upgrade."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
     echo "* Image is up to date. Now installing more software to image."
@@ -189,7 +189,7 @@ setup_arm64_chroot () {
 
 get_rpi_firmware () {
     cd /build/source
-    echo "* Downloading current RPI firmware."
+    echo "* Downloading current RPI firmware. &"
     git clone --quiet --depth=1 https://github.com/Hexxeh/rpi-firmware
 }
 
