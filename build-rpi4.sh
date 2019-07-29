@@ -479,6 +479,13 @@ make_kernel_install_scripts () {
     echo "Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
 #!/bin/sh -eu
+# Note that this conflicts with using uboot in /boot/firmware/kernel8.img
+#
+# If uboot is working for your hardware, and you have a functional 
+# flash-kernel uboot boot script, you can delete this, and also likely UNcomment 
+# out the lines in the Raspberry Pi 4B entry of /etc/flash-kernel/db 
+# to use u-boot.
+#
 COMMAND="\$1"
 KERNEL_VERSION="\$2"
 #BOOT_DIR_ABS="\$3"
@@ -497,9 +504,12 @@ EOF
 #
 # Raspberry Pi 4 Model B Rev 1.1
 DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
+#U-Boot-Script-Name: bootscr.rpi3
+#Required-Packages: u-boot-tools
 Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
 Boot-Kernel-Path: /boot/firmware/vmlinuz
 Boot-Initrd-Path: /boot/firmware/initrd.img
+#Boot-Script-Path: /boot/firmware/boot.scr
 EOF
 
 }
