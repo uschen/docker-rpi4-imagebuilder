@@ -142,7 +142,7 @@ findpids() {
 }
 
 findpids $container_pid
-echo "Using sudo to renice container to lowest priority:"
+echo "Using sudo to renice build container to lowest priority:"
 echo "(Some renices are expected to fail.)"
 sudo renice -n 20 -p $PID_LIST > /dev/null || true
 echo "Tailing build log:"

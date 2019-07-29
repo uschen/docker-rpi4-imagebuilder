@@ -146,8 +146,7 @@ setup_arm64_chroot () {
                wget \
                xz-utils $silence_apt_flags
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    chroot /mnt /bin/bash -c "apt update $silence_apt_flags \
-    && /usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     install -y --no-install-recommends \
                build-essential \
                bc \
