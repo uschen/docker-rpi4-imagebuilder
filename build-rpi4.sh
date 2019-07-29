@@ -102,14 +102,14 @@ setup_arm64_chroot () {
    
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update
+    update -qq > /dev/null
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    upgrade -d -y
+    upgrade -d -y -qq > /dev/null
     #-o Acquire::GzipIndexes=false \
     #-o Dir::State=/mnt/var/lib/apt \
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq > /dev/null"
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
@@ -144,7 +144,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils
+               xz-utils -qq > /dev/null
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
     chroot /mnt /bin/bash -c "apt update && /usr/bin/apt-get \
     install -y --no-install-recommends \
@@ -176,7 +176,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils"
+               xz-utils -qq > /dev/null"
     #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
     #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
@@ -460,22 +460,22 @@ cleanup_image_remove_chroot () {
 
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y
+    -d install wireless-tools wireless-regdb crda -y -qq > /dev/null
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    install wireless-tools wireless-regdb crda -y"
+    install wireless-tools wireless-regdb crda -y -qq > /dev/null"
     
     
     echo "* Cleaning up arm64 chroot"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    autoclean -y"
+    autoclean -y -qq > /dev/null"
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt \
-    -d install binfmt-support -y
+    -d install binfmt-support -y -qq > /dev/null
         
 
     
