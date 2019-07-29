@@ -144,7 +144,7 @@ findpids() {
 findpids $container_pid
 echo "Using sudo to renice container to lowest priority:"
 echo "(This looks messy.)"
-sudo renice -n 20 -p $PID_LIST || true
+sudo renice -n 20 -p $PID_LIST > /dev/null || true
 echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
