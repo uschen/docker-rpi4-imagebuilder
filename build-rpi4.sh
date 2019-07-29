@@ -75,8 +75,9 @@ checkfor_ubuntu_image () {
         fi
     fi
     # Symlink existing image
-    [ ! -f /build/source/${ubuntu_image} ]; then \
+    [ ! -f /build/source/${ubuntu_image} ]; then 
     ln -s /$ubuntu_image /build/source/
+    fi
 }
 
 extract_and_mount_image () {
