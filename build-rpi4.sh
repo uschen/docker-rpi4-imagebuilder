@@ -72,7 +72,7 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     ##mount /dev/mapper/loop0p2 /mnt
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt
+    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o noatime,dev
     #guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
 
 }
@@ -86,6 +86,7 @@ setup_arm64_chroot () {
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
 #    mount -o bind /dev/pts /mnt/dev/pts
+#    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
     chmod -R 777 /apt_cache
     mkdir /mnt/ccache
