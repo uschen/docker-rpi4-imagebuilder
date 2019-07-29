@@ -87,7 +87,7 @@ setup_arm64_chroot () {
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
     mount -o bind /dev/pts /mnt/dev/pts
-#    mknod -m 0666 /mnt/dev/null c 1 3
+    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
