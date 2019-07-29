@@ -96,7 +96,7 @@ setup_arm64_chroot () {
     mount --bind /run /mnt/run
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
-    rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd
+    rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd > /dev/null
     
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
@@ -110,7 +110,7 @@ setup_arm64_chroot () {
     #-o Acquire::GzipIndexes=false \
     #-o Dir::State=/mnt/var/lib/apt \
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq > /dev/null"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq -o Dpkg::Use-Pty=0 > /dev/null"
     #-o dir::cache::archives=/build/src/apt/archives \
     #upgrade -y"
     
