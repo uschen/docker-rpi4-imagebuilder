@@ -154,7 +154,6 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils 2>/dev/null
-    #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
     echo "* Downloading wifi software."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
@@ -227,7 +226,6 @@ get_kernel_src () {
 build_kernel () {
     echo "* Building $branch kernel."
     cd /build/source/rpi-linux
-    #git checkout origin/rpi-4.19.y # change the branch name for newer versions
     mkdir /build/source/kernel-build
     
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
@@ -253,7 +251,9 @@ build_kernel () {
     sed -e 's/.*"\(.*\)".*/\1/'`
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
-    # later, so let's fix this with natively compiled module tools.
+    # later, due to module install files being installed into the target system in
+    # the cross-compile build host architecture, so let's fix this with natively 
+    # compiled module tools which have been installed into the image.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
         "scripts/basic/fixdep")
         
@@ -282,6 +282,9 @@ build_kernel () {
     cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
     
+    # Maybe this can all be worked around by statically compiling these files
+    # so that qemu-static can just deal with them without library issues during the 
+    # packaging process. This two lines may not be needed.
     aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/basic/fixdep.c -o \
     /build/source/kernel-build/tmp/scripts/basic/fixdep
     
@@ -293,11 +296,12 @@ build_kernel () {
     echo "* Copying out $KERNEL_VERSION kernel debs."
     cp /build/source/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
-    #make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} modules_prepare ;\
-    #make -j $(($(nproc) + 1)) O=/build/source/kernel-build ARCH=arm64 bindeb-pkg"
-    
+
+
+    # Now that we have the kernel packages, let us go ahead and make a local 
+    # install anyways so that we can manually copy the required files over for
+    # first boot.
     mkdir /build/source/kernel-install
-#    sed '/^a.tmp_quiet_recordmcount/i $(Q)cp ' Makefile
     sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build DEPMOD=echo \
     INSTALL_MOD_PATH=/build/source/kernel-install \
@@ -308,11 +312,19 @@ install_kernel () {
     echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
     df -h
     cd /build/source
-    # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4.
-    # Replacee uBoot with kernel.
+    # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4, as of
+    # July 2019, and puts uboot into /boot/firmware/kernel8.img .
+    # 
+    # We replacee uboot with kernel, but we're installing the kernel properly as
+    # well so if a working uboot is installed it still works.
+    # Note that the flash-kernel db file installed later works around uboot 
+    # getting installed into kernel8.img on kernel installs.
     cp /build/source/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
-    # Once uBoot works, it should be able to use the standard raspberry pi boot
-    # script to boot the compressed kernel on arm64, so we copy this in anyways.
+    #
+    # Once uboot works, it should be able to use the standard raspberry pi boot
+    # script to boot a compressed kernel on arm64, since linux on arm64 does not
+    # support self-decompression of the kernel, so we copy this in anyways for usage
+    # with a working uboot in the future.
     cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/vmlinuz-${KERNEL_VERSION}
     
@@ -341,16 +353,19 @@ install_kernel () {
 
 install_kernel_headers () {
      echo "* Copying ${KERNEL_VERSION} kernel headers to image."
-#     mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-# 
-#     cp /build/source/kernel-build/.config /build/source/rpi-linux/
-#     chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
-#     make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
-#     rm .config"
-#     
-#     
-#     rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
-#     cp /build/source/kernel-build/Module.symvers /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
+    # This doesn't actually work. Much better to just install the generated
+    # kernel headers package, so we skip this for now.
+    # mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
+    #
+    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
+    # chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    # make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
+    # rm .config"
+    # 
+    # 
+    # rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
+    # cp /build/source/kernel-build/Module.symvers \
+    # /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
 get_armstub8-gic () {
