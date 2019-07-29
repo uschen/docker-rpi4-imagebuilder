@@ -232,7 +232,6 @@ build_kernel () {
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     echo "* Regenerating broken cross-compile module installation infrastructure."
-    echo "** This takes a while."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, so let's fix this with natively compiled module tools.
     files=("scripts/recordmcount" "scripts/mod/modpost" \
