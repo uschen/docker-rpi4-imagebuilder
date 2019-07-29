@@ -106,7 +106,7 @@ setup_arm64_chroot () {
    
     echo "* Starting first apt update."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update $silence_apt_update_flags
+    update < /dev/null > /dev/null 
     echo "* First apt update done."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
