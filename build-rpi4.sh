@@ -79,7 +79,7 @@ extract_and_mount_image () {
 }
 
 setup_arm64_chroot () {
-    echo "* Setup arm64 chroot"
+    echo "* Setup ARM64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     
 
@@ -183,7 +183,7 @@ setup_arm64_chroot () {
     #install gcc make flex bison libssl-dev -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install gcc make flex bison libssl-dev -y"
-     
+    echo "* ARM64 chroot is setup" 
 }
 
 get_rpi_firmware () {
