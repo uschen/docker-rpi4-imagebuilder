@@ -123,7 +123,7 @@ build_cid=`cat $cidfile`
 # read build_cid <$cidfile
 # echo $build_cid
 echo ""
-echo "Tailing build log:"
+
 
 # From https://unix.stackexchange.com/posts/317605/revisions
 
@@ -140,8 +140,9 @@ findpids() {
 }
 
 findpids $container_pid
+echo "Using sudo to renice container to lowest priority:"
 sudo renice -n 20 -p $PID_LIST || true
-
+echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
 echo ""
