@@ -146,7 +146,9 @@ setup_arm64_chroot () {
                wget \
                xz-utils -qq < /dev/null > /dev/null
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    chroot /mnt /bin/bash -c "apt update && /usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "apt update \
+    -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null \
+    && /usr/bin/apt-get \
     install -y --no-install-recommends \
                build-essential \
                bc \
