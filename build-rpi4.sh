@@ -189,6 +189,11 @@ get_rpi_firmware () {
     cd /build/source
     echo "* Downloading current RPI firmware."
     git clone --quiet --depth=1 https://github.com/Hexxeh/rpi-firmware
+}
+
+install_rpi_firmware () {
+    cd /build/source
+    echo "* Installing current RPI firmware."
     cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
     cp rpi-firmware/*.elf /mnt/boot/firmware/
     cp rpi-firmware/*.dat /mnt/boot/firmware/
@@ -544,6 +549,7 @@ get_non-free_firmware &
 get_rpi_userland &
 extract_and_mount_image
 setup_arm64_chroot
+install_rpi_firmware
 # KERNEL_VERSION is set here:
 build_kernel
 install_armstub8-gic
