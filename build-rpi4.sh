@@ -103,7 +103,8 @@ setup_arm64_chroot () {
     
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
-   
+    echo "* ARM64 chroot setup is complete." 
+    
     echo "* Starting apt update."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update 2>/dev/null | grep packages | cut -d '.' -f 1 
@@ -192,15 +193,9 @@ setup_arm64_chroot () {
                xz-utils $silence_apt_flags"
     echo "* Native kernel build software installed."
     echo "* Installing wifi software to image."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     install wireless-tools wireless-regdb crda -y $silence_apt_flags"
     echo "* Wifi software installed."
-    #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
-    #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
-    #install gcc make flex bison libssl-dev -y"
-    #-o dir::cache::archives=/build/src/apt/archives \
-    #install gcc make flex bison libssl-dev -y"
-    echo "* ARM64 chroot is setup" 
 }
 
 get_rpi_firmware () {
@@ -384,7 +379,7 @@ install_non-free_firmware () {
 
 
 configure_rpi_config_txt () {
-    echo "* Making /boot/firmware/config.txt modifications."
+    echo "* Making /boot/firmware/config.txt modifications. &"
     echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
@@ -426,7 +421,7 @@ EOF
 }
 
 modify_wifi_firmware () {
-    echo "* Modifying wireless firmware."
+    echo "* Modifying wireless firmware. &"
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
     if ! grep -qs 'boardflags3=0x44200100' \
     /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt
@@ -436,7 +431,7 @@ modify_wifi_firmware () {
 }
 
 install_first_start_cleanup_script () {
-    echo "* Creating first start cleanup script."
+    echo "* Creating first start cleanup script. &"
     tee /mnt/etc/rc.local <<EOF
 #!/bin/sh -e
 # 1st Boot Cleanup Script
@@ -462,7 +457,7 @@ EOF
 make_kernel_install_scripts () {
     # This script allows flash-kernel to create the uncompressed kernel file
     # on the boot partition.
-    echo "* Making kernel install scripts."
+    echo "* Making kernel install scripts. &"
     mkdir -p /mnt/etc/kernel/postinst.d
     echo "Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
