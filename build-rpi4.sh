@@ -484,7 +484,7 @@ cleanup_image_remove_chroot () {
     install wireless-tools wireless-regdb crda -y -qq > /dev/null"
     
     
-    echo "* Cleaning up arm64 chroot"
+    echo "* Cleaning up ARM64 chroot"
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     autoclean -y -qq > /dev/null"
     
