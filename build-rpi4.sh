@@ -10,8 +10,9 @@ kernelgitrepo="https://github.com/raspberrypi/linux.git"
 #branch=bcm2711-initial-v5.2
 #kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
 # This should be the image we want to modify.
+base_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/"
 base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
-base_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${base_image}"
+base_image_url="${base_url}/${base_image}"
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 # Comment out the following if apt is throwing errors silently.
@@ -47,7 +48,7 @@ mkdir -p /build/source
 download_base_image () {
         echo "* Downloading ${base_image} ."
         wget_fail=0
-        wget -nv $base_image_url -O $base_image || wget_fail=1
+        wget -nv ${base_image_url} -O ${base_image} || wget_fail=1
         echo "* Downloaded ${base_image} ."
 }
 
@@ -59,7 +60,7 @@ checkfor_base_image () {
         download_base_image
     else
         echo "* Downloaded ${base_image} exists."
-        current_output=`curl --silent $base_image_url/SHA1SUMS`
+        current_output=`curl --silent ${base_url}/SHA1SUMS`
         current=${current_output%% *}
         local_line=`sha1sum /${base_image}`
         local=${local_line%% *}
