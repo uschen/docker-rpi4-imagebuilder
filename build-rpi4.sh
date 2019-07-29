@@ -60,13 +60,13 @@ extract_and_mount_image () {
     xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
-    echo "* Clearing existing loopback mounts."
-    losetup -d /dev/loop0
-    dmsetup remove_all
-    losetup -a
+    #echo "* Clearing existing loopback mounts."
+    #losetup -d /dev/loop0
+    #dmsetup remove_all
+    #losetup -a
     cd /build/source
     echo "Mounting: ${new_image}.img"
-    sleep 6000
+    #sleep 6000
     ##kpartx -av ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
@@ -493,7 +493,7 @@ unmount_image () {
     
     #kpartx -dv /build/source/${new_image}.img
     #losetup -d /dev/loop0
-    dmsetup remove_all
+    #dmsetup remove_all
 }
 
 export_compressed_image () {
