@@ -110,12 +110,14 @@ setup_arm64_chroot () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade 2>/dev/null
-    echo "* Starting chroot apt update."
-    chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
-    | grep packages | cut -d '.' -f 1"
-    echo "* Chroot apt update done, doing chroot apt upgrade."
+    #echo "* Starting chroot apt update."
+    #chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
+    #| grep packages | cut -d '.' -f 1"
+    #echo "* Chroot apt update done."
+    echo "* Doing chroot apt upgrade."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
-    echo "* Image is up to date. Now installing more software to image."
+    echo "* Image is up to date. Now getting more software for image."
+    echo "* Downloading software to build container."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
@@ -147,8 +149,9 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils $silence_apt_flags
+               xz-utils 2>/dev/null
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
+    echo "* Installing software to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
                bc \
@@ -205,7 +208,7 @@ install_rpi_firmware () {
 }
 
 get_kernel_src () {
-    echo "* Downloading $branch kernel source."
+    echo "* Downloading $branch kernel source. &"
     cd /build/source
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
@@ -341,7 +344,7 @@ install_kernel_headers () {
 }
 
 get_armstub8-gic () {
-    echo "* Get RPI4 armstub8-gic source."
+    echo "* Get RPI4 armstub8-gic source. &"
     cd /build/source
     git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
 }
@@ -355,7 +358,7 @@ install_armstub8-gic () {
 }
 
 get_non-free_firmware () {
-    echo "* Getting non-free firmware."
+    echo "* Getting non-free firmware. &"
     cd /build/source
     git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree firmware-nonfree
 }
@@ -384,7 +387,7 @@ configure_rpi_config_txt () {
 }
 
 get_rpi_userland () {
-    echo "* Getting Raspberry Pi userland source."
+    echo "* Getting Raspberry Pi userland source. &"
     cd /build/source
     git clone --quiet --depth=1 https://github.com/raspberrypi/userland
 }
