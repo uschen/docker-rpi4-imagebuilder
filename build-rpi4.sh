@@ -10,8 +10,8 @@ kernelgitrepo="https://github.com/raspberrypi/linux.git"
 #branch=bcm2711-initial-v5.2
 #kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
 # This should be the image we want to modify.
-ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
-ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
+base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
+base_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${base_image}"
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
 # Comment out the following if apt is throwing errors silently.
@@ -44,30 +44,30 @@ ccache -F 0 > /dev/null
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
 
-download_ubuntu_image () {
-        echo "* Downloading ${ubuntu_image} ."
+download_base_image () {
+        echo "* Downloading ${base_image} ."
         wget_fail=0
-        wget $ubuntu_image_url -O $ubuntu_image || wget_fail=1
-        echo "* Downloaded ${ubuntu_image} ."
+        wget $base_image_url -O $base_image || wget_fail=1
+        echo "* Downloaded ${base_image} ."
 }
 
 
-checkfor_ubuntu_image () {
-    echo "* Checking for downloaded ${ubuntu_image} ."
+checkfor_base_image () {
+    echo "* Checking for downloaded ${base_image} ."
     cd /build/source
-    if [ ! -f /${ubuntu_image} ]; then
-        download_ubuntu_image
+    if [ ! -f /${base_image} ]; then
+        download_base_image
     else
-        echo "* Downloaded ${ubuntu_image} exists."
-        current_output=`curl --silent $ubuntu_image_url/SHA1SUMS`
+        echo "* Downloaded ${base_image} exists."
+        current_output=`curl --silent $base_image_url/SHA1SUMS`
         current=${current_output%% *}
-        local_line=`sha1sum /${ubuntu_image}`
+        local_line=`sha1sum /${base_image}`
         local=${local_line%% *}
         [ ! "$local" == "$current" ] && echo "new image available" || echo "current file"
         if [ ! "$local" == "$current" ]; then
             echo "* New base image available."
             echo "* Looking for current base image"
-            download_ubuntu_image
+            download_base_image
             [ "$wget_fail" ] && "* Download failed. Using existing image" || \
             echo ""
         else
@@ -75,14 +75,14 @@ checkfor_ubuntu_image () {
         fi
     fi
     # Symlink existing image
-    if [ ! -f /build/source/${ubuntu_image} ]; then 
-        ln -s /$ubuntu_image /build/source/
+    if [ ! -f /build/source/${base_image} ]; then 
+        ln -s /$base_image /build/source/
     fi
 }
 
 extract_and_mount_image () {
-    echo "* Extracting: ${ubuntu_image} to ${new_image}.img"
-    xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
+    echo "* Extracting: ${base_image} to ${new_image}.img"
+    xzcat /build/source/$base_image > /build/source/$new_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -97,7 +97,7 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    echo "* Extraction of ${ubuntu_image} to ${new_image}.img done."
+    echo "* Extraction of ${base_image} to ${new_image}.img done."
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
 
@@ -611,7 +611,7 @@ function abspath {
     echo $(cd "$1" && pwd)
 }
 
-checkfor_and_download_ubuntu_image 
+checkfor_base_image 
 get_kernel_src &
 get_rpi_firmware &
 get_armstub8-gic &
