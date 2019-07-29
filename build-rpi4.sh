@@ -47,7 +47,7 @@ mkdir -p /build/source
 download_base_image () {
         echo "* Downloading ${base_image} ."
         wget_fail=0
-        wget $base_image_url -O $base_image || wget_fail=1
+        wget -nv $base_image_url -O $base_image || wget_fail=1
         echo "* Downloaded ${base_image} ."
 }
 
