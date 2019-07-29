@@ -61,7 +61,7 @@ docker_args="-dt "
 # Needed for loopback to work inside container.
 #docker_args+="--cap-add=CAP_MKNOD --device-cgroup-rule='b 7:* rmw' "
 #docker_args+="-v /dev:/dev --privileged "
-docker_args+="--device /dev/fuse --cap-add SYS_ADMIN "
+docker_args+="--device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined "
 
 # Check that optional parameters are valid
 if [[ "$depdir" ]]; then
