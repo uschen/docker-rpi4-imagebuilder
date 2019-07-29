@@ -73,7 +73,6 @@ extract_and_mount_image () {
     ##mount /dev/mapper/loop0p2 /mnt
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
     guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o noatime,dev
-    #guestmount -a ${new_image}.img -m /dev/sda1 --rw /mnt/boot/firmware
 
 }
 
@@ -98,11 +97,7 @@ setup_arm64_chroot () {
     
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
-    #mkdir -p /build/src/apt/archives
-    
-    # Waiting on this in case this is causing a problem with logins.
-    #chroot /mnt /bin/bash -c "/usr/bin/apt-get -o APT::Architecture=arm64 \
-    #remove initramfs-tools flash-kernel -y"
+   
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
@@ -459,6 +454,7 @@ cleanup_image () {
     echo "* Finishing image setup."
 
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/apt_cache \
     -d install wireless-tools wireless-regdb crda -y
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
