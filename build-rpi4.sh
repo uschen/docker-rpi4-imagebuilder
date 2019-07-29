@@ -201,7 +201,7 @@ get_rpi_firmware () {
 get_kernel_src () {
     echo "* Downloading $branch kernel source."
     cd /build/source
-    git clone -quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
+    git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
 }
 
