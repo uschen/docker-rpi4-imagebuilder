@@ -491,6 +491,7 @@ fi
 /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
 /usr/bin/apt remove linux-image-raspi2 -y
 /usr/bin/apt update && /usr/bin/apt upgrade -y
+/usr/sbin/update-initramfs -c `uname -r`
 #cd /usr/src
 #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
 #linux-headers-${KERNEL_VERSION}
