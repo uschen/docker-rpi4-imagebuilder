@@ -45,7 +45,7 @@ mkdir -p /build/source
 
 
 checkfor_and_download_ubuntu_image () {
-    echo "Checking for downloaded ${ubuntu_image}"
+    echo "* Checking for downloaded ${ubuntu_image}"
     cd /build/source
     if [ ! -f /${ubuntu_image} ]; then
         echo "Downloading ${ubuntu_image}"
@@ -65,7 +65,7 @@ extract_and_mount_image () {
     dmsetup remove_all
     losetup -a
     cd /build/source
-    echo "Mounting: ${new_image}.img"
+    echo "* Mounting: ${new_image}.img"
 
     kpartx -av ${new_image}.img
     #e2fsck -f /dev/loop0p2
@@ -462,7 +462,7 @@ EOF
     # This allows flash-kernel to copy ther kernel so that it can 
     # be copied to the boot partition.
     mkdir -p /mnt/etc/flash-kernel/
-    echo "Creating /mnt/etc/flash-kernel/db ."
+    echo "* Creating /mnt/etc/flash-kernel/db ."
     tee /mnt/etc/flash-kernel/db <<EOF
 #
 # Raspberry Pi 4 Model B Rev 1.1
@@ -570,3 +570,4 @@ export_compressed_image
 export_log
 # This stops the tail process.
 rm $TMPLOG
+echo "* Done."
