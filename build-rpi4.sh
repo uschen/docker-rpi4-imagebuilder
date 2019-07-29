@@ -134,7 +134,6 @@ setup_arm64_chroot () {
                libncurses-dev \
                libssl-dev \
                qemu-user-static \
-               binfmt-support \
                patch \
                rsync \
                sudo \
@@ -167,7 +166,6 @@ setup_arm64_chroot () {
                libncurses-dev \
                libssl-dev \
                qemu-user-static \
-               binfmt-support \
                patch \
                rsync \
                sudo \
@@ -456,7 +454,7 @@ cleanup_image () {
     umount /mnt/var/cache/apt
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt \
-    -d install wireless-tools wireless-regdb crda -y
+    -d install wireless-tools wireless-regdb crda binfmt-support -y
     
     #chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     #install wireless-tools wireless-regdb crda -y"
