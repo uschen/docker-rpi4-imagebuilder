@@ -526,7 +526,6 @@ install_first_start_cleanup_script #&
 cleanup_image #&
 make_kernel_install_scripts
 #install_kernel_headers 
-sleep 60000
 remove_chroot
 unmount_image
 export_compressed_image
