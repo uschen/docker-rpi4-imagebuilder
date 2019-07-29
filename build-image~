@@ -149,4 +149,4 @@ echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
 echo ""
-exec $tail_log_cmd 2>/dev/null
+exec $tail_log_cmd

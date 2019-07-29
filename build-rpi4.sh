@@ -44,22 +44,39 @@ ccache -F 0 > /dev/null
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
 
+download_ubuntu_image () {
+        echo "* Downloading ${ubuntu_image} ."
+        wget_fail=0
+        wget $ubuntu_image_url -O $ubuntu_image || wget_fail=1
+        echo "* Downloaded ${ubuntu_image} ."
+}
 
 
-
-
-
-checkfor_and_download_ubuntu_image () {
+checkfor_ubuntu_image () {
     echo "* Checking for downloaded ${ubuntu_image} ."
     cd /build/source
     if [ ! -f /${ubuntu_image} ]; then
-        echo "* Downloading ${ubuntu_image} ."
-        wget $ubuntu_image_url -O $ubuntu_image
-        echo "* Downloaded ${ubuntu_image} ."
+        download_ubuntu_image
     else
         echo "* Downloaded ${ubuntu_image} exists."
-        ln -s /$ubuntu_image /build/source/
+        current_output=`curl --silent $ubuntu_image_url/SHA1SUMS`
+        current=${current_output%% *}
+        local_line=`sha1sum /${ubuntu_image}`
+        local=${local_line%% *}
+        [ ! "$local" == "$current" ] && echo "new image available" || echo "current file"
+        if [ ! "$local" == "$current" ]; then
+            echo "* New base image available."
+            echo "* Looking for current base image"
+            download_ubuntu_image
+            [ "$wget_fail" ] && "* Download failed. Using existing image" || \
+            echo ""
+        else
+            echo "* Base image file is current"
+        fi
     fi
+    # Symlink existing image
+    [ ! -f /build/source/${ubuntu_image} ]; then \
+    ln -s /$ubuntu_image /build/source/
 }
 
 extract_and_mount_image () {
@@ -573,11 +590,13 @@ export_compressed_image () {
      echo "* Compressing ${new_image} with $i and exporting"
      echo "  out of container to:"
      echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i"
-     compresscmd="$i -c ${new_image}.img > /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
-     echo $compresscmd
+     compresscmd="$i -v -k ${new_image}.img && \
+     mv ${new_image}.img.$i \
+     /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     #echo $compresscmd
      $compresscmd
      chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i
-     echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i created."
+     echo "/output/${new_image}-${KERNEL_VERSION}_${now}.img.$i created."
     done
 }
 
@@ -585,6 +604,10 @@ export_log () {
     echo "* Build log at: build-log-${KERNEL_VERSION}_${now}.log"
     cat $TMPLOG > /output/build-log-${KERNEL_VERSION}_${now}.log
     chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${now}.log
+}
+
+function abspath {
+    echo $(cd "$1" && pwd)
 }
 
 checkfor_and_download_ubuntu_image 

@@ -45,6 +45,8 @@ while getopts "i:o:h" opt; do
 done
 
 shift $(($OPTIND - 1))
+ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
+ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
 srcdir=$1
 #docker_args="-it "
 # The bash script & copy log if failure setup doesn't work without the "-dt" docker argument.
@@ -81,11 +83,18 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 # for debugging
 docker_args+="--rm "
 
-if [ ! -f $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz ]; then
-echo "Downloading daily-preinstalled eoan ubuntu-server raspi3 image."
-wget http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/eoan-preinstalled-server-arm64+raspi3.img.xz -O $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz
+
+download_ubuntu_image () {
+        echo "* Downloading ${ubuntu_image} ."
+        wget_fail=0
+        wget $ubuntu_image_url -O $(abspath "$srcdir")/$ubuntu_image || wget_fail=1
+        echo "* Downloaded ${ubuntu_image} ."
+}
+
+if [ ! -f $(abspath "$srcdir")/$ubuntu_image ]; then
+        download_ubuntu_image
 fi
-docker_args+="-v $(abspath "$srcdir")/eoan-preinstalled-server-arm64+raspi3.img.xz:/eoan-preinstalled-server-arm64+raspi3.img.xz "
+docker_args+="-v $(abspath "$srcdir")/$ubuntu_image:/$ubuntu_image "
 
 # For ccache
 #docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
