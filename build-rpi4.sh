@@ -65,6 +65,7 @@ checkfor_base_image () {
         local=${local_line%% *}
         if [ ! "$local" == "$current" ]; then
             echo "local: $local"
+            echo "current_output: $current_output"
             echo "current: $current"
             echo "* New base image available."
             echo "* Looking for current base image"
