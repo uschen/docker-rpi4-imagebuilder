@@ -72,7 +72,7 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     ##mount /dev/mapper/loop0p2 /mnt
     ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o noatime,dev
+    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
 
 }
 
