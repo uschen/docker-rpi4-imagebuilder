@@ -14,6 +14,8 @@ ubuntu_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/${ubuntu_image}"
 # This is the base name of the image we are creating.
 new_image="eoan-preinstalled-server-arm64+raspi4"
+# Comment out the following if apt is throwing errors silently.
+silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
 
 
 # Set Time Stamp
@@ -102,18 +104,16 @@ setup_arm64_chroot () {
     mount -o bind /build /mnt/build
    
     
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
-    update -qq > /dev/null
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0  \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    update $silence_apt_flags
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    upgrade -d -y -qq > /dev/null
-    #-o Acquire::GzipIndexes=false \
-    #-o Dir::State=/mnt/var/lib/apt \
+    upgrade $silence_apt_flags
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
     
     echo "* Image is up to date. Now installing more software to image."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
                build-essential \
@@ -144,10 +144,9 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils -qq < /dev/null > /dev/null
+               xz-utils $silence_apt_flags
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    chroot /mnt /bin/bash -c "apt update \
-    -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null \
+    chroot /mnt /bin/bash -c "apt update $silence_apt_flags \
     && /usr/bin/apt-get \
     install -y --no-install-recommends \
                build-essential \
@@ -178,7 +177,7 @@ setup_arm64_chroot () {
                rsync \
                sudo \
                wget \
-               xz-utils -qq -o Dpkg::Use-Pty=0 < /dev/null > /dev/null"
+               xz-utils $silence_apt_flags"
     #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
     #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
@@ -479,24 +478,24 @@ EOF
 cleanup_image_remove_chroot () {
     echo "* Finishing image setup."
 
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y -qq > /dev/null
+    -d install wireless-tools wireless-regdb crda -y $silence_apt_flags
     
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o Dpkg::Use-Pty=0 \
-    install wireless-tools wireless-regdb crda -y -qq > /dev/null"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
+    install wireless-tools wireless-regdb crda -y $silence_apt_flags"
     
     
     echo "* Cleaning up ARM64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o Dpkg::Use-Pty=0 \
-    autoclean -y -qq > /dev/null"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
+    autoclean -y $silence_apt_flags"
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
-    -d install binfmt-support -y -qq > /dev/null
+    -d install binfmt-support -y $silence_apt_flags
         
 
     
