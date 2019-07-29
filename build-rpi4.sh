@@ -16,6 +16,7 @@ ubuntu_image_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/cur
 new_image="eoan-preinstalled-server-arm64+raspi4"
 # Comment out the following if apt is throwing errors silently.
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
+silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 
 
 # Set Time Stamp
@@ -105,7 +106,7 @@ setup_arm64_chroot () {
    
     
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    update $silence_apt_flags
+    update $silence_apt_update_flags
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade $silence_apt_flags
@@ -146,8 +147,8 @@ setup_arm64_chroot () {
                wget \
                xz-utils $silence_apt_flags
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    install -y --no-install-recommends \
+    chroot /mnt /bin/bash -c "/usr/bin/apt update $silence_apt_update_flags && \
+    /usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
                bc \
                bison \
