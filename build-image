@@ -192,4 +192,4 @@ echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log" 
 echo $tail_log_cmd
 echo ""
-exec /bin/bash -c "if ! (${tail_log_cmd}); then tail ${outdir}/build_fail.log; fi"
+exec /bin/bash -c "if ! (${tail_log_cmd}); then [ -e ${outdir}/build_fail.log ] && tail ${outdir}/build_fail.log; fi"
