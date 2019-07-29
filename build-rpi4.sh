@@ -496,8 +496,8 @@ cleanup_image_remove_chroot () {
 unmount_image () {
     echo "* Unmounting modified ${new_image}.img"
     sync
-    mount | grep /mnt
-    umount /mnt
+    umount /mnt/boot/firmware
+    umount /mnt || (mount | grep /mnt)
     #guestunmount /mnt
 
     
