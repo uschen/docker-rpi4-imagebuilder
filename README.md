@@ -59,6 +59,9 @@ If you want builds to be compressed using xz (which makes images roughly twice a
 After a successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img___kernel___timestamp.lz4` 
 file in your specified `output` directory. (Failure will lead to a build_fail.log in that folder.)
 
+Currently the images are under 700Mb compressed with xz, or about 1.3Gb compressed with lz4.
+The xz images are about 50 Mb larger than the base ubuntu images.
+
 ## Installing image to sd card
 
 Use the instructions here: https://ubuntu.com/download/iot/installation-media
