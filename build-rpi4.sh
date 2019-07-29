@@ -33,8 +33,8 @@ CCACHE_DIR=/ccache
 ccache -M 0
 ccache -F 0
 # Show ccache stats
-echo "Build ccache stats:"
-ccache -s
+#echo "Build ccache stats:"
+#ccache -s
 # Create work directory
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
@@ -72,6 +72,7 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
+    echo "* Extraction of ${ubuntu_image} to ${new_image}.img done."
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
 
