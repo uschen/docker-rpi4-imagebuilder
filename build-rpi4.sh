@@ -429,7 +429,7 @@ if [ "\$_IP" ]; then
  printf "My IP address is %s\n" "\$_IP"
 fi
 #
-/usr/bin/dpkg -i /var/cache/apt/archive/*.deb
+/usr/bin/dpkg -i /var/cache/apt/archives/*.deb
 /usr/bin/apt remove linux-image-raspi2 -y
 #cd /usr/src
 #/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
@@ -493,14 +493,15 @@ cleanup_image_remove_chroot () {
     # installed at first boot.
     umount /mnt/var/cache/apt
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 -o Dpkg::Use-Pty=0 \
-    -o dir::cache::archives=/mnt/var/cache/apt \
+    -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
     -d install binfmt-support -y -qq > /dev/null
         
 
     
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
-    cp /build/source/*.deb /var/cache/apt/archives/
+    echo "* Copying compiled kernel debs to image for proper first boot install."
+    cp /build/source/*.deb /mnt/var/cache/apt/archives/
     sync
     umount /mnt/build
     umount /mnt/run
