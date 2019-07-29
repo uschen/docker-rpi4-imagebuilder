@@ -140,7 +140,7 @@ findpids() {
 }
 
 findpids $container_pid
-renice -n 20 -p $PID_LIST > /dev/null
+sudo renice -n 20 -p $PID_LIST || true
 
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log"
 echo $tail_log_cmd
