@@ -18,6 +18,7 @@ new_image="eoan-preinstalled-server-arm64+raspi4"
 # Note that these only work for the chroot commands.
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
 silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
+image_compressors=("lz4" "xz")
 
 
 # Set Time Stamp
@@ -560,15 +561,20 @@ unmount_image () {
 }
 
 export_compressed_image () {
-    echo "* Compressing ${new_image} with lz4 and exporting"
-    echo "  out of container to:"
-    echo "${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
-    cd /build/source
+    # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
-    compresscmd="lz4 -v ${new_image}.img \
-    /output/${new_image}-${KERNEL_VERSION}_${now}.img.lz4"
-    echo $compresscmd
-    $compresscmd
+    cd /build/source
+    for i in "${image_compressors[@]}"
+    do
+     echo "* Compressing ${new_image} with $i and exporting"
+     echo "  out of container to:"
+     echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     compresscmd="$i -c ${new_image}.img > \
+    /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     echo $compresscmd
+     time $compresscmd
+     chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i
+    done
 }
 
 export_log () {
