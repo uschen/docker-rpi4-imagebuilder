@@ -25,9 +25,9 @@ Clone the
 usage:
 
 
-    $ git clone https://github.com/satmandu/docker-rpi4-imagebuilder
-    $ cd docker-rpi4-imagebuilder
-    $ ./build-image
+    git clone https://github.com/satmandu/docker-rpi4-imagebuilder
+    cd docker-rpi4-imagebuilder
+    ./build-image
     usage: build [options...] SOURCEDIR
     Options:
       -i IMAGE  Name of the docker image (including tag) to use as package build environment.
@@ -79,3 +79,5 @@ After the network starts, you should be able to ssh to the IP of the RPI with us
 
 Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata```. You can also use ```nmtui``` to configure the wireless network after doing ```sudo apt install network-manager```.
 
+## Note that running this repeatedly will create much container cruft.
+Do run ```docker container prune``` to reclaim unused space.
