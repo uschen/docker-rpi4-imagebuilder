@@ -61,7 +61,7 @@ checkfor_and_download_ubuntu_image () {
 
 extract_and_mount_image () {
     echo "* Extracting: ${ubuntu_image} to ${new_image}.img"
-     xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
+    xzcat /build/source/$ubuntu_image > /build/source/$new_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -104,21 +104,21 @@ setup_arm64_chroot () {
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
    
-    echo "* Starting first apt update."
+    echo "* Starting apt update."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update 2>/dev/null | grep packages | cut -d '.' -f 1 
-    echo "* First apt update done."
+    echo "* Apt update done."
+    echo "Downloading software for apt upgrade."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade 2>/dev/null
+    echo "Apt upgrade download done."
     #echo "* Starting chroot apt update."
     #chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
     #| grep packages | cut -d '.' -f 1"
     #echo "* Chroot apt update done."
-    echo "* Doing chroot apt upgrade."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
-    echo "* Image is up to date. Now getting more software for image."
-    echo "* Downloading software to build container."
+
+    echo "* Downloading software for native kernel build portion."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     install -d -y --no-install-recommends \
@@ -152,7 +152,14 @@ setup_arm64_chroot () {
                wget \
                xz-utils 2>/dev/null
     #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
-    echo "* Installing software to image."
+    echo "* Downloading wifi software."
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/apt_cache \
+    -d install wireless-tools wireless-regdb crda -y 2>/dev/null
+    echo "* Apt upgrade in chroot."
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
+    echo "* Chroot apt upgrade done."
+    echo "* Installing native kernel build software to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
                bc \
@@ -183,6 +190,11 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils $silence_apt_flags"
+    echo "* Native kernel build software installed."
+    echo "* Installing wifi software to image."
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
+    install wireless-tools wireless-regdb crda -y $silence_apt_flags"
+    echo "* Wifi software installed."
     #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
     #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
@@ -482,31 +494,23 @@ EOF
 
 cleanup_image_remove_chroot () {
     echo "* Finishing image setup."
-
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt_cache \
-    -d install wireless-tools wireless-regdb crda -y 2>/dev/null
-    
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
-    install wireless-tools wireless-regdb crda -y $silence_apt_flags"
-    
     
     echo "* Cleaning up ARM64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get -o \
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     autoclean -y $silence_apt_flags"
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
+    echo "Installing binfmt-support files for install at first boot."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
     -d install binfmt-support -y 2>/dev/null
-        
 
-    
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
-    echo "* Copying compiled kernel debs to image for proper first boot install."
+    echo "* Copying compiled kernel debs to image for proper install"
+    echo "* at first boot."
     cp /build/source/*.deb /mnt/var/cache/apt/archives/
     sync
     umount /mnt/build
