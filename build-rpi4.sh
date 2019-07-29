@@ -62,17 +62,18 @@ extract_and_mount_image () {
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     #echo "* Clearing existing loopback mounts."
     #losetup -d /dev/loop0
-    #dmsetup remove_all
-    #losetup -a
+    dmsetup remove_all
+    losetup -a
     cd /build/source
     echo "Mounting: ${new_image}.img"
 
-    ##kpartx -av ${new_image}.img
+    kpartx -av ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
-    ##mount /dev/mapper/loop0p2 /mnt
-    ##mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
+    mount /dev/mapper/loop0p2 /mnt
+    mount /dev/mapper/loop0p1 /mnt/boot/firmware
+    # Guestmount is at least an order of magnitude slower than using loopback device.
+    #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
 
 }
 
@@ -88,6 +89,8 @@ setup_arm64_chroot () {
 #    mknod -m 0666 /mnt/dev/null c 1 3
     mount --bind /apt_cache /mnt/var/cache/apt
     chmod -R 777 /apt_cache
+    chmod -R 777 /mnt/var/lib/apt/
+    setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
     mkdir /mnt/ccache
     mount --bind /ccache /mnt/ccache
     mount --bind /run /mnt/run
@@ -99,10 +102,13 @@ setup_arm64_chroot () {
     mount -o bind /build /mnt/build
    
     
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 update
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    update
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade -d -y
+    #-o Acquire::GzipIndexes=false \
+    #-o Dir::State=/mnt/var/lib/apt \
     
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y"
     #-o dir::cache::archives=/build/src/apt/archives \
@@ -140,7 +146,7 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils
-    sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
+    #sed -i -- 's/# deb-src/deb-src/g' /mnt/etc/apt/sources.list
     chroot /mnt /bin/bash -c "apt update && /usr/bin/apt-get \
     install -y --no-install-recommends \
                build-essential \
@@ -172,8 +178,8 @@ setup_arm64_chroot () {
                sudo \
                wget \
                xz-utils"
-    chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
-    sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
+    #chroot /mnt /bin/bash -c "apt build-dep -y linux-image-raspi2"
+    #sed -i -- 's/deb-src/# deb-src/g' /mnt/etc/apt/sources.list
     #install gcc make flex bison libssl-dev -y"
     #-o dir::cache::archives=/build/src/apt/archives \
     #install gcc make flex bison libssl-dev -y"
@@ -494,13 +500,14 @@ remove_chroot () {
 unmount_image () {
     echo "* Unmounting modified ${new_image}.img"
     sync
-    
-    guestunmount /mnt
+    mount | grep /mnt
+    umount /mnt
+    #guestunmount /mnt
 
     
-    #kpartx -dv /build/source/${new_image}.img
+    kpartx -dv /build/source/${new_image}.img
     #losetup -d /dev/loop0
-    #dmsetup remove_all
+    dmsetup remove_all
 }
 
 export_compressed_image () {
