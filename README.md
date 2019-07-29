@@ -81,4 +81,4 @@ After the network starts, you should be able to ssh to the IP of the RPI with us
 Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata``` when you first login. You can use ```nmtui``` to configure the wireless network.
 
 ## Note that running this repeatedly will create much container cruft.
-Do run ```docker container prune``` to reclaim unused space.
+Consider running ```docker container prune``` on your docker machine to reclaim unused space.
