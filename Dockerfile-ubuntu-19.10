@@ -26,6 +26,7 @@ RUN set -ex \
                kpartx \
                lz4 \
                libelf-dev \
+               libguestfs-tools \
                libncurses-dev \
                libssl-dev \
                qemu-user-static \
