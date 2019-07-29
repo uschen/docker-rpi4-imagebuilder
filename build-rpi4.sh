@@ -30,8 +30,8 @@ exec 1>$TMPLOG 2>&1
 PATH=/usr/lib/ccache:$PATH
 CCACHE_DIR=/ccache
 # Change these settings if you need them to be different.
-ccache -M 0
-ccache -F 0
+ccache -M 0 > /dev/null
+ccache -F 0 > /dev/null
 # Show ccache stats
 #echo "Build ccache stats:"
 #ccache -s
