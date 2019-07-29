@@ -61,7 +61,7 @@ extract_and_mount_image () {
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
     echo "* Clearing existing loopback mounts."
-    losetup -d /dev/loop0
+    losetup -d /dev/loop0 || true
     dmsetup remove_all
     losetup -a
     cd /build/source
