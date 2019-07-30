@@ -248,7 +248,8 @@ get_kernel_src () {
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse --short HEAD`
     LOCALVERSION=-${kernelrev}
-    echo "* Current $branch kernel revision is ${kernelrev}"
+    echo "* Current $branch kernel source downloaded."
+    echo "* Current $branch kernel revision is ${kernelrev}."
 }
 
 build_kernel () {
