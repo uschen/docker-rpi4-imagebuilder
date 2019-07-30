@@ -66,8 +66,9 @@ waitfor () {
     touch /tmp/wait.${FUNCNAME[1]}_for_${1}
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
-   < <(inotifywait  -e create,open --format '%f' --quiet /tmp --monitor)
-    rm /tmp/wait.${FUNCNAME[1]}_for_${1}
+   < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
+    echo "${FUNCNAME[1]} done waiting for ${1}."
+    rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 endfunc () {
@@ -666,6 +667,11 @@ cleanup_image_remove_chroot () {
     echo "* at first boot."
     cp /build/source/*.deb /mnt/var/cache/apt/archives/
     sync
+    if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
+        echo "** Container paused. **"
+        echo 'Type in "touch /tmp/ok_to_exit_container_after_build.done"'
+        echo "in a shell into this container to continue."
+    fi 
     waitfor "ok_to_exit_container_after_build"
     umount /mnt/build
     umount /mnt/run
