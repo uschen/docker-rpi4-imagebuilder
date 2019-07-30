@@ -114,11 +114,10 @@ download_base_image () {
         curl -o $(abspath "$srcdir")/${base_image}.new $base_image_url || curl_fail=1
         check_new_image_hash
 
-        
         if [ "$curl_fail" ]; then 
             echo "* ${base_image} download failed."
             if [ -e "$(abspath "$srcdir")/${base_image}.bak" ] &&
-            [ -e "$(abspath "$srcdir")/${base_image}.shasum" ]
+            [ -e "$(abspath "$srcdir")/${base_image}.shasum" ]; then
                 mv $(abspath "$srcdir")/${base_image}.bak \
                 $(abspath "$srcdir")/$base_image
                 echo "* Restoring existing  ${base_image}"
