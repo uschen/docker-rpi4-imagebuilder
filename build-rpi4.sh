@@ -51,14 +51,16 @@ mkdir -p /build/source
 waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
+    touch /tmp/${FUNCNAME[1]}.waitingfor.${1}
     while read waitforit; do if [ "$waitforit" == "/tmp/${1}" ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open --format '%f' --quiet /tmp --monitor)
+    rm /tmp/${FUNCNAME[1]}.waitingfor.${1}
 }
 
 endfunc () {
     touch /tmp/${FUNCNAME[1]}
-    echo "* ${FUNCNAME[1]} done."
+    echo "** ${FUNCNAME[1]} done."
 }
 
 
@@ -66,7 +68,6 @@ download_base_image () {
     echo "* Downloading ${base_image} ."
     wget_fail=0
     wget -nv ${base_image_url} -O ${base_image} || wget_fail=1
-    echo "* Downloaded ${base_image} ."
 endfunc
 }
 
@@ -105,6 +106,7 @@ endfunc
 
 extract_and_mount_image () {
     waitfor "checkfor_base_image"
+    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat /build/source/$base_image > /build/source/$new_image.img
     #echo "* Increasing image size by 200M"
@@ -121,7 +123,6 @@ extract_and_mount_image () {
     #resize2fs /dev/loop0p2
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
-    echo "* Extraction of ${base_image} to ${new_image}.img done."
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
 endfunc
@@ -129,6 +130,7 @@ endfunc
 
 setup_arm64_chroot () {
     waitfor "extract_and_mount_image"
+    
     echo "* Setup ARM64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     
@@ -248,7 +250,7 @@ endfunc
 
 get_rpi_firmware () {
     cd /build/source
-    echo "* Downloading current RPI firmware. &"
+    echo "* Downloading current RPI firmware."
     git clone --quiet --depth=1 https://github.com/Hexxeh/rpi-firmware
 endfunc
 }
@@ -256,6 +258,7 @@ endfunc
 install_rpi_firmware () {
     waitfor "get_rpi_firmware"
     waitfor "extract_and_mount_image"
+    
     cd /build/source
     echo "* Installing current RPI firmware."
     cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
@@ -268,12 +271,11 @@ endfunc
 }
 
 get_kernel_src () {
-    echo "* Downloading $branch kernel source. &"
+    echo "* Downloading $branch kernel source."
     cd /build/source
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`cd /build/source/rpi-linux ; git rev-parse --short HEAD`
     LOCALVERSION="-${kernelrev}"
-    echo "* Current $branch kernel source downloaded."
     echo "* Current $branch kernel revision is ${kernelrev}."
 endfunc
 }
@@ -281,6 +283,7 @@ endfunc
 build_kernel () {
     waitfor "get_kernel_src"
     waitfor "setup_arm64_chroot"
+    
     echo "* Building $branch kernel."
     cd /build/source/rpi-linux
     mkdir /build/source/kernel-build
@@ -377,6 +380,7 @@ endfunc
 install_kernel () {
     waitfor "build_kernel"
     waitfor "extract_and_mount_image"
+    
     echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
     df -h
     cd /build/source
@@ -400,22 +404,31 @@ install_kernel () {
     /mnt/boot/firmware/vmlinuz
     
     cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+endfunc
+}
 
+install_kernel_modules () {
+    waitfor "install_kernel"
+    
     echo "* Copying compiled ${KERNEL_VERSION} modules to image."
     #rm  -rf /build/source/kernel-install/lib/modules/build
     cp -avr /build/source/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
+endfunc
+}
 
+install_kernel_dtbs () {
+    waitfor "install_kernel"
+    
     echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
     cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
-    
+        
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
-    /mnt/etc/flash-kernel/dtbs/
-    
+    /mnt/etc/flash-kernel/dtbs/    
 endfunc
 }
 
@@ -437,7 +450,7 @@ install_kernel_headers () {
 }
 
 get_armstub8-gic () {
-    echo "* Get RPI4 armstub8-gic source. &"
+    echo "* Get RPI4 armstub8-gic source."
     cd /build/source
     git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
 endfunc
@@ -446,6 +459,7 @@ endfunc
 install_armstub8-gic () {
     waitfor "get_armstub8-gic"
     waitfor "extract_and_mount_image"
+    
     echo "* Installing RPI4 armstub8-gic source."
     cd /build/source/rpi-tools/armstubs
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- armstub8-gic.bin
@@ -455,7 +469,8 @@ endfunc
 }
 
 get_non-free_firmware () {
-    echo "* Getting non-free firmware. &"
+    echo "* Getting non-free firmware."
+    
     cd /build/source
     git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree \
     firmware-nonfree
@@ -465,7 +480,7 @@ endfunc
 install_non-free_firmware () {
     waitfor "get_non-free_firmware"
     waitfor "extract_and_mount_image"
-    echo "* Installing non-free firmware."
+    
     cp -avf /build/source/firmware-nonfree/* /mnt/usr/lib/firmware
 endfunc
 }
@@ -473,6 +488,7 @@ endfunc
 
 configure_rpi_config_txt () {
     waitfor "extract_and_mount_image"
+    
     echo "* Making /boot/firmware/config.txt modifications. &"
     echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
@@ -490,7 +506,7 @@ endfunc
 }
 
 get_rpi_userland () {
-    echo "* Getting Raspberry Pi userland source. &"
+    echo "* Getting Raspberry Pi userland source."
     cd /build/source
     git clone --quiet --depth=1 https://github.com/raspberrypi/userland
 endfunc
@@ -522,7 +538,8 @@ endfunc
 modify_wifi_firmware () {
     waitfor "extract_and_mount_image"
     waitfor "install_non-free_firmware"
-    echo "* Modifying wireless firmware. &"
+    
+    echo "* Modifying wireless firmware."
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
     if ! grep -qs 'boardflags3=0x44200100' \
     /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt
@@ -535,7 +552,8 @@ endfunc
 install_first_start_cleanup_script () {
     waitfor "extract_and_mount_image"
     waitfor "build_kernel"
-    echo "* Creating first start cleanup script. &"
+    
+    echo "* Creating first start cleanup script."
     tee /mnt/etc/rc.local <<EOF
 #!/bin/sh -e
 # 1st Boot Cleanup Script
@@ -563,6 +581,7 @@ endfunc
 
 make_kernel_install_scripts () {
     waitfor "extract_and_mount_image"
+    
     # This script allows flash-kernel to create the uncompressed kernel file
     # on the boot partition.
     echo "* Making kernel install scripts. &"
@@ -609,6 +628,9 @@ endfunc
 cleanup_image_remove_chroot () {
     waitfor "build_kernel"
     waitfor "install_kernel"
+    waitfor "install_kernel_modules"
+    waitfor "install_kernel_dtbs"
+    
     echo "* Finishing image setup."
     
     echo "* Cleaning up ARM64 chroot"
@@ -729,6 +751,8 @@ make_kernel_install_scripts &
 # KERNEL_VERSION is set here:
 build_kernel
 install_kernel
+install_kernel_modules &
+install_kernel_dtbs &
 #install_kernel_headers 
 cleanup_image_remove_chroot
 unmount_image
