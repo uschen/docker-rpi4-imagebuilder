@@ -320,6 +320,7 @@ startfunc
     local git_clone_cmd="cd $cache_path && git clone $git_flags $clone_flags"
     local git_pull_cmd="cd $cache_path && git pull $git_flags $pull_flags"
     local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
+    echo $git_update_cmd
     [ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
     #git clone --quiet --depth=1 $git_url
      #git clone \
