@@ -51,11 +51,15 @@ ccache -F 0 > /dev/null
 echo "Build ccache stats:"
 ccache -s
 # Create work directory
-mkdir -p /build/source
-#cp -a /source-ro/ /build/source
+workdir=/build/source
+mkdir -p $workdir
+
+# Source cache is on the cache volume
+src_cache=/src_cache
+
+#cp -a /source-ro/ $workdir
 
 inotify_touch_events () {
-    
     # Since inotifywait seems to need help in docker. :/
     while [ ! -f "/tmp/export_log.done" ]
     do
@@ -77,8 +81,12 @@ waitfor () {
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
+startfunc () {
+    touch /tmp/${FUNCNAME[1]}.start
+    echo "-- ${FUNCNAME[1]} start."
+}
 endfunc () {
-    touch /tmp/${FUNCNAME[1]}.done
+    mv /tmp/${FUNCNAME[1]}.start /tmp/${FUNCNAME[1]}.done
     echo "++ ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
@@ -87,7 +95,24 @@ endfunc () {
 }
 
 
+git_check () {
+    local git_base="$1"
+    [ -z "$2" ] && local git_branch="master" || local git_branch="$2"
+    local git_output=`git ls-remote ${git_base} refs/heads/${git_branch}`
+    local git_hash=${git_output%% *}
+    return $git_hash
+}
+
+local_check () {
+    local git_path="$1"
+    local git_output=`git -C $git_path rev-parse`
+    local git_hash=${git_output%% *}
+    return $git_hash
+}
+
+
 download_base_image () {
+startfunc
     echo "* Downloading ${base_image} ."
     wget_fail=0
     wget -nv ${base_image_url} -O ${base_image} || wget_fail=1
@@ -96,8 +121,9 @@ endfunc
 
 
 checkfor_base_image () {
+startfunc
     echo "* Checking for downloaded ${base_image} ."
-    cd /build/source
+    cd $workdir
     if [ ! -f /${base_image} ]; then
         download_base_image
     else
@@ -121,8 +147,8 @@ checkfor_base_image () {
 #         fi
 #     fi
     # Symlink existing image
-    if [ ! -f /build/source/${base_image} ]; then 
-        ln -s /$base_image /build/source/
+    if [ ! -f $workdir/${base_image} ]; then 
+        ln -s /$base_image $workdir/
     fi
     
 endfunc
@@ -130,16 +156,16 @@ endfunc
 
 extract_and_mount_image () {
     waitfor "checkfor_base_image"
-    
+startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
-    xzcat /build/source/$base_image > /build/source/$new_image.img
+    xzcat $workdir/$base_image > $workdir/$new_image.img
     #echo "* Increasing image size by 200M"
-    #dd if=/dev/zero bs=1M count=200 >> /build/source/$new_image.img
+    #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
     losetup -d /dev/loop0 || true
     dmsetup remove_all
     losetup -a
-    cd /build/source
+    cd $workdir
     echo "* Mounting: ${new_image}.img"
 
     kpartx -av ${new_image}.img
@@ -154,7 +180,7 @@ endfunc
 
 setup_arm64_chroot () {
     waitfor "extract_and_mount_image"
-    
+startfunc    
     echo "* Setup ARM64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
     
@@ -275,17 +301,29 @@ endfunc
 }
 
 get_rpi_firmware () {
-    cd /build/source
-    echo "* Downloading current RPI firmware."
-    git clone --quiet --depth=1 https://github.com/Hexxeh/rpi-firmware
+startfunc
+    local git_url="https://github.com/Hexxeh/rpi-firmware"
+    local local__path=rpi-firmware
+    local cache_path=$src_cache/$local__path
+    mkdir -p $cache_path
+    cd $workdir
+    remote_git=(git_check $git_url)
+    local_git=(local_check $cache_path)
+    #echo "* Downloading current RPI firmware."
+    [ $remote_git = $local_git ] && echo "samehash"  || echo "differenthash"
+    #git clone --quiet --depth=1 $git_url
+     git clone \
+    --quiet --depth=1 $git_url $cache_path
+     git clone \
+    --quiet --depth=1 $git_url $workdir/$local__path
 endfunc
 }
 
 install_rpi_firmware () {
     waitfor "get_rpi_firmware"
     waitfor "extract_and_mount_image"
-    
-    cd /build/source
+startfunc    
+    cd $workdir
     echo "* Installing current RPI firmware."
     cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
     cp rpi-firmware/*.elf /mnt/boot/firmware/
@@ -297,10 +335,11 @@ endfunc
 }
 
 get_kernel_src () {
+startfunc
     echo "* Downloading $branch kernel source."
-    cd /build/source
+    cd $workdir
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
-    kernelrev=`git -C /build/source/rpi-linux rev-parse --short HEAD`
+    kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
     #LOCALVERSION="-${kernelrev}"
     echo "* Current $branch kernel revision is ${kernelrev}."
 endfunc
@@ -309,35 +348,35 @@ endfunc
 build_kernel () {
     waitfor "get_kernel_src"
     waitfor "setup_arm64_chroot"
-    
+startfunc    
     echo "* Building $branch kernel."
-    cd /build/source/rpi-linux
-    mkdir /build/source/kernel-build
+    cd $workdir/rpi-linux
+    mkdir $workdir/kernel-build
     
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
-    make O=/build/source/kernel-build ARCH=arm64 \
+    make O=$workdir/kernel-build ARCH=arm64 \
     CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
     
-    cd /build/source/kernel-build
+    cd $workdir/kernel-build
     # Use kernel config modification script from sakaki- found at 
     # https://github.com/sakaki-/bcm2711-kernel-bis
     # This is needed to enable squashfs - which snapd requires, since otherwise
     # login at boot fails on the ubuntu server image.
     # This also enables the BPF syscall for systemd-journald firewalling
     /source-ro/conform_config.sh
-    yes "" | make O=./build/source/kernel-build/ \
+    yes "" | make O=.$workdir/kernel-build/ \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
     cd ..
 
-    cd /build/source/rpi-linux
+    cd $workdir/rpi-linux
     make -j $(($(nproc) + 1)) \
-    O=/build/source/kernel-build \
+    O=$workdir/kernel-build \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     
-    KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
+    KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
@@ -349,23 +388,23 @@ build_kernel () {
         
     for i in "${files[@]}"
     do
-     rm /build/source/kernel-build/$i || true
+     rm $workdir/kernel-build/$i || true
     done
-    chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; \
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH make -j $(($(nproc) + 1)) \
-    O=/build/source/kernel-build modules_prepare"
+    O=$workdir/kernel-build modules_prepare"
 
-    mkdir -p /build/source/kernel-build/tmp/scripts/mod
-    mkdir -p /build/source/kernel-build/tmp/scripts/basic
+    mkdir -p $workdir/kernel-build/tmp/scripts/mod
+    mkdir -p $workdir/kernel-build/tmp/scripts/basic
     for i in "${files[@]}"
     do
-     cp /build/source/kernel-build/$i /build/source/kernel-build/tmp/$i
-     rm /build/source/kernel-build/$i
-     sed -i "/.tmp_quiet_recordmcount$/i TABTMP\$(Q)cp /build/source/kernel-build/tmp/${i} ${i}" \
-     /build/source/rpi-linux/Makefile
+     cp $workdir/kernel-build/$i $workdir/kernel-build/tmp/$i
+     rm $workdir/kernel-build/$i
+     sed -i "/.tmp_quiet_recordmcount$/i TABTMP\$(Q)cp $workdir/kernel-build/tmp/${i} ${i}" \
+     $workdir/rpi-linux/Makefile
     done
     TAB=$'\t'
-    sed -i "s/TABTMP/${TAB}/g" /build/source/rpi-linux/Makefile
+    sed -i "s/TABTMP/${TAB}/g" $workdir/rpi-linux/Makefile
     
     # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
     # from image to build container in case they are needed during this install.
@@ -375,30 +414,30 @@ build_kernel () {
     # Maybe this can all be worked around by statically compiling these files
     # so that qemu-static can just deal with them without library issues during the 
     # packaging process. This two lines may not be needed.
-    aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/basic/fixdep.c -o \
-    /build/source/kernel-build/tmp/scripts/basic/fixdep
+    aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/basic/fixdep.c -o \
+    $workdir/kernel-build/tmp/scripts/basic/fixdep
     
-    aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/recordmcount.c -o \
-    /build/source/kernel-build/tmp/scripts/recordmount
+    aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/recordmcount.c -o \
+    $workdir/kernel-build/tmp/scripts/recordmount
 
     
-    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-`git -C /build/source/rpi-linux rev-parse --short HEAD` \
+    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=/build/source/kernel-build bindeb-pkg"
+    O=$workdir/kernel-build bindeb-pkg"
     echo $debcmd
     $debcmd
     echo "* Copying out $KERNEL_VERSION kernel debs."
-    cp /build/source/*.deb /output/ 
+    cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
 
 
     # Now that we have the kernel packages, let us go ahead and make a local 
     # install anyways so that we can manually copy the required files over for
     # first boot.
-    mkdir /build/source/kernel-install
+    mkdir $workdir/kernel-install
     sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=/build/source/kernel-build DEPMOD=echo \
-    INSTALL_MOD_PATH=/build/source/kernel-install \
+    O=$workdir/kernel-build DEPMOD=echo \
+    INSTALL_MOD_PATH=$workdir/kernel-install \
     modules_install
 endfunc
 }
@@ -406,10 +445,10 @@ endfunc
 install_kernel () {
     waitfor "build_kernel"
     waitfor "extract_and_mount_image"
-    
+startfunc    
     echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
     df -h
-    cd /build/source
+    cd $workdir
     # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4, as of
     # July 2019, and puts uboot into /boot/firmware/kernel8.img .
     # 
@@ -417,28 +456,28 @@ install_kernel () {
     # well so if a working uboot is installed it still works.
     # Note that the flash-kernel db file installed later works around uboot 
     # getting installed into kernel8.img on kernel installs.
-    cp /build/source/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
+    cp $workdir/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
     #
     # Once uboot works, it should be able to use the standard raspberry pi boot
     # script to boot a compressed kernel on arm64, since linux on arm64 does not
     # support self-decompression of the kernel, so we copy this in anyways for usage
     # with a working uboot in the future.
-    cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
+    cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/vmlinuz-${KERNEL_VERSION}
     
-    cp /build/source/kernel-build/arch/arm64/boot/Image.gz \
+    cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/firmware/vmlinuz
     
-    cp /build/source/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+    cp $workdir/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
 endfunc
 }
 
 install_kernel_modules () {
     waitfor "install_kernel"
-    
+startfunc    
     echo "* Copying compiled ${KERNEL_VERSION} modules to image."
-    #rm  -rf /build/source/kernel-install/lib/modules/build
-    cp -avr /build/source/kernel-install/lib/modules/* \
+    #rm  -rf $workdir/kernel-install/lib/modules/build
+    cp -avr $workdir/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/
     
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
@@ -447,13 +486,13 @@ endfunc
 
 install_kernel_dtbs () {
     waitfor "install_kernel"
-    
+startfunc    
     echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
-    cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
-    cp /build/source/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
+    cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
+    cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
         
-    cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
+    cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/    
 endfunc
 }
@@ -464,20 +503,21 @@ install_kernel_headers () {
     # kernel headers package, so we skip this for now.
     # mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
     #
-    # cp /build/source/kernel-build/.config /build/source/rpi-linux/
-    # chroot /mnt /bin/bash -c "cd /build/source/rpi-linux ; \
+    # cp $workdir/kernel-build/.config $workdir/rpi-linux/
+    # chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; \
     # make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
     # rm .config"
     # 
     # 
     # rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
-    # cp /build/source/kernel-build/Module.symvers \
+    # cp $workdir/kernel-build/Module.symvers \
     # /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
 get_armstub8-gic () {
+startfunc
     echo "* Get RPI4 armstub8-gic source."
-    cd /build/source
+    cd $workdir
     git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
 endfunc
 }
@@ -485,9 +525,9 @@ endfunc
 install_armstub8-gic () {
     waitfor "get_armstub8-gic"
     waitfor "extract_and_mount_image"
-    
+startfunc    
     echo "* Installing RPI4 armstub8-gic source."
-    cd /build/source/rpi-tools/armstubs
+    cd $workdir/rpi-tools/armstubs
     make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- armstub8-gic.bin
     cd ../..
     cp rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
@@ -495,9 +535,10 @@ endfunc
 }
 
 get_non-free_firmware () {
+startfunc
     echo "* Getting non-free firmware."
     
-    cd /build/source
+    cd $workdir
     git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree \
     firmware-nonfree
 endfunc
@@ -506,15 +547,15 @@ endfunc
 install_non-free_firmware () {
     waitfor "get_non-free_firmware"
     waitfor "extract_and_mount_image"
-    
-    cp -avf /build/source/firmware-nonfree/* /mnt/usr/lib/firmware
+startfunc    
+    cp -avf $workdir/firmware-nonfree/* /mnt/usr/lib/firmware
 endfunc
 }
 
 
 configure_rpi_config_txt () {
     waitfor "extract_and_mount_image"
-    
+startfunc    
     echo "* Making /boot/firmware/config.txt modifications. &"
     echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
@@ -532,8 +573,9 @@ endfunc
 }
 
 get_rpi_userland () {
+startfunc
     echo "* Getting Raspberry Pi userland source."
-    cd /build/source
+    cd $workdir
     git clone --quiet --depth=1 https://github.com/raspberrypi/userland
 endfunc
 }
@@ -541,8 +583,9 @@ endfunc
 install_rpi_userland () {
     waitfor "get_rpi_userland"
     waitfor "extract_and_mount_image"
+startfunc
     echo "* Installing Raspberry Pi userland source."
-    cd /build/source
+    cd $workdir
     mkdir -p /mnt/opt/vc
     cd userland/
     CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt
@@ -564,7 +607,7 @@ endfunc
 modify_wifi_firmware () {
     waitfor "extract_and_mount_image"
     waitfor "install_non-free_firmware"
-    
+startfunc    
     echo "* Modifying wireless firmware."
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
     if ! grep -qs 'boardflags3=0x44200100' \
@@ -578,7 +621,7 @@ endfunc
 install_first_start_cleanup_script () {
     waitfor "extract_and_mount_image"
     waitfor "build_kernel"
-    
+startfunc    
     echo "* Creating first start cleanup script."
     tee /mnt/etc/rc.local <<EOF
 #!/bin/sh -e
@@ -607,7 +650,7 @@ endfunc
 
 make_kernel_install_scripts () {
     waitfor "extract_and_mount_image"
-    
+startfunc    
     # This script allows flash-kernel to create the uncompressed kernel file
     # on the boot partition.
     echo "* Making kernel install scripts. &"
@@ -656,7 +699,7 @@ cleanup_image_remove_chroot () {
     waitfor "install_kernel"
     waitfor "install_kernel_modules"
     waitfor "install_kernel_dtbs"
-    
+startfunc    
     echo "* Finishing image setup."
     
     echo "* Cleaning up ARM64 chroot"
@@ -675,7 +718,7 @@ cleanup_image_remove_chroot () {
     # first boot.
     echo "* Copying compiled kernel debs to image for proper install"
     echo "* at first boot."
-    cp /build/source/*.deb /mnt/var/cache/apt/archives/
+    cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
     if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
         echo "** Container paused. **"
@@ -696,6 +739,7 @@ endfunc
 }
 
 unmount_image () {
+startfunc
     echo "* Unmounting modified ${new_image}.img"
     sync
     umount /mnt/boot/firmware
@@ -703,16 +747,17 @@ unmount_image () {
     #guestunmount /mnt
 
     
-    kpartx -dv /build/source/${new_image}.img
+    kpartx -dv $workdir/${new_image}.img
     #losetup -d /dev/loop0
     dmsetup remove_all
 endfunc
 }
 
 export_compressed_image () {
+startfunc
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
-    cd /build/source
+    cd $workdir
     for i in "${image_compressors[@]}"
     do
      echo "* Compressing ${new_image} with $i and exporting"
@@ -721,7 +766,7 @@ export_compressed_image () {
      compress_flags=""
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
-     cpcmd="cp /build/source/${new_image}.img.$i \
+     cpcmd="cp $workdir/${new_image}.img.$i \
      /output/${new_image}-${KERNEL_VERSION}-${kernelrev}_${now}.img.$i"
      echo $compresscmd
      $compresscmd
@@ -734,6 +779,7 @@ endfunc
 }
 
 export_log () {
+startfunc
     echo "* Build log at: build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log"
     cat $TMPLOG > /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
     chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
