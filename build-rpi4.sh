@@ -222,6 +222,8 @@ setup_arm64_chroot () {
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
     echo "* Apt upgrading image in chroot."
+    echo "* There may be some errors here do to" 
+    echo "* installation happening in a chroot."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
     echo "* Image apt upgrade done."
     echo "* Installing native kernel build software to image."
