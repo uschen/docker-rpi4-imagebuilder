@@ -308,16 +308,17 @@ startfunc
     local local__path=rpi-firmware
     local cache_path=$src_cache/$local__path
     mkdir -p $cache_path
-    cd $workdir
+    mkdir -p $workdir/$local__path
     remote_git=(git_check $git_url)
     local_git=(local_check $cache_path)
     #echo "* Downloading current RPI firmware."
-    [ $remote_git = $local_git ] && echo "samehash"  || echo "differenthash"
+    git_cache_cmd="git clone --quiet --depth=1 $git_url -C $cache_path clone || git --quiet --depth=1 -C $cache_path pull"
+    [ $remote_git = $local_git ] && echo "samehash"  || $git_cache_cmd
     #git clone --quiet --depth=1 $git_url
-     git clone \
-    --quiet --depth=1 $git_url $cache_path
-     git clone \
-    --quiet --depth=1 $git_url $workdir/$local__path
+     #git clone \
+    #--quiet --depth=1 $git_url $cache_path
+     #git clone    --quiet --depth=1 $git_url $workdir/$local__path
+    rsync -av $cache_path $workdir/$local__path
 endfunc
 }
 
