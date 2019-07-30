@@ -23,13 +23,16 @@ image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
 #DEBUG=1
-[[ $DEBUG ]] && mkdir -p /output/$now/
+
 
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=/apt_cache install inotify-tools -qq
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
+
+# Create debug output folder.
+[[ $DEBUG ]] && mkdir -p /output/$now/
 
 # Logging Setup
 TMPLOG=/tmp/build.log
