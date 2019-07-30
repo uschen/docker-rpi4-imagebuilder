@@ -61,6 +61,17 @@ waitfor () {
 endfunc () {
     touch /tmp/${FUNCNAME[1]}
     echo "** ${FUNCNAME[1]} done."
+    # inotifywait is having issues in docker.
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    sleep 1
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}
+    
 }
 
 
@@ -106,7 +117,7 @@ endfunc
 }
 
 extract_and_mount_image () {
-    #waitfor "checkfor_base_image"
+    waitfor "checkfor_base_image"
     
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat /build/source/$base_image > /build/source/$new_image.img
