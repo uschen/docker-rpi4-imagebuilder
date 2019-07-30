@@ -87,17 +87,38 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 # for debugging
 docker_args+="--rm "
 
+check_new_image_hash () {
+    current_output=`curl --silent ${base_url}/SHA1SUMS`
+    current=${current_output%% *}
+    local_hash_output=`sha1sum $(abspath "$srcdir")/${base_image}.new`
+    local=${local_line%% *}
+    if [ "$local" == "$current" ]; then
+        tee $(abspath "$srcdir")/${base_image}.shasum <<EOF
+$local
+EOF
+    echo "* ${base_image} hash verified."
+    mv $(abspath "$srcdir")/${base_image}.new $(abspath "$srcdir")/${base_image}
+    else
+    hashfail=1
+    download_base_image
+    fi
+}
 
 download_base_image () {
         echo "* Downloading ${base_image} ."
-        [[ -e "$(abspath "$srcdir")/$base_image" ]] && \
-        mv $(abspath "$srcdir")/$base_image \
+        if [ -e "$(abspath "$srcdir")/$base_image" ] && \
+        [ -e "$(abspath "$srcdir")/${base_image}.shasum" ] ; then
+        cp $(abspath "$srcdir")/$base_image \
         $(abspath "$srcdir")/${base_image}.bak 2>/dev/null
         
-        curl -o $(abspath "$srcdir")/$base_image $base_image_url || curl_fail=1
+        curl -o $(abspath "$srcdir")/${base_image}.new $base_image_url || curl_fail=1
+        check_new_image_hash
+
+        
         if [[ "$curl_fail" ]]; then 
             echo "* ${base_image} download failed."
-            [[ -e "$(abspath "$srcdir")/${base_image}.bak" ]]
+            if [ -e "$(abspath "$srcdir")/${base_image}.bak" ] &&
+            [ -e "$(abspath "$srcdir")/${base_image}.shasum" ]
             mv $(abspath "$srcdir")/${base_image}.bak \
             $(abspath "$srcdir")/$base_image
             echo "* Restoring existing  ${base_image}"
@@ -109,7 +130,7 @@ download_base_image () {
 check_for_current_image () {
     current_output=`curl --silent ${base_url}/SHA1SUMS`
     current=${current_output%% *}
-    local_line=`sha1sum $(abspath "$srcdir")/${base_image}`
+    local_hash_output=`sha1sum $(abspath "$srcdir")/${base_image}`
     local=${local_line%% *}
     if [ ! "$local" == "$current" ]; then
         echo "Local base image sha1sum is:"
@@ -118,8 +139,8 @@ check_for_current_image () {
         echo $current
         echo "* New base image available."
         echo "* Trying to get current base image."
-            download_base_image
-            [ "$wget_fail" ] && "* Download failed. Using existing image." || \
+        download_base_image
+        [[ "$curl_fail" ]] && "* Download failed. Using existing image." || \
             echo ""
         else
             echo "* Base image file is current."
