@@ -89,12 +89,12 @@ startfunc () {
 
 endfunc () {
     mv /tmp/${FUNCNAME[1]}.start /tmp/${FUNCNAME[1]}.done
-    echo "++ ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
     # debugging
     [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
     [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
+    echo "++ ${FUNCNAME[1]} done."
 }
 
 
