@@ -88,6 +88,7 @@ docker_args+="-e USER=$(id -u) -e GROUP=$(id -g) "
 docker_args+="--rm "
 
 check_new_image_hash () {
+    echo "* Checking image hash."
     current_output=`curl --silent ${base_url}/SHA1SUMS`
     current=${current_output%% *}
     local_hash_output=`sha1sum $(abspath "$srcdir")/${base_image}.new`
