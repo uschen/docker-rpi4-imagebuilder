@@ -108,9 +108,9 @@ download_base_image () {
         echo "* Downloading ${base_image} ."
         if [ -e "$(abspath "$srcdir")/$base_image" ] && \
         [ -e "$(abspath "$srcdir")/${base_image}.shasum" ] ; then
-        cp $(abspath "$srcdir")/$base_image \
-        $(abspath "$srcdir")/${base_image}.bak 2>/dev/null
-        
+            cp $(abspath "$srcdir")/$base_image \
+            $(abspath "$srcdir")/${base_image}.bak 2>/dev/null
+        fi
         curl -o $(abspath "$srcdir")/${base_image}.new $base_image_url || curl_fail=1
         check_new_image_hash
 
