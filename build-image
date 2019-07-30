@@ -115,13 +115,14 @@ download_base_image () {
         check_new_image_hash
 
         
-        if [[ "$curl_fail" ]]; then 
+        if [ "$curl_fail" ]; then 
             echo "* ${base_image} download failed."
             if [ -e "$(abspath "$srcdir")/${base_image}.bak" ] &&
             [ -e "$(abspath "$srcdir")/${base_image}.shasum" ]
-            mv $(abspath "$srcdir")/${base_image}.bak \
-            $(abspath "$srcdir")/$base_image
-            echo "* Restoring existing  ${base_image}"
+                mv $(abspath "$srcdir")/${base_image}.bak \
+                $(abspath "$srcdir")/$base_image
+                echo "* Restoring existing  ${base_image}"
+            fi
         fi
         [[ -e "$(abspath "$srcdir")/$base_image" ]] && \
         echo "* Now have local ${base_image} ."
