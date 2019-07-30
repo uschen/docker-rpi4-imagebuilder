@@ -641,11 +641,10 @@ endfunc
 }
 
 cleanup_image_remove_chroot () {
-    # Just using actual wait
-    #waitfor "build_kernel"
-    #waitfor "install_kernel"
-    #waitfor "install_kernel_modules"
-    #waitfor "install_kernel_dtbs"
+    waitfor "build_kernel"
+    waitfor "install_kernel"
+    waitfor "install_kernel_modules"
+    waitfor "install_kernel_dtbs"
     
     echo "* Finishing image setup."
     
@@ -783,7 +782,6 @@ install_kernel
 install_kernel_modules &
 install_kernel_dtbs &
 #install_kernel_headers
-wait 
 cleanup_image_remove_chroot
 unmount_image
 export_compressed_image
