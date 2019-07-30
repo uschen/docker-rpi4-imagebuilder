@@ -67,7 +67,7 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    echo "++ ${FUNCNAME[1]} is done waiting for ${1}."
+    echo "++ ${FUNCNAME[1]} no longer waiting for ${1} to finish."
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
