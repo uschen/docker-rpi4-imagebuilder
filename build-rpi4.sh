@@ -51,6 +51,8 @@ download_base_image () {
         wget_fail=0
         wget -nv ${base_image_url} -O ${base_image} || wget_fail=1
         echo "* Downloaded ${base_image} ."
+    touch /build/${FUNCNAME[0]}
+    echo "* ${FUNCNAME[0]} done."
 }
 
 
@@ -83,6 +85,8 @@ checkfor_base_image () {
     if [ ! -f /build/source/${base_image} ]; then 
         ln -s /$base_image /build/source/
     fi
+    touch /build/${FUNCNAME[0]}
+    echo "* ${FUNCNAME[0]} done."
 }
 
 extract_and_mount_image () {
@@ -105,7 +109,8 @@ extract_and_mount_image () {
     echo "* Extraction of ${base_image} to ${new_image}.img done."
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
-
+    touch /build/${FUNCNAME[0]}
+    echo "* ${FUNCNAME[0]} done."
 }
 
 setup_arm64_chroot () {
@@ -352,6 +357,8 @@ build_kernel () {
     O=/build/source/kernel-build DEPMOD=echo \
     INSTALL_MOD_PATH=/build/source/kernel-install \
     modules_install
+    touch /build/${FUNCNAME[0]}
+    echo "* ${FUNCNAME[0]} done."
 }
 
 install_kernel () {
@@ -394,7 +401,8 @@ install_kernel () {
     cp /build/source/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/
     
-
+    touch /build/${FUNCNAME[0]}
+    echo "* ${FUNCNAME[0]} done."
 }
 
 install_kernel_headers () {
@@ -527,7 +535,7 @@ if [ "\$_IP" ]; then
 fi
 #
 /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
-/usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y
+/usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
 /usr/bin/apt update && /usr/bin/apt upgrade -y
 /usr/sbin/update-initramfs -c -k all
 #cd /usr/src
