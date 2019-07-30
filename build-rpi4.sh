@@ -582,13 +582,14 @@ EOF
     tee /mnt/etc/flash-kernel/db <<EOF
 #
 # Raspberry Pi 4 Model B Rev 1.1
+Machine: Raspberry Pi 4 Model B Rev 1.1
 DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
-#U-Boot-Script-Name: bootscr.rpi3
-#Required-Packages: u-boot-tools
 Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
 Boot-Kernel-Path: /boot/firmware/vmlinuz
 Boot-Initrd-Path: /boot/firmware/initrd.img
-#Boot-Script-Path: /boot/firmware/boot.scr
+#Boot-Script-Path: /boot/firmware/boot.scrTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
+#U-Boot-Script-Name: bootscr.rpi3
+#Required-Packages: u-boot-tools
 EOF
     touch /build/${FUNCNAME[0]}
     echo "* ${FUNCNAME[0]} done."
