@@ -315,7 +315,7 @@ startfunc
     #echo "* Downloading current RPI firmware."
     [[ $git_branch ]] && git__extra_flags= || git__extra_flags="-b $branch"
     git_flags="--quiet --depth=1 $git_repo $git__extra_flags -C $cache_path"
-    git_cache_cmd="git $git_flags clone || git $git_flags pull"
+    git_cache_cmd="git clone $git_flags || git pull $git_flags"
     [ $remote_git = $local_git ] && echo "* Same git hash."  || $git_cache_cmd
     #git clone --quiet --depth=1 $git_url
      #git clone \
