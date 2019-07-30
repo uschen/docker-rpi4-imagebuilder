@@ -328,7 +328,7 @@ startfunc
         echo "* Same git hash."
     else
     cd $cache_path
-        $git_clone_cmd  || (/usr/bin/git pull $git_flags $pull_flags)
+        (/usr/bin/git clone $git_flags $clone_flags .)  || /usr/bin/git pull $git_flags $pull_flags
     fi
     rsync -a $cache_path $workdir/
 
