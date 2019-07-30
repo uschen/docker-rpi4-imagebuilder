@@ -67,7 +67,7 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    echo "++ ${FUNCNAME[1]} done waiting for ${1}."
+    echo "++ ${FUNCNAME[1]} is done waiting for ${1}."
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
@@ -221,9 +221,9 @@ setup_arm64_chroot () {
     -o dir::cache::archives=/apt_cache \
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
-    echo "* Apt upgrade in chroot."
+    echo "* Apt upgrading image in chroot."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
-    echo "* Chroot apt upgrade done."
+    echo "* Image apt upgrade done."
     echo "* Installing native kernel build software to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
