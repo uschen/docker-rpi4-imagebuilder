@@ -312,8 +312,8 @@ startfunc
     mkdir -p $workdir/$local__path
     #local remote_git
     #local local_git
-    local remote_git=git_check($git_url)
-    local local_git=local_check($cache_path)
+    local remote_git=git_check $git_url
+    local local_git=local_check $cache_path
     #echo "* Downloading current RPI firmware."
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags="-b $branch"
