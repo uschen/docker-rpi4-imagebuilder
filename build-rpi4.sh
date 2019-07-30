@@ -48,14 +48,24 @@ ccache -s
 mkdir -p /build/source
 #cp -a /source-ro/ /build/source
 
+inotify_touch_events () {
+# Since inotifywait seems to need help in docker. :/
+while [ ! -e "/tmp/export_log" ]
+then
+    touch /tmp/*
+    sleep 1
+done
+
+
+
 waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
-    touch /tmp/${FUNCNAME[1]}.waitingfor.${1}
+    touch /tmp/wait.${FUNCNAME[1]}_for_${1}
     while read waitforit; do if [ "$waitforit" = $1 ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open --format '%f' --quiet /tmp --monitor)
-    rm /tmp/${FUNCNAME[1]}.waitingfor.${1}
+    rm /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 endfunc () {
@@ -63,8 +73,14 @@ endfunc () {
     echo "** ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
-    sleep 5
-    touch /tmp/*  
+    sleep 1
+    touch /tmp/*
+    sleep 1
+    touch /tmp/*
+    sleep 1
+    touch /tmp/*
+    sleep 1
+    touch /tmp/*
 }
 
 
@@ -631,10 +647,11 @@ endfunc
 }
 
 cleanup_image_remove_chroot () {
-    waitfor "build_kernel"
-    waitfor "install_kernel"
-    waitfor "install_kernel_modules"
-    waitfor "install_kernel_dtbs"
+    # Just using actual wait
+    #waitfor "build_kernel"
+    #waitfor "install_kernel"
+    #waitfor "install_kernel_modules"
+    #waitfor "install_kernel_dtbs"
     
     echo "* Finishing image setup."
     
@@ -737,6 +754,11 @@ image-dependent-installs () {
     make_kernel_install_scripts &
 }
 
+# inotify in docker seems to not recognize that files are being 
+# created unless they are touched. Not sure where this bug is.
+# So we will work around it.
+inotify_touch_events &
+
 checkfor_base_image
 get_kernel_src &
 get_rpi_firmware &
@@ -758,7 +780,8 @@ build_kernel
 install_kernel
 install_kernel_modules &
 install_kernel_dtbs &
-#install_kernel_headers 
+#install_kernel_headers
+wait 
 cleanup_image_remove_chroot
 unmount_image
 export_compressed_image
