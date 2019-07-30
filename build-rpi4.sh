@@ -33,6 +33,7 @@ now=`date +"%m_%d_%Y_%H%M"`
 
 # Create debug output folder.
 [[ $DEBUG ]] && mkdir -p /output/$now/
+[[ $DEBUG ]] && chown $USER:$GROUP /output/$now/
 
 # Logging Setup
 TMPLOG=/tmp/build.log
@@ -92,6 +93,7 @@ endfunc () {
     touch /tmp/*
     # debugging
     [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
+    [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
 }
 
 
