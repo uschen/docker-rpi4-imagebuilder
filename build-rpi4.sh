@@ -306,8 +306,8 @@ get_rpi_firmware () {
 startfunc
     local git_branch=
     local git_repo="https://github.com/Hexxeh/rpi-firmware"
-    local local__path=rpi-firmware
-    local cache_path=$src_cache/$local__path
+    local local_path=rpi-firmware
+    local cache_path=$src_cache/$local_path
     mkdir -p $cache_path
     mkdir -p $workdir/$local__path
     remote_git=(git_check $git_url)
@@ -338,7 +338,8 @@ startfunc
      #git clone \
     #--quiet --depth=1 $git_url $cache_path
      #git clone    --quiet --depth=1 $git_url $workdir/$local__path
-    rsync -av $cache_path $workdir/$local__path/
+    rsync -av $cache_path $workdir/
+    ls $workdir/$local_path/
 endfunc
 }
 
