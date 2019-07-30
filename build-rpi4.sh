@@ -75,14 +75,6 @@ endfunc () {
     echo "** ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
-    sleep 1
-    touch /tmp/*
-    sleep 1
-    touch /tmp/*
-    sleep 1
-    touch /tmp/*
-    sleep 1
-    touch /tmp/*
 }
 
 
@@ -675,6 +667,7 @@ cleanup_image_remove_chroot () {
     echo "* at first boot."
     cp /build/source/*.deb /mnt/var/cache/apt/archives/
     sync
+    waitfor "ok_to_exit_container_after_build"
     umount /mnt/build
     umount /mnt/run
     umount /mnt/ccache
@@ -755,6 +748,13 @@ image-dependent-installs () {
     install_first_start_cleanup_script &
     make_kernel_install_scripts &
 }
+
+# Delete this by connecting to the container using a shell if you want to 
+# debug the container before the image is unmounted.
+# The shell command would be something like this:
+# docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
+# Note that this flag is looked for in the cleanup_image_remove_chroot function
+touch /tmp/ok_to_exit_container_after_build.done
 
 # inotify in docker seems to not recognize that files are being 
 # created unless they are touched. Not sure where this bug is.
