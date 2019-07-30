@@ -19,8 +19,8 @@ new_image="eoan-preinstalled-server-arm64+raspi4"
 # Note that these only work for the chroot commands.
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
 silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
-#image_compressors=("lz4" "xz")
-image_compressors=("lz4")
+image_compressors=("lz4" "xz")
+#image_compressors=("lz4")
 
 
 # Set Time Stamp
@@ -246,7 +246,7 @@ get_kernel_src () {
     echo "* Downloading $branch kernel source. &"
     cd /build/source
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
-    kernelrev=`cd /build/source/rpi-linux ; git rev-parse HEAD`
+    kernelrev=`cd /build/source/rpi-linux ; git rev-parse --short HEAD`
 }
 
 build_kernel () {
@@ -278,6 +278,7 @@ build_kernel () {
     
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
+    KDEB_PKGVERSION=${KERNEL_VERSION}-${kernelrev}
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, due to module install files being installed into the target system in
@@ -598,25 +599,25 @@ export_compressed_image () {
     do
      echo "* Compressing ${new_image} with $i and exporting"
      echo "  out of container to:"
-     echo "${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     echo "${new_image}-${KERNEL_VERSION}_${kernelrev}_${now}.img.$i"
      compress_flags=""
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
      cpcmd="cp /build/source/${new_image}.img.$i \
-     /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i"
+     /output/${new_image}-${KERNEL_VERSION}_${kernelrev}_${now}.img.$i"
      echo $compresscmd
      $compresscmd
      echo $cpcmd
      $cpcmd
-     chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${now}.img.$i
-     echo "/output/${new_image}-${KERNEL_VERSION}_${now}.img.$i created."
+     chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}_${kernelrev}_${now}.img.$i
+     echo "/output/${new_image}-${KERNEL_VERSION}_${kernelrev}_${now}.img.$i created."
     done
 }
 
 export_log () {
-    echo "* Build log at: build-log-${KERNEL_VERSION}_${now}.log"
-    cat $TMPLOG > /output/build-log-${KERNEL_VERSION}_${now}.log
-    chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${now}.log
+    echo "* Build log at: build-log-${KERNEL_VERSION}_${kernelrev}_${now}.log"
+    cat $TMPLOG > /output/build-log-${KERNEL_VERSION}_${kernelrev}_${now}.log
+    chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}_${kernelrev}_${now}.log
 }
 
 function abspath {
