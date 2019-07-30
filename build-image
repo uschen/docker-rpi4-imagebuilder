@@ -90,14 +90,20 @@ docker_args+="--rm "
 
 download_base_image () {
         echo "* Downloading ${base_image} ."
-        wget_fail=0
-        mv $(abspath "$srcdir")/$base_image $(abspath "$srcdir")/$base_image.bak || true
-        wget $base_image_url -O $(abspath "$srcdir")/$base_image || wget_fail=1
-        if [ "$wget_fail" ]; then 
-            mv $(abspath "$srcdir")/$base_image.bak $(abspath "$srcdir")/$base_image
-        else
-            echo "* Downloaded ${base_image} ."
+        [[ -e "$(abspath "$srcdir")/$base_image" ]] && \
+        mv $(abspath "$srcdir")/$base_image \
+        $(abspath "$srcdir")/${base_image}.bak 2>/dev/null
+        
+        curl -o $(abspath "$srcdir")/$base_image $base_image_url || curl_fail=1
+        if [[ "$curl_fail" ]]; then 
+            echo "* ${base_image} download failed."
+            [[ -e "$(abspath "$srcdir")/${base_image}.bak" ]]
+            mv $(abspath "$srcdir")/${base_image}.bak \
+            $(abspath "$srcdir")/$base_image
+            echo "* Restoring existing  ${base_image}"
         fi
+        [[ -e "$(abspath "$srcdir")/$base_image" ]] && \
+        echo "* Now have local ${base_image} ."
 }
 
 check_for_current_image () {
