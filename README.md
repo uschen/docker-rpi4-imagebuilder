@@ -48,7 +48,7 @@ To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
    # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
     git pull ; time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
-A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache if I have xz compression disabled and just use lz4 for image compression, or 20 min if I use both.
+A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache if I have xz compression disabled and just use lz4 for image compression, or 25 min if I use both.
 
 (xz compression be toggled at the top of the build-rpi4.sh file.) 
 
