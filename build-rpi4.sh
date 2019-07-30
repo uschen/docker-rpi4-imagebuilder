@@ -101,11 +101,12 @@ checkfor_base_image () {
     if [ ! -f /build/source/${base_image} ]; then 
         ln -s /$base_image /build/source/
     fi
+    
 endfunc
 }
 
 extract_and_mount_image () {
-    waitfor "checkfor_base_image"
+    #waitfor "checkfor_base_image"
     
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat /build/source/$base_image > /build/source/$new_image.img
