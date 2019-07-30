@@ -318,18 +318,18 @@ startfunc
     local git_flags="--quiet --depth=1"
     local clone_flags="$git_repo $git_extra_flags"
     local pull_flags=
-    local git_clone_cmd="(/usr/bin/git clone $git_flags $clone_flags .)"
-    local git_pull_cmd="(/usr/bin/git pull $git_flags $pull_flags)"
-    local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
-    echo $git_update_cmd
-    cd $cache_path
+    #local git_clone_cmd="(/usr/bin/git clone $git_flags $clone_flags .)"
+    #local git_pull_cmd="(/usr/bin/git pull $git_flags $pull_flags)"
+    #local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
+    #echo $git_update_cmd
     #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
     if [ $remote_git = $local_git ]; then
         echo "* Same git hash."
     else
         cd $cache_path
-        /usr/bin/git clone $git_flags $clone_flags . || true
-        /usr/bin/git pull $git_flags $pull_flags
+        git clone $git_flags $clone_flags || true
+        cd $cache_path/$local__path
+        git pull $git_flags $pull_flags
     fi
     rsync -a $cache_path $workdir/
 
