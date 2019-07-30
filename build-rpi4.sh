@@ -22,6 +22,9 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
+DEBUG=1
+[[ $DEBUG ]] && mkdir -p /output/$now/
+
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=/apt_cache install inotify-tools -qq
 
@@ -76,6 +79,8 @@ endfunc () {
     echo "++ ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
+    # debugging
+    [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
 }
 
 
@@ -293,7 +298,7 @@ get_kernel_src () {
     cd /build/source
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
     kernelrev=`git -C /build/source/rpi-linux rev-parse --short HEAD`
-    LOCALVERSION="-${kernelrev}"
+    #LOCALVERSION="-${kernelrev}"
     echo "* Current $branch kernel revision is ${kernelrev}."
 endfunc
 }
