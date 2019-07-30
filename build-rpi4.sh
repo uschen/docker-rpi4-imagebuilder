@@ -304,7 +304,8 @@ endfunc
 
 get_rpi_firmware () {
 startfunc
-    local git_url="https://github.com/Hexxeh/rpi-firmware"
+    local git_branch=
+    local git_repo="https://github.com/Hexxeh/rpi-firmware"
     local local__path=rpi-firmware
     local cache_path=$src_cache/$local__path
     mkdir -p $cache_path
@@ -312,8 +313,10 @@ startfunc
     remote_git=(git_check $git_url)
     local_git=(local_check $cache_path)
     #echo "* Downloading current RPI firmware."
-    git_cache_cmd="git clone --quiet --depth=1 $git_url -C $cache_path clone || git --quiet --depth=1 -C $cache_path pull"
-    [ $remote_git = $local_git ] && echo "samehash"  || $git_cache_cmd
+    [[ $git_branch ]] && git__extra_flags= || git__extra_flags="-b $branch"
+    git_flags="--quiet --depth=1 $git_repo $git__extra_flags -C $cache_path"
+    git_cache_cmd="git $git_flags clone || git $git_flags pull"
+    [ $remote_git = $local_git ] && echo "* Same git hash."  || $git_cache_cmd
     #git clone --quiet --depth=1 $git_url
      #git clone \
     #--quiet --depth=1 $git_url $cache_path
@@ -826,8 +829,8 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-get_kernel_src
 get_rpi_firmware
+get_kernel_src
 get_armstub8-gic &
 get_non-free_firmware &
 get_rpi_userland &
