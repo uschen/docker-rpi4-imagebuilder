@@ -313,12 +313,14 @@ startfunc
     remote_git=(git_check $git_url)
     local_git=(local_check $cache_path)
     #echo "* Downloading current RPI firmware."
-    [[ $git_branch ]] && git__extra_flags= || git__extra_flags="-b $branch"
-    local git_flags="-C $cache_path --quiet --depth=1"
-    local clone_flags="$git_repo $git__extra_flags"
+    [[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
+    local git_flags="--quiet --depth=1"
+    local clone_flags="$git_repo $git_extra_flags"
     local pull_flags=
-    git_cache_cmd="git clone $git_flags $clone_flags || git pull $git_flags"
-    [ $remote_git = $local_git ] && echo "* Same git hash."  || $git_cache_cmd
+    local git_clone_cmd="pushd $cache_path && git clone $git_flags $clone_flags && popd"
+    local git_pull_cmd="pushd $cache_path && git pull $git_flags $pull_flags && popd"
+    local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
+    [ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
     #git clone --quiet --depth=1 $git_url
      #git clone \
     #--quiet --depth=1 $git_url $cache_path
