@@ -52,7 +52,7 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /tmp/${FUNCNAME[1]}.waitingfor.${1}
-    while read waitforit; do if [ "$waitforit" == "${1}" ]; then break; \
+    while read waitforit; do if [ "$waitforit" = $1 ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open --format '%f' --quiet /tmp --monitor)
     rm /tmp/${FUNCNAME[1]}.waitingfor.${1}
