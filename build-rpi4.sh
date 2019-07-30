@@ -338,7 +338,7 @@ startfunc
      #git clone \
     #--quiet --depth=1 $git_url $cache_path
      #git clone    --quiet --depth=1 $git_url $workdir/$local__path
-    rsync -av $cache_path $workdir/$local__path
+    rsync -av $cache_path $workdir/$local__path/
 endfunc
 }
 
