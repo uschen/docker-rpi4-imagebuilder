@@ -38,21 +38,19 @@ usage:
 
 To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
-    # create destination directory to store the build results
+   # create destination directory to store the build results
     mkdir output
     
-    
-
-    # MAKE SURE YOU HAVE ALREADY MADE YOUR BUILD ENVIRONMENT CONTAINER like thus:
+   # MAKE SURE YOU HAVE ALREADY MADE YOUR BUILD ENVIRONMENT CONTAINER like thus:
     docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
-    # build package from source directory
-    # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
-    time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
+   # build package from source directory
+   # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
+    git pull ; time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
-A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache.
+A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache if I have xz compression disabled and just use lz4 for image compression, or 20 min if I use both.
 
-If you want builds to be compressed using xz (which makes images roughly twice as small as lz4) you can enable that at the top of the build-rpi4.sh file, though using xz to compress the image takes as long as building the image in the first place.
+(xz compression be toggled at the top of the build-rpi4.sh file.) 
 
 
 
