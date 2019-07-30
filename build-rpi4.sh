@@ -323,13 +323,13 @@ startfunc
     local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
     echo $git_update_cmd
     cd $cache_path
-    [ $remote_git = $local_git ] && echo "* Same git hash." || $git_clone_cmd  || (/usr/bin/git pull $git_flags $pull_flags)
-#     if [ $remote_git = $local_git ]; then
-#         echo "* Same git hash."
-#     else
-#     cd $cache_path
-#         $git_clone_cmd  || (/usr/bin/git pull $git_flags $pull_flags)
-#     fi
+    #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
+    if [ $remote_git = $local_git ]; then
+        echo "* Same git hash."
+    else
+    cd $cache_path
+        $git_clone_cmd  || (/usr/bin/git pull $git_flags $pull_flags)
+    fi
     rsync -a $cache_path $workdir/
 
 endfunc
