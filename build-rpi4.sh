@@ -22,7 +22,7 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
-#DEBUG=1
+DEBUG=1
 
 
 # Make sure inotify-tools is installed.
