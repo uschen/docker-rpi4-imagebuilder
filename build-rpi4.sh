@@ -86,6 +86,7 @@ startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
     echo "-- ${FUNCNAME[1]} start."
 }
+
 endfunc () {
     mv /tmp/${FUNCNAME[1]}.start /tmp/${FUNCNAME[1]}.done
     echo "++ ${FUNCNAME[1]} done."
@@ -151,8 +152,7 @@ startfunc
     # Symlink existing image
     if [ ! -f $workdir/${base_image} ]; then 
         ln -s /$base_image $workdir/
-    fi
-    
+    fi   
 endfunc
 }
 
@@ -825,8 +825,8 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-get_kernel_src &
-get_rpi_firmware &
+get_kernel_src
+get_rpi_firmware
 get_armstub8-gic &
 get_non-free_firmware &
 get_rpi_userland &
