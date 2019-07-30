@@ -323,9 +323,12 @@ startfunc
     #local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
     #echo $git_update_cmd
     #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
+    echo "remote: $remote_git"
+    echo "local: $local_git"
     if [ $remote_git = $local_git ]; then
         echo "* Same git hash."
     else
+        echo "* Refreshing from git."
         cd $cache_path
         git clone $git_flags $clone_flags || true
         cd $cache_path/$local__path
