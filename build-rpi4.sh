@@ -293,7 +293,7 @@ build_kernel () {
     cd ..
 
     cd /build/source/rpi-linux
-    make -j $(($(nproc) + 1)) LOCALVERSION="-${kernelrev}" \
+    make -j $(($(nproc) + 1)) \
     O=/build/source/kernel-build \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     
@@ -341,9 +341,12 @@ build_kernel () {
     aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/recordmcount.c -o \
     /build/source/kernel-build/tmp/scripts/recordmount
 
-    make -j $(($(nproc) + 1)) LOCALVERSION="-${kernelrev}" \
+    
+    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-${kernelrev} \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=/build/source/kernel-build bindeb-pkg
+    O=/build/source/kernel-build bindeb-pkg"
+    echo $debcmd
+    $debcmd
     echo "* Copying out $KERNEL_VERSION kernel debs."
     cp /build/source/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
