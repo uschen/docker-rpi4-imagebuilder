@@ -310,10 +310,12 @@ startfunc
     local cache_path=$src_cache/$local_path
     mkdir -p $cache_path
     mkdir -p $workdir/$local__path
-    local remote_git=
-    local local_git=
-    remote_git=git_check $git_url
-    local_git=local_check $cache_path
+    
+    git_check "$git_url"
+    local remote_git=$?
+    local_check "$cache_path"
+    local local_git=$?
+    
     #echo "* Downloading current RPI firmware."
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags="-b $branch"
