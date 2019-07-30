@@ -836,6 +836,7 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
+wait
 get_rpi_firmware
 get_kernel_src
 get_armstub8-gic &
