@@ -527,7 +527,7 @@ if [ "\$_IP" ]; then
 fi
 #
 /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
-/usr/bin/apt remove linux-image-raspi2 -y
+/usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y
 /usr/bin/apt update && /usr/bin/apt upgrade -y
 /usr/sbin/update-initramfs -c `uname -r`
 #cd /usr/src
@@ -553,9 +553,9 @@ make_kernel_install_scripts () {
 # Note that this conflicts with using uboot in /boot/firmware/kernel8.img
 #
 # If uboot is working for your hardware, and you have a functional 
-# flash-kernel uboot boot script, you can delete this, and also likely UNcomment 
-# out the lines in the Raspberry Pi 4B entry of /etc/flash-kernel/db 
-# to use u-boot.
+# flash-kernel uboot boot script, you can delete this, and also likely 
+# uncomment out the lines in the Raspberry Pi 4B entry of 
+# /etc/flash-kernel/db to use u-boot.
 #
 COMMAND="\$1"
 KERNEL_VERSION="\$2"
