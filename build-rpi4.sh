@@ -5,7 +5,7 @@
 # mounted as docker volumes to allow files to be exchanged between the host and 
 # the container.
 
-branch=rpi-4.19.y
+kernel_branch=rpi-4.19.y
 kernelgitrepo="https://github.com/raspberrypi/linux.git"
 #branch=bcm2711-initial-v5.2
 #kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
@@ -348,12 +348,12 @@ endfunc
 
 get_kernel_src () {
 startfunc
-    echo "* Downloading $branch kernel source."
+    echo "* Downloading $kernel_branch kernel source."
     cd $workdir
-    git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
+    git clone --quiet --depth=1 -b $kernel_branch $kernelgitrepo rpi-linux
     kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
     #LOCALVERSION="-${kernelrev}"
-    echo "* Current $branch kernel revision is ${kernelrev}."
+    echo "* Current $kernel_branch kernel revision is ${kernelrev}."
 endfunc
 }
 
@@ -361,7 +361,7 @@ build_kernel () {
     waitfor "get_kernel_src"
     waitfor "setup_arm64_chroot"
 startfunc    
-    echo "* Building $branch kernel."
+    echo "* Building $kernel_branch kernel."
     cd $workdir/rpi-linux
     mkdir $workdir/kernel-build
     
