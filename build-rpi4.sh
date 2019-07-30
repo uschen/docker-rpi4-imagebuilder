@@ -292,7 +292,7 @@ get_kernel_src () {
     echo "* Downloading $branch kernel source."
     cd /build/source
     git clone --quiet --depth=1 -b $branch $kernelgitrepo rpi-linux
-    kernelrev=`cd /build/source/rpi-linux ; git rev-parse --short HEAD`
+    kernelrev=`git -C /build/source/rpi-linux rev-parse --short HEAD`
     LOCALVERSION="-${kernelrev}"
     echo "* Current $branch kernel revision is ${kernelrev}."
 endfunc
@@ -374,7 +374,7 @@ build_kernel () {
     /build/source/kernel-build/tmp/scripts/recordmount
 
     
-    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-${kernelrev} \
+    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-`git -C /build/source/rpi-linux rev-parse --short HEAD` \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg"
     echo $debcmd
