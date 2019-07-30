@@ -311,7 +311,7 @@ startfunc
     mkdir -p $cache_path
     mkdir -p $workdir/$local__path
     
-    git_check "$git_url"
+    git_check "$git_repo"
     local remote_git=$?
     local_check "$cache_path"
     local local_git=$?
