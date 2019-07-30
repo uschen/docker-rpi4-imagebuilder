@@ -62,16 +62,9 @@ endfunc () {
     touch /tmp/${FUNCNAME[1]}
     echo "** ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    sleep 1
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    touch /tmp/${FUNCNAME[1]}
-    
+    touch /tmp/*
+    sleep 5
+    touch /tmp/*  
 }
 
 
