@@ -38,5 +38,6 @@ RUN set -ex \
                wget \
                xz-utils \         
     && apt-get build-dep -y linux-image-raspi2 \
+    && apt-get upgrade -y \
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
