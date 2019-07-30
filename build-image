@@ -92,7 +92,7 @@ check_new_image_hash () {
     current_output=`curl --silent ${base_url}/SHA1SUMS`
     current=${current_output%% *}
     local_hash_output=`sha1sum $(abspath "$srcdir")/${base_image}.new`
-    local=${local_line%% *}
+    local=${local_hash_output%% *}
     if [ "$local" == "$current" ]; then
         tee $(abspath "$srcdir")/${base_image}.shasum <<EOF
 $local
@@ -100,6 +100,7 @@ EOF
     echo "* ${base_image} hash verified."
     mv $(abspath "$srcdir")/${base_image}.new $(abspath "$srcdir")/${base_image}
     else
+    echo "* Image hash mismatch."
     hashfail=1
     download_base_image
     fi
@@ -132,7 +133,7 @@ check_for_current_image () {
     current_output=`curl --silent ${base_url}/SHA1SUMS`
     current=${current_output%% *}
     local_hash_output=`sha1sum $(abspath "$srcdir")/${base_image}`
-    local=${local_line%% *}
+    local=${local_hash_output%% *}
     if [ ! "$local" == "$current" ]; then
         echo "Local base image sha1sum is:"
         echo $local
