@@ -318,7 +318,7 @@ startfunc
     local git_flags="--quiet --depth=1"
     local clone_flags="$git_repo $git_extra_flags"
     local pull_flags=
-    local git_clone_cmd="/usr/bin/git clone $git_flags $clone_flags"
+    local git_clone_cmd="/usr/bin/git clone $git_flags $clone_flags ."
     local git_pull_cmd="/usr/bin/git pull $git_flags $pull_flags"
     local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
     echo $git_update_cmd
@@ -327,7 +327,7 @@ startfunc
     if [ $remote_git = $local_git ]; then
         echo "* Same git hash."
     else
-        "/usr/bin/git clone $git_flags $clone_flags" || "/usr/bin/git pull $git_flags $pull_flags"
+        "/usr/bin/git clone $git_flags $clone_flags ." || "/usr/bin/git pull $git_flags $pull_flags"
     fi
     #git clone --quiet --depth=1 $git_url
      #git clone \
@@ -841,7 +841,6 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-wait
 get_rpi_firmware
 get_kernel_src
 get_armstub8-gic &
