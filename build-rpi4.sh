@@ -331,7 +331,7 @@ startfunc
     ls
         #(/usr/bin/git clone $git_flags $clone_flags .) || (/usr/bin/git pull $git_flags $pull_flags)
         #$git_update_cmd
-        $git_clone_cmd || $git_pull_cmd
+        #$git_clone_cmd || $git_pull_cmd
         (/usr/bin/git clone $git_flags $clone_flags .) || $git_pull_cmd
     fi
     #git clone --quiet --depth=1 $git_url
