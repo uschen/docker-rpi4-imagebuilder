@@ -136,6 +136,9 @@ docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
 # Store apt-cache on ccache volume too
 docker_args+="-v ccache:/apt_cache "
 
+# Is an email local variable set?
+[[ -v EMAIL ]] && docker_args+="-e EMAIL=${EMAIL} "
+
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
