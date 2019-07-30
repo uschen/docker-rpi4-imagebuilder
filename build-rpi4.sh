@@ -328,8 +328,9 @@ startfunc
         echo "* Same git hash."
     else
     cd $cache_path
+    ls
     pwd
-        "/usr/bin/git clone $git_flags $clone_flags ." || "/usr/bin/git pull $git_flags $pull_flags"
+        (/usr/bin/git clone $git_flags $clone_flags .) || (/usr/bin/git pull $git_flags $pull_flags)
     fi
     #git clone --quiet --depth=1 $git_url
      #git clone \
