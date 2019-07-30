@@ -51,7 +51,7 @@ mkdir -p /build/source
 inotify_touch_events () {
     
     # Since inotifywait seems to need help in docker. :/
-    while [ ! -f "/tmp/export_log" ]
+    while [ ! -f "/tmp/export_log.done" ]
     do
         touch /tmp/*
         sleep 1
