@@ -50,6 +50,7 @@ shift $(($OPTIND - 1))
 base_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/"
 base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
 base_image_url="${base_url}/${base_image}"
+cache_volume=rpi4-imagebuilder-cache
 
 srcdir=$1
 #docker_args="-it "
@@ -160,10 +161,13 @@ docker_args+="-v $(abspath "$srcdir")/$base_image:/$base_image "
 
 # For ccache
 #docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
-docker_args+="-e CCACHE_DIR=/ccache -v ccache:/ccache "
+docker_args+="-e CCACHE_DIR=/ccache -v $cache_volume:/ccache "
 
-# Store apt-cache on ccache volume too
-docker_args+="-v ccache:/apt_cache "
+# Store apt-cache on cache volume too
+docker_args+="-v $cache_volume:/apt_cache "
+
+# Store remote src cache on ccache volume too
+docker_args+="-v $cache_volume:/src_cache "
 
 # Is an email local variable set?
 [[ -v EMAIL ]] && docker_args+="-e EMAIL=${EMAIL} "
@@ -184,8 +188,8 @@ rm -f $outdir/build_fail.log
 #cmd="docker run $docker_args $image /bin/bash -c $startcmd"
 
 # Create Docker ccache volume if it does not exist as per https://stackoverflow.com/revisions/39652117/2
-echo "Creating docker ccache volume if it does not exist."
-docker volume create --name ccache
+echo "Creating docker cache volume $cache_volume if it does not exist."
+docker volume create --name $cache_volume
 
 #Remove existing build container if it exists.
 #docker rm -v $build_container_name
