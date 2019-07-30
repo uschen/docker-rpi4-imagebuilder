@@ -276,7 +276,8 @@ build_kernel () {
     cd ..
 
     cd /build/source/rpi-linux
-    make -j $(($(nproc) + 1)) O=/build/source/kernel-build \
+    make -j $(($(nproc) + 1)) LOCALVERSION=-${kernelrev} \
+    O=/build/source/kernel-build \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
     
     KERNEL_VERSION=`cat /build/source/kernel-build/include/generated/utsrelease.h | \
@@ -323,7 +324,8 @@ build_kernel () {
     aarch64-linux-gnu-gcc -static /build/source/rpi-linux/scripts/recordmcount.c -o \
     /build/source/kernel-build/tmp/scripts/recordmount
 
-    make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    make -j $(($(nproc) + 1)) LOCALVERSION=-${kernelrev} \
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=/build/source/kernel-build bindeb-pkg
     echo "* Copying out $KERNEL_VERSION kernel debs."
     cp /build/source/*.deb /output/ 
@@ -422,8 +424,7 @@ get_non-free_firmware () {
 
 install_non-free_firmware () {
     echo "* Installing non-free firmware."
-    cd /build/source
-    cp -avf firmware-nonfree/* /mnt/usr/lib/firmware
+    cp -avf /build/source/firmware-nonfree/* /mnt/usr/lib/firmware
 }
 
 
@@ -626,24 +627,33 @@ function abspath {
     echo $(cd "$1" && pwd)
 }
 
-checkfor_base_image 
-get_kernel_src &
-get_rpi_firmware &
-get_armstub8-gic &
-get_non-free_firmware &
-get_rpi_userland &
+no-image-depend-installs () {
+    get_kernel_src
+    get_rpi_firmware
+    get_armstub8-gic
+    get_non-free_firmware
+    get_rpi_userland
+
+}
+
+image-depend-installs () {
+    install_rpi_firmware
+    install_armstub8-gic
+    install_non-free_firmware 
+    configure_rpi_config_txt
+    install_rpi_userland
+    modify_wifi_firmware
+    install_first_start_cleanup_script
+    make_kernel_install_scripts
+}
+
+checkfor_base_image
+no-image-depend-installs &
 extract_and_mount_image
 setup_arm64_chroot
-install_rpi_firmware
+image-depend-installs &
 # KERNEL_VERSION is set here:
 build_kernel
-install_armstub8-gic
-install_non-free_firmware
-configure_rpi_config_txt &
-install_rpi_userland
-modify_wifi_firmware &
-install_first_start_cleanup_script &
-make_kernel_install_scripts &
 install_kernel
 #install_kernel_headers 
 cleanup_image_remove_chroot
