@@ -67,13 +67,13 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    echo "${FUNCNAME[1]} done waiting for ${1}."
+    echo "++ ${FUNCNAME[1]} done waiting for ${1}."
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 endfunc () {
     touch /tmp/${FUNCNAME[1]}.done
-    echo "** ${FUNCNAME[1]} done."
+    echo "++ ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
 }
@@ -173,11 +173,11 @@ setup_arm64_chroot () {
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     update 2>/dev/null | grep packages | cut -d '.' -f 1 
     echo "* Apt update done."
-    echo "Downloading software for apt upgrade."
+    echo "* Downloading software for apt upgrade."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/apt_cache \
     upgrade -d -qq 2>/dev/null
-    echo "Apt upgrade download done."
+    echo "* Apt upgrade download done."
     #echo "* Starting chroot apt update."
     #chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
     #| grep packages | cut -d '.' -f 1"
@@ -602,7 +602,7 @@ make_kernel_install_scripts () {
     # on the boot partition.
     echo "* Making kernel install scripts. &"
     mkdir -p /mnt/etc/kernel/postinst.d
-    echo "Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
+    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
 #!/bin/sh -eu
 # Note that this conflicts with using uboot in /boot/firmware/kernel8.img
@@ -794,4 +794,4 @@ export_compressed_image
 export_log
 # This stops the tail process.
 rm $TMPLOG
-echo "* Done."
+echo "**** Done."
