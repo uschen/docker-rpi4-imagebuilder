@@ -49,9 +49,10 @@ mkdir -p /build/source
 #cp -a /source-ro/ /build/source
 
 inotify_touch_events () {
+    
     # Since inotifywait seems to need help in docker. :/
-    while [ ! -e "/tmp/export_log" ]
-    then
+    while [ ! -f "/tmp/export_log" ]
+    do
         touch /tmp/*
         sleep 1
     done
@@ -63,14 +64,14 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /tmp/wait.${FUNCNAME[1]}_for_${1}
-    while read waitforit; do if [ "$waitforit" = $1 ]; then break; \
+    while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open --format '%f' --quiet /tmp --monitor)
     rm /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 endfunc () {
-    touch /tmp/${FUNCNAME[1]}
+    touch /tmp/${FUNCNAME[1]}.done
     echo "** ${FUNCNAME[1]} done."
     # inotifywait is having issues in docker.
     touch /tmp/*
