@@ -108,7 +108,7 @@ endfunc () {
 git_check () {
     local git_base="$1"
     local git_branch="$2"
-    [ ! -z "$2" ] !! git_branch="master"
+    [ ! -z "$2" ] || git_branch="master"
     local git_output=`git ls-remote ${git_base} refs/heads/${git_branch}`
     local git_hash
     local discard 
