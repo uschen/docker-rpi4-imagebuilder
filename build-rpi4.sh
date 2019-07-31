@@ -110,10 +110,12 @@ git_check () {
 }
 
 local_check () {
+startfunc
     local git_path="$1"
     `git -C $git_path rev-parse HEAD`
     #local git_output=`git -C $git_path rev-parse HEAD`
     #echo $git_output
+endfunc
 }
 
 
@@ -312,7 +314,7 @@ startfunc
     local local_path=rpi-firmware
     local cache_path=$src_cache/$local_path
     mkdir -p $cache_path
-    mkdir -p $workdir/$local__path
+    mkdir -p $workdir/$local_path
     
     #git_check "$git_repo"
     local remote_git=$(git_check "$git_repo")
@@ -337,8 +339,9 @@ startfunc
     else
         echo "* Refreshing from git."
         cd $cache_path
-        git clone $git_flags $clone_flags || true
-        cd $cache_path/$local__path
+        [ ! -d $cache_path/$local_path/.git ] && rm -rf $cache_path/$local_path
+        git clone $git_flags $clone_flags $local_path || true
+        cd $cache_path/$local_path
         git pull $git_flags $pull_flags
     fi
     rsync -a $cache_path $workdir/
