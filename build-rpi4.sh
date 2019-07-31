@@ -333,9 +333,8 @@ startfunc
     #echo $remote_git > /tmp/remote.git
     echo "${FUNCNAME[0]} local hash: $local_git"
     #echo $local_git > /tmp/local.git
-    if [ "$remote_git" = "$local_git" ]; then
-        #echo ""
-    else
+    if [ ! "$remote_git" = "$local_git" ]; then
+
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
@@ -393,9 +392,8 @@ startfunc
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
-    if [ "$remote_git" = "$local_git" ]; then
-        #echo ""
-    else
+    if [ ! "$remote_git" = "$local_git" ]; then
+
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
@@ -607,9 +605,8 @@ startfunc
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
-    if [ "$remote_git" = "$local_git" ]; then
-        #echo ""
-    else
+    if [ ! "$remote_git" = "$local_git" ]; then
+
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
@@ -666,9 +663,8 @@ startfunc
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
-    if [ "$remote_git" = "$local_git" ]; then
-        #echo ""
-    else
+    if [ ! "$remote_git" = "$local_git" ]; then
+
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
@@ -736,9 +732,8 @@ startfunc
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
-    if [ "$remote_git" = "$local_git" ]; then
-        #echo ""
-    else
+    if [ ! "$remote_git" = "$local_git" ]; then
+
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
