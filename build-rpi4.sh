@@ -337,13 +337,15 @@ startfunc
     if [ "$remote_git" == "$local_git" ]; then
         echo "* Same git hash."
     else
-        echo "* Refreshing from git."
+        echo "* Refreshing cache from git."
         cd $cache_path
-        [ ! -d $cache_path/$local_path/.git ] && rm -rf $cache_path/$local_path
+        [ ! -d "$cache_path/$local_path/.git" ] && rm -rf $cache_path/$local_path
         git clone $git_flags $clone_flags $local_path || true
         cd $cache_path/$local_path
         git pull $git_flags $pull_flags
+        ls $cache_path/$local_path
     fi
+    echo "* Copying from cache"
     rsync -a $cache_path $workdir/
 
 endfunc
