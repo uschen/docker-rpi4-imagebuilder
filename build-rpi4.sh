@@ -729,7 +729,7 @@ Boot-Script-Path: /boot/firmware/boot.scr
 U-Boot-Script-Name: bootscr.rpi
 Required-Packages: u-boot-tools
 # XXX we should copy the entire overlay dtbs dir too
-# Note as of July 31,2019 the Ubuntu u-boot-rpi does 
+# Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
 # not have the required u-boot for the RPI4 yet.
 
 
