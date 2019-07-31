@@ -380,7 +380,7 @@ startfunc
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=$workdir/kernel-build \
-    bcm2711_defconfig &> /tmp/${FUNCNAME[0]}.compile.log
+    bcm2711_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     
     cd $workdir/kernel-build
     # Use kernel config modification script from sakaki- found at 
@@ -392,7 +392,7 @@ startfunc
     yes "" | make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=.$workdir/kernel-build/ \
-    olddefconfig &> /tmp/${FUNCNAME[0]}.compile.log
+    olddefconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     
     cd ..
 
@@ -400,7 +400,7 @@ startfunc
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    -j $(($(nproc) + 1)) O=$workdir/kernel-build &> /tmp/${FUNCNAME[0]}.compile.log
+    -j $(($(nproc) + 1)) O=$workdir/kernel-build &>> /tmp/${FUNCNAME[0]}.compile.log
     
     
     KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
@@ -426,7 +426,7 @@ startfunc
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
     LOCALVERSION=-${kernelrev} \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build \
-    modules_prepare" &> /tmp/${FUNCNAME[0]}.compile.log
+    modules_prepare" &>> /tmp/${FUNCNAME[0]}.compile.log
 
     mkdir -p $workdir/kernel-build/tmp/scripts/mod
     mkdir -p $workdir/kernel-build/tmp/scripts/basic
@@ -449,10 +449,10 @@ startfunc
     # so that qemu-static can just deal with them without library issues during the 
     # packaging process. This two lines may not be needed.
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/basic/fixdep.c -o \
-    $workdir/kernel-build/tmp/scripts/basic/fixdep &> /tmp/${FUNCNAME[0]}.compile.log
+    $workdir/kernel-build/tmp/scripts/basic/fixdep &>> /tmp/${FUNCNAME[0]}.compile.log
     
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/recordmcount.c -o \
-    $workdir/kernel-build/tmp/scripts/recordmount &> /tmp/${FUNCNAME[0]}.compile.log
+    $workdir/kernel-build/tmp/scripts/recordmount &>> /tmp/${FUNCNAME[0]}.compile.log
 
     
     debcmd="make \
@@ -462,7 +462,7 @@ startfunc
     bindeb-pkg"
     
     echo $debcmd
-    $debcmd > /tmp/${FUNCNAME[0]}.compile.log
+    $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
     echo "* Copying out $KERNEL_VERSION kernel debs."
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
@@ -476,7 +476,7 @@ startfunc
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
     -j $(($(nproc) + 1))  O=$workdir/kernel-build \
-    modules_install &> /tmp/${FUNCNAME[0]}.compile.log
+    modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
     
 endfunc
 }
@@ -536,29 +536,12 @@ startfunc
 endfunc
 }
 
-install_kernel_headers () {
-     echo "* Copying ${KERNEL_VERSION} kernel headers to image."
-    # This doesn't actually work. Much better to just install the generated
-    # kernel headers package, so we skip this for now.
-    # mkdir -p /mnt/usr/src/linux-headers-${KERNEL_VERSION}
-    #
-    # cp $workdir/kernel-build/.config $workdir/rpi-linux/
-    # chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; \
-    # make -j $(($(nproc) + 1)) O=/usr/src/linux-headers-${KERNEL_VERSION} oldconfig ;\
-    # rm .config"
-    # 
-    # 
-    # rm /mnt/usr/src/linux-headers-${KERNEL_VERSION}/source
-    # cp $workdir/kernel-build/Module.symvers \
-    # /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
-}
-
 install_armstub8-gic () {
     git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
 startfunc    
     echo "* Installing RPI4 armstub8-gic source."
     cd $workdir/rpi-tools/armstubs
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make armstub8-gic.bin
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make armstub8-gic.bin &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
     cd ../..
     cp rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
@@ -601,7 +584,7 @@ startfunc
     cd $workdir
     mkdir -p /mnt/opt/vc
     cd rpi-userland/
-    CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt
+    CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt &>> /tmp/${FUNCNAME[0]}.compile.log
     echo '/opt/vc/lib' > /mnt/etc/ld.so.conf.d/vc.conf 
     mkdir -p /mnt/etc/environment.d
     tee /mnt/etc/environment.d/10-vcgencmd.conf <<EOF
@@ -639,8 +622,8 @@ andrei_gherzan_uboot_fork () {
 startfunc
     git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/v2019.07-rpi4-wip"   
     cd $workdir/u-boot
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &> /tmp/${FUNCNAME[0]}.compile.log
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &> /tmp/${FUNCNAME[0]}.compile.log
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
     echo "* Installing Andrei Gherzan's RPI uboot fork."
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
