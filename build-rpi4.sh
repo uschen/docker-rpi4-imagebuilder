@@ -22,8 +22,8 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
-# Currently broken if this is unset. I need to fix this. :p
-DEBUG=1
+
+#DEBUG=1
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Set Time Stamp
