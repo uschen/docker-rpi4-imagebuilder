@@ -409,9 +409,10 @@ startfunc
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build &>> /tmp/${FUNCNAME[0]}.compile.log
     
-    
-    KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
-    sed -e 's/.*"\(.*\)".*/\1/'`
+    # Not sure why setting this isn't working globally. :/
+    export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    ###
+    echo "* Kernel version is ${KERNEL_VERSION} *"
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, due to module install files being installed into the target system in
@@ -492,7 +493,7 @@ install_kernel () {
     waitfor "build_kernel"
     waitfor "extract_and_mount_image"
 startfunc    
-    echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
+    echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
     df -h
     cd $workdir
     # Ubuntu defaults to using uBoot, which now works for RPI4, as of
@@ -506,31 +507,31 @@ startfunc
     # kernel on arm64, since linux on arm64 does not support self-decompression of 
     # the kernel, so we copy this for use with uboot.
     cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
-    /mnt/boot/vmlinuz-${KERNEL_VERSION}
+    /mnt/boot/vmlinuz-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     
     cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/firmware/vmlinuz
     
-    cp $workdir/kernel-build/.config /mnt/boot/config-${KERNEL_VERSION}
+    cp $workdir/kernel-build/.config /mnt/boot/config-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
 endfunc
 }
 
 install_kernel_modules () {
     waitfor "install_kernel"
 startfunc    
-    echo "* Copying compiled ${KERNEL_VERSION} modules to image."
+    echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` modules to image."
     #rm  -rf $workdir/kernel-install/lib/modules/build
     cp -avr $workdir/kernel-install/lib/modules/* \
     /mnt/usr/lib/modules/ &>> /tmp/${FUNCNAME[0]}.install.log
     
-    rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
+    rm  -rf /mnt/usr/lib/modules/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/build 
 endfunc
 }
 
 install_kernel_dtbs () {
     waitfor "install_kernel"
 startfunc    
-    echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
+    echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` dtbs & dtbos to image."
     cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/ 
     cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
@@ -604,8 +605,12 @@ EOF
 export PATH="$PATH:/opt/vc/bin:/opt/vc/sbin"
 EOF
        chmod +x /mnt/etc/profile.d/98-rpi.sh
-    
-    # cd ..
+       
+    tee /mnt/etc/ld.so.conf.d/00-vmcs.conf <<EOF
+/opt/vc/lib
+EOF
+
+
 endfunc
 }
 
@@ -638,6 +643,8 @@ startfunc
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/kernel8.bin
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/kernel8.img
+    mkdir -p /mnt/usr/lib/u-boot/rpi_4/
+    cp $workdir/u-boot/u-boot.bin /mnt/usr/lib/u-boot/rpi_4/
     chroot /mnt /bin/bash -c "mkimage -A arm64 -O linux -T script \
     -d /etc/flash-kernel/bootscript/bootscr.rpi \
     /boot/firmware/boot.scr"
@@ -791,27 +798,27 @@ startfunc
     do
      echo "* Compressing ${new_image} with $i and exporting"
      echo "  out of container to:"
-     echo "${new_image}-${KERNEL_VERSION}-${kernelrev}_${now}.img.$i"
+     echo "${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
      compress_flags=""
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
      cpcmd="cp $workdir/${new_image}.img.$i \
-     /output/${new_image}-${KERNEL_VERSION}-${kernelrev}_${now}.img.$i"
+     /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
      echo $compresscmd
      $compresscmd
      echo $cpcmd
      $cpcmd
-     chown $USER:$GROUP /output/${new_image}-${KERNEL_VERSION}-${kernelrev}_${now}.img.$i
-     echo "/output/${new_image}-${KERNEL_VERSION}-${kernelrev}_${now}.img.$i created."
+     chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
+     echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created."
     done
 endfunc
 }
 
 export_log () {
 startfunc
-    echo "* Build log at: build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log"
-    cat $TMPLOG > /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
-    chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
+    echo "* Build log at: build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log"
+    cat $TMPLOG > /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
+    chown $USER:$GROUP /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
 endfunc
 }
 
