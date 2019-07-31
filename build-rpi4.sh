@@ -343,7 +343,9 @@ startfunc
     #echo $git_update_cmd
     #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
     echo "Remote hash: $remote_git"
+    echo $remote_git > /tmp/remote.git
     echo "Local hash: $local_git"
+    echo $local_git > /tmp/local.git
     if [ "$remote_git" = "$local_git" ]; then
         echo "* Same git hash."
     else
