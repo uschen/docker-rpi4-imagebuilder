@@ -337,7 +337,7 @@ startfunc
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
         && mkdir -p $src_cache/$local_path
-        git clone $git_flags $clone_flags $local_path || true
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
         #ls $cache_path/$local_path
@@ -400,7 +400,7 @@ startfunc
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
         && mkdir -p $src_cache/$local_path
-        git clone $git_flags $clone_flags $local_path || true
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
         #ls $cache_path/$local_path
