@@ -172,6 +172,8 @@ docker_args+="-e apt_cache=/cache/apt_cache "
 # Is an email local variable set?
 [[ -v EMAIL ]] && docker_args+="-e EMAIL=${EMAIL} "
 
+# Is a XDELTA local variable set?
+[[ -v XDELTA ]] && docker_args+="-e XDELTA=${XDELTA} "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
