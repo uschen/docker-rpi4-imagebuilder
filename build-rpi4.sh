@@ -106,6 +106,7 @@ endfunc () {
 
 
 git_check () {
+startfunc
     local git_base="$1"
     [ -z "$2" ] && local git_branch="master" || local git_branch="$2"
     local git_output=`git ls-remote ${git_base} refs/heads/${git_branch}`
@@ -113,6 +114,7 @@ git_check () {
     local discard 
     read git_hash discard< <(echo "$git_output")
     echo $git_hash
+endfunc
 }
 
 local_check () {
