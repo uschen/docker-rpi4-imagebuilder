@@ -335,7 +335,8 @@ startfunc
     else
         echo "* Refreshing cache from git."
         cd $src_cache
-        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
         git clone $git_flags $clone_flags $local_path || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
@@ -377,7 +378,7 @@ startfunc
     local git_branch="$kernel_branch"
     local git_repo="$kernelgitrepo"
     local local_path="rpi-linux"
-    mkdir -p $src_cache/$local_path
+#    mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo")
@@ -397,7 +398,8 @@ startfunc
     else
         echo "* Refreshing cache from git."
         cd $src_cache
-        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
         git clone $git_flags $clone_flags $local_path || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
