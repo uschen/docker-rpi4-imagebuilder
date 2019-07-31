@@ -23,6 +23,7 @@ image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
 DEBUG=1
+export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 
 # Make sure inotify-tools is installed.
