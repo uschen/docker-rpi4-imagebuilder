@@ -156,14 +156,18 @@ git_get () {
     echo "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
-
         echo "* ${FUNCNAME[1]} refreshing cache files from git."
+        
+        
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
         && mkdir -p $src_cache/$local_path
+        
         git clone $git_flags $clone_flags $local_path 2>/dev/null || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
+        echo "* ${FUNCNAME[1]} Last Commit:"
+        git log -1
         #ls $cache_path/$local_path
     fi
     echo "* ${FUNCNAME[1]} copying files from cache."
@@ -373,9 +377,10 @@ startfunc
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
+    make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    make O=$workdir/kernel-build \
+    O=$workdir/kernel-build \
     bcm2711_defconfig
     
     cd $workdir/kernel-build
@@ -385,17 +390,18 @@ startfunc
     # login at boot fails on the ubuntu server image.
     # This also enables the BPF syscall for systemd-journald firewalling
     /source-ro/conform_config.sh
-    yes "" | ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    yes "" | make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    make O=.$workdir/kernel-build/ \
+    O=.$workdir/kernel-build/ \
     olddefconfig
     
     cd ..
 
     cd $workdir/rpi-linux
+    make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    make -j $(($(nproc) + 1)) O=$workdir/kernel-build
+    -j $(($(nproc) + 1)) O=$workdir/kernel-build
     
     
     KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
@@ -412,10 +418,10 @@ startfunc
     do
      rm $workdir/kernel-build/$i || true
     done
-    chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; \
+    chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; make \
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
     LOCALVERSION=-${kernelrev} \
-    make -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+    -j $(($(nproc) + 1)) O=$workdir/kernel-build \
     modules_prepare"
 
     mkdir -p $workdir/kernel-build/tmp/scripts/mod
@@ -445,9 +451,10 @@ startfunc
     $workdir/kernel-build/tmp/scripts/recordmount
 
     
-    debcmd="ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    debcmd="make \
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    make -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+    -j $(($(nproc) + 1)) O=$workdir/kernel-build \
     bindeb-pkg"
     
     echo $debcmd
@@ -461,10 +468,10 @@ startfunc
     # install anyways so that we can manually copy the required files over for
     # first boot.
     mkdir $workdir/kernel-install
-    sudo ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
-    make -j $(($(nproc) + 1))  O=$workdir/kernel-build \
+    -j $(($(nproc) + 1))  O=$workdir/kernel-build \
     modules_install
     
 endfunc
