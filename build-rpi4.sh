@@ -315,7 +315,7 @@ startfunc
     local git_branch=
     local git_repo="https://github.com/Hexxeh/rpi-firmware"
     local local_path="rpi-firmware"
-    mkdir -p $cache_path
+    mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo")
@@ -377,7 +377,7 @@ startfunc
     local git_branch="$kernel_branch"
     local git_repo="$kernelgitrepo"
     local local_path="rpi-linux"
-    mkdir -p $cache_path
+    mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo")
