@@ -337,7 +337,7 @@ startfunc
 endfunc
 }
 
-get_rpi_firmware () {
+get_rpi_firmware_new () {
 startfunc
 
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
@@ -345,42 +345,42 @@ startfunc
 endfunc
 }
 
-# get_rpi_firmware () {
-# startfunc
-#     local git_branch=
-#     local git_repo="https://github.com/Hexxeh/rpi-firmware"
-#     local local_path="rpi-firmware"
-#     mkdir -p $src_cache/$local_path
-#     mkdir -p $workdir/$local_path
-#     
-#     local remote_git=$(git_check "$git_repo" "$git_branch")
-#     local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
-#     
-#     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
-#     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
-#     local git_flags=" --quiet --depth=1 "
-#     local clone_flags=" $git_repo $git_extra_flags "
-#     local pull_flags=
-#     echo "${FUNCNAME[0]} remote hash: $remote_git"
-#     #echo $remote_git > /tmp/remote.git
-#     echo "${FUNCNAME[0]}  local hash: $local_git"
-#     #echo $local_git > /tmp/local.git
-#     if [ ! "$remote_git" = "$local_git" ]; then
-# 
-#         echo "* ${FUNCNAME[0]} refreshing cache from git."
-#         cd $src_cache
-#         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
-#         && mkdir -p $src_cache/$local_path
-#         git clone $git_flags $clone_flags $local_path 2>/dev/null || true
-#         cd $src_cache/$local_path
-#         git pull $git_flags $pull_flags || true
-#         #ls $cache_path/$local_path
-#     fi
-#     echo "* ${FUNCNAME[0]} copying from cache."
-#     echo ""
-#     rsync -a $src_cache/$local_path $workdir/
-# endfunc
-# }
+get_rpi_firmware () {
+startfunc
+    local git_branch=
+    local git_repo="https://github.com/Hexxeh/rpi-firmware"
+    local local_path="rpi-firmware"
+    mkdir -p $src_cache/$local_path
+    mkdir -p $workdir/$local_path
+    
+    local remote_git=$(git_check "$git_repo" "$git_branch")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+    
+    #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_repo $git_extra_flags "
+    local pull_flags=
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
+    #echo $remote_git > /tmp/remote.git
+    echo "${FUNCNAME[0]}  local hash: $local_git"
+    #echo $local_git > /tmp/local.git
+    if [ ! "$remote_git" = "$local_git" ]; then
+
+        echo "* ${FUNCNAME[0]} refreshing cache from git."
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        cd $src_cache/$local_path
+        git pull $git_flags $pull_flags || true
+        #ls $cache_path/$local_path
+    fi
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
+    rsync -a $src_cache/$local_path $workdir/
+endfunc
+}
 
 install_rpi_firmware () {
     waitfor "get_rpi_firmware"
