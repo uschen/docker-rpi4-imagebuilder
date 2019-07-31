@@ -165,9 +165,9 @@ git_get () {
         
         git clone $git_flags $clone_flags $local_path 2>/dev/null || true
         cd $src_cache/$local_path
-        git pull $git_flags $pull_flags || true
+        git pull $git_flags $pull_flags 2>/dev/null || true
         echo "* ${FUNCNAME[1]} Last Commit:"
-        git log -1
+        git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
     echo "* ${FUNCNAME[1]} copying files from cache."
@@ -366,7 +366,6 @@ endfunc
 
 build_kernel () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
-    waitfor "setup_arm64_chroot"
 startfunc    
     echo "* Building $kernel_branch kernel."
     kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
@@ -418,6 +417,11 @@ startfunc
     do
      rm $workdir/kernel-build/$i || true
     done
+    
+    # This is all we can do before the image is mounted.
+    waitfor "extract_and_mount_image"   
+    waitfor "setup_arm64_chroot"
+    
     chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; make \
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
     LOCALVERSION=-${kernelrev} \
@@ -631,14 +635,14 @@ startfunc
 endfunc
 }
 
-install_andrei_gherzan_uboot_fork () {
+andrei_gherzan_uboot_fork () {
+startfunc
     git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/v2019.07-rpi4-wip"   
-startfunc    
-    echo "* Installing Andrei Gherzan's RPI uboot fork."
     cd $workdir/u-boot
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &> /dev/null
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &> /dev/null
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &> /tmp/${FUNCNAME[0]}.compile.log
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
+    echo "* Installing Andrei Gherzan's RPI uboot fork."
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
 endfunc
 }
@@ -868,7 +872,7 @@ modify_wifi_firmware &
 install_first_start_cleanup_script &
 make_kernel_install_scripts &
 # KERNEL_VERSION is set here:
-build_kernel
+build_kernel &
 install_kernel
 install_kernel_modules &
 install_kernel_dtbs &
