@@ -844,6 +844,8 @@ install_armstub8-gic &
 install_non-free_firmware & 
 install_rpi_userland &
 install_andrei_gherzan_uboot_fork &
+# KERNEL_VERSION is set here:
+build_kernel &
 #get_kernel_src
 #get_armstub8-gic &
 #get_non-free_firmware &
@@ -854,8 +856,6 @@ configure_rpi_config_txt &
 modify_wifi_firmware &
 install_first_start_cleanup_script &
 make_kernel_install_scripts &
-# KERNEL_VERSION is set here:
-build_kernel &
 install_kernel
 install_kernel_modules &
 install_kernel_dtbs &
