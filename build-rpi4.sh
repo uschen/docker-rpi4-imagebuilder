@@ -651,7 +651,7 @@ startfunc
     cp $workdir/u-boot/u-boot.bin /mnt/usr/lib/u-boot/rpi_4/
     chroot /mnt /bin/bash -c "mkimage -A arm64 -O linux -T script \
     -d /etc/flash-kernel/bootscript/bootscr.rpi \
-    /boot/firmware/boot.scr"
+    /boot/firmware/boot.scr" &>> /tmp/${FUNCNAME[0]}.compile.log
 
 endfunc
 }
