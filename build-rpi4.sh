@@ -206,7 +206,7 @@ startfunc
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
     mkdir /mnt/ccache || ls -aFl /mnt
-    mount --bind /ccache /mnt/ccache
+    mount --bind $CCACHE_DIR /mnt/ccache
     mount --bind /run /mnt/run
     mkdir -p /run/systemd/resolve
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
@@ -338,8 +338,8 @@ startfunc
     #local git_update_cmd="$git_clone_cmd || $git_pull_cmd"
     #echo $git_update_cmd
     #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
-    echo "remote: $remote_git"
-    echo "local: $local_git"
+    echo "Remote hash: $remote_git"
+    echo "Local hash: $local_git"
     if [ "$remote_git" == "$local_git" ]; then
         echo "* Same git hash."
     else
@@ -349,11 +349,10 @@ startfunc
         git clone $git_flags $clone_flags $local_path || true
         cd $cache_path/$local_path
         git pull $git_flags $pull_flags
-        ls $cache_path/$local_path
+        #ls $cache_path/$local_path
     fi
     echo "* Copying from cache"
     rsync -a $cache_path $workdir/
-
 endfunc
 }
 
