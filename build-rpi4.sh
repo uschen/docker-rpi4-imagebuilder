@@ -322,7 +322,7 @@ startfunc
     mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
-    local remote_git=$(git_check "$git_repo")
+    local remote_git=$(git_check "$git_repo" "$git_branch")
     local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
@@ -385,7 +385,7 @@ startfunc
 #    mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
-    local remote_git=$(git_check "$git_repo")
+    local remote_git=$(git_check "$git_repo" "$git_branch")
     local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
