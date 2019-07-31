@@ -149,7 +149,7 @@ git_get () {
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
 
-        echo "* ${FUNCNAME[1]} refreshing cache from git."
+        echo "* ${FUNCNAME[1]} refreshing cache files from git."
         cd $src_cache
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
         && mkdir -p $src_cache/$local_path
@@ -158,7 +158,7 @@ git_get () {
         git pull $git_flags $pull_flags || true
         #ls $cache_path/$local_path
     fi
-    echo "* ${FUNCNAME[1]} copying from cache."
+    echo "* ${FUNCNAME[1]} copying files from cache."
     echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
@@ -334,17 +334,17 @@ startfunc
 endfunc
 }
 
-get_rpi_firmware () {
-startfunc
-
-    git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
-
-endfunc
-}
+# get_rpi_firmware () {
+# startfunc
+# 
+#     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
+# 
+# endfunc
+# }
 
 
 install_rpi_firmware () {
-    waitfor "get_rpi_firmware"
+    git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
     waitfor "extract_and_mount_image"
 startfunc    
     cd $workdir
@@ -848,14 +848,15 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-get_rpi_firmware
+#get_rpi_firmware
+install_rpi_firmware &
 get_kernel_src
 get_armstub8-gic &
 get_non-free_firmware &
 get_rpi_userland &
 extract_and_mount_image
 setup_arm64_chroot
-install_rpi_firmware &
+
 install_armstub8-gic &
 install_non-free_firmware & 
 configure_rpi_config_txt &
