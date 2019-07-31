@@ -151,12 +151,12 @@ git_get () {
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags="origin/$git_branch"
-    echo "${FUNCNAME[1]} remote hash: $remote_git"
+    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
-    echo "${FUNCNAME[1]}  local hash: $local_git"
+    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
-        echo "* ${FUNCNAME[1]} refreshing cache files from git."
+        printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} refreshing cache files from git. *"
         
         
         cd $src_cache
@@ -167,11 +167,11 @@ git_get () {
         cd $src_cache/$local_path
         git fetch --all $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
         git reset --hard $pull_flags $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
-        echo "* ${FUNCNAME[1]} Last Commit:"
+        printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} Last Commit: *"
         git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    echo "* ${FUNCNAME[1]} copying files from cache."
+    printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} copying files from cache. *"
     echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
