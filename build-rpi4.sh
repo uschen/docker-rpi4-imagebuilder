@@ -102,15 +102,16 @@ git_check () {
     local git_base="$1"
     [ -z "$2" ] && local git_branch="master" || local git_branch="$2"
     local git_output=`git ls-remote ${git_base} refs/heads/${git_branch}`
-    local git_hash=${git_output%% *}
-    return $git_hash
+    local git_hash
+    local discard 
+    read git_hash discard< <(echo "$git_output")
+    echo $git_hash
 }
 
 local_check () {
     local git_path="$1"
     local git_output=`git -C $git_path rev-parse`
-    local git_hash=${git_output%% *}
-    return $git_hash
+    echo ${git_output%% *}
 }
 
 
@@ -311,10 +312,10 @@ startfunc
     mkdir -p $cache_path
     mkdir -p $workdir/$local__path
     
-    git_check "$git_repo"
-    local remote_git=$?
-    local_check "$cache_path"
-    local local_git=$?
+    #git_check "$git_repo"
+    local remote_git=$(git_check "$git_repo")
+    #local_check "$cache_path"
+    local local_git=$(local_check "$cache_path")
     
     #echo "* Downloading current RPI firmware."
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
