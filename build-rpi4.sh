@@ -597,9 +597,12 @@ ROOTPATH="/opt/vc/bin:/opt/vc/sbin"
 LDPATH="/opt/vc/lib"
 EOF
     chmod +x /mnt/etc/environment.d/10-vcgencmd.conf
-# tee /mnt/etc/profile.d/rpi.sh <<EOF
-# PATH="/opt/vc/bin:/opt/vc/sbin"
-    
+    tee /mnt/etc/profile.d/98-rpi.sh <<EOF
+# /etc/profile.d/98-rpi.sh
+# Adds Raspberry Pi Foundation userland binaries to path
+export PATH="$PATH:/opt/vc/bin:/opt/vc/sbin"
+EOF
+       chmod +x /mnt/etc/profile.d/98-rpi.sh
     
     # cd ..
 endfunc
@@ -703,9 +706,11 @@ DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
 Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
 Boot-Kernel-Path: /boot/firmware/vmlinuz
 Boot-Initrd-Path: /boot/firmware/initrd.img
-#Boot-Script-Path: /boot/firmware/boot.scrTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
-#U-Boot-Script-Name: bootscr.rpi3
+#Boot-Script-Path: /boot/firmware/boot.scr
+#U-Boot-Script-Name: bootscr.rpi
 #Required-Packages: u-boot-tools
+# XXX we should copy the entire overlay dtbs dir too
+
 EOF
 endfunc
 }
