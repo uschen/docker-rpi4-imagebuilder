@@ -536,7 +536,7 @@ startfunc
 endfunc
 }
 
-install_armstub8-gic () {
+armstub8-gic () {
     git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
 startfunc    
     echo "* Installing RPI4 armstub8-gic source."
@@ -548,7 +548,7 @@ startfunc
 endfunc
 }
 
-install_non-free_firmware () {
+non-free_firmware () {
     git_get "https://github.com/RPi-Distro/firmware-nonfree" "firmware-nonfree"
     waitfor "extract_and_mount_image"
 startfunc    
@@ -576,7 +576,7 @@ startfunc
 endfunc
 }
 
-install_rpi_userland () {
+rpi_userland () {
     git_get "https://github.com/raspberrypi/userland" "rpi-userland"
     waitfor "extract_and_mount_image"
 startfunc
@@ -839,11 +839,11 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-install_rpi_firmware &
-install_armstub8-gic &
-install_non-free_firmware & 
-install_rpi_userland &
-install_andrei_gherzan_uboot_fork &
+rpi_firmware &
+armstub8-gic &
+non-free_firmware & 
+rpi_userland &
+andrei_gherzan_uboot_fork &
 # KERNEL_VERSION is set here:
 build_kernel &
 #get_kernel_src
