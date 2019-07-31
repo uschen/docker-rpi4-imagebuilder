@@ -373,8 +373,10 @@ startfunc
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
-    make O=$workdir/kernel-build ARCH=arm64 \
-    CROSS_COMPILE=aarch64-linux-gnu- bcm2711_defconfig
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    make O=$workdir/kernel-build \
+    bcm2711_defconfig
     
     cd $workdir/kernel-build
     # Use kernel config modification script from sakaki- found at 
@@ -383,14 +385,18 @@ startfunc
     # login at boot fails on the ubuntu server image.
     # This also enables the BPF syscall for systemd-journald firewalling
     /source-ro/conform_config.sh
-    yes "" | make O=.$workdir/kernel-build/ \
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig
+    yes "" | ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    make O=.$workdir/kernel-build/ \
+    olddefconfig
+    
     cd ..
 
     cd $workdir/rpi-linux
-    make -j $(($(nproc) + 1)) \
-    O=$workdir/kernel-build \
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    make -j $(($(nproc) + 1)) O=$workdir/kernel-build
+    
     
     KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
     sed -e 's/.*"\(.*\)".*/\1/'`
@@ -407,8 +413,10 @@ startfunc
      rm $workdir/kernel-build/$i || true
     done
     chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; \
-    CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH make -j $(($(nproc) + 1)) \
-    O=$workdir/kernel-build modules_prepare"
+    CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
+    LOCALVERSION=-${kernelrev} \
+    make -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+    modules_prepare"
 
     mkdir -p $workdir/kernel-build/tmp/scripts/mod
     mkdir -p $workdir/kernel-build/tmp/scripts/basic
@@ -437,9 +445,11 @@ startfunc
     $workdir/kernel-build/tmp/scripts/recordmount
 
     
-    debcmd="make -j $(($(nproc) + 1)) LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=$workdir/kernel-build bindeb-pkg"
+    debcmd="ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    make -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+    bindeb-pkg"
+    
     echo $debcmd
     $debcmd
     echo "* Copying out $KERNEL_VERSION kernel debs."
@@ -451,10 +461,12 @@ startfunc
     # install anyways so that we can manually copy the required files over for
     # first boot.
     mkdir $workdir/kernel-install
-    sudo make -j $(($(nproc) + 1)) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    O=$workdir/kernel-build DEPMOD=echo \
-    INSTALL_MOD_PATH=$workdir/kernel-install \
+    sudo ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
+    make -j $(($(nproc) + 1))  O=$workdir/kernel-build \
     modules_install
+    
 endfunc
 }
 
@@ -532,11 +544,11 @@ install_kernel_headers () {
 
 install_armstub8-gic () {
     git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
-    waitfor "extract_and_mount_image"
 startfunc    
     echo "* Installing RPI4 armstub8-gic source."
     cd $workdir/rpi-tools/armstubs
-    make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- armstub8-gic.bin
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make armstub8-gic.bin
+    waitfor "extract_and_mount_image"
     cd ../..
     cp rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
 endfunc
@@ -607,6 +619,22 @@ startfunc
     fi
 endfunc
 }
+
+install_andrei_gherzan_uboot_fork () {
+    git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/v2019.07-rpi4-wip"   
+startfunc    
+    #echo "* Installing RPI4 armstub8-gic source."
+    cd $workdir/u-boot
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1))
+    cd ../..
+    waitfor "extract_and_mount_image"
+    cp u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
+endfunc
+}
+
+
+
 
 install_first_start_cleanup_script () {
     waitfor "extract_and_mount_image"
@@ -817,6 +845,7 @@ install_rpi_firmware &
 install_armstub8-gic &
 install_non-free_firmware & 
 install_rpi_userland &
+install_andrei_gherzan_uboot_fork &
 #get_kernel_src
 #get_armstub8-gic &
 #get_non-free_firmware &
