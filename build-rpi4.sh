@@ -163,9 +163,9 @@ git_get () {
         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
         && mkdir -p $src_cache/$local_path
         
-        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        git clone $git_flags $clone_flags $local_path &>> /tmp/${FUNCNAME[1]}.git.log || true
         cd $src_cache/$local_path
-        git pull $git_flags $pull_flags 2>/dev/null || true
+        git pull $git_flags $pull_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
         echo "* ${FUNCNAME[1]} Last Commit:"
         git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
@@ -517,7 +517,7 @@ startfunc
     echo "* Copying compiled ${KERNEL_VERSION} modules to image."
     #rm  -rf $workdir/kernel-install/lib/modules/build
     cp -avr $workdir/kernel-install/lib/modules/* \
-    /mnt/usr/lib/modules/
+    /mnt/usr/lib/modules/ &>> /tmp/${FUNCNAME[0]}.install.log
     
     rm  -rf /mnt/usr/lib/modules/${KERNEL_VERSION}/build 
 endfunc
