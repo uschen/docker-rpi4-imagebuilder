@@ -829,15 +829,19 @@ startfunc
      chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
      echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
     done
-    
-    ### Xdelta
+endfunc
+}    
 
-    if [[ $XDELTA ]]; then
+export_xdelta_image () {
+startfunc
         echo "* Making xdelta binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta delta -p -V $workdir/old_image.img $workdir/${new_image}.img $workdir/patchout.xdelta
+        xdelta delta -p -V $workdir/old_image.img $workdir/${new_image}.img \
+        $workdir/patchout.xdelta
         for i in "${image_compressors[@]}"
         do
+            compress_flags=""
+            [ "$i" == "lz4" ] && compress_flags="-m"
             xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
             $xdelta_patchout_compresscmd
             xdelta_patchout_cpcmd="cp $workdir/patchout.xdelta.$i \
@@ -845,7 +849,6 @@ startfunc
             $xdelta_patchout_cpcmd
             chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
         done
-    fi
 endfunc
 }
 
@@ -897,6 +900,7 @@ install_kernel_dtbs &
 cleanup_image_remove_chroot
 unmount_image
 export_compressed_image
+[[ $XDELTA ]] && export_xdelta_image
 export_log
 # This stops the tail process.
 rm $TMPLOG
