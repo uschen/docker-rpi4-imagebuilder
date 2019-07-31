@@ -853,6 +853,7 @@ endfunc
 }
 
 export_log () {
+    waitfor "export_compressed_image"
 startfunc
     echo "* Build log at: build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log"
     cat $TMPLOG > /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
@@ -899,8 +900,9 @@ install_kernel_modules &
 install_kernel_dtbs &
 cleanup_image_remove_chroot
 unmount_image
-export_compressed_image
+export_compressed_image &
 [[ $XDELTA ]] && export_xdelta_image
+[[ $XDELTA ]] && waitfor "export_xdelta_image"
 export_log
 # This stops the tail process.
 rm $TMPLOG
