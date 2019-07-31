@@ -119,7 +119,6 @@ git_check () {
 local_check () {
     local git_path="$1"
     local git_branch="$2"
-    
     [ ! -z "$2" ] || git_branch="HEAD"
     local git_output=`git -C $git_path rev-parse ${git_branch} 2>/dev/null`
     echo $git_output
@@ -382,21 +381,17 @@ startfunc
     local git_branch="$kernel_branch"
     local git_repo="$kernelgitrepo"
     local local_path="rpi-linux"
-#    mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo" "$git_branch")
     local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
     
-    #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "Remote hash: $remote_git"
-    #echo $remote_git > /tmp/remote.git
     echo "Local hash: $local_git"
-    #echo $local_git > /tmp/local.git
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
     else
@@ -407,7 +402,6 @@ startfunc
         git clone $git_flags $clone_flags $local_path 2>/dev/null || true
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
-        #ls $cache_path/$local_path
     fi
     echo "* Copying from cache"
     rsync -a $src_cache/$local_path $workdir/
@@ -422,6 +416,7 @@ build_kernel () {
     waitfor "setup_arm64_chroot"
 startfunc    
     echo "* Building $kernel_branch kernel."
+    kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
     cd $workdir/rpi-linux
     mkdir $workdir/kernel-build
     
@@ -586,13 +581,49 @@ install_kernel_headers () {
     # /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
+# get_armstub8-gic () {
+# startfunc
+#     echo "* Get RPI4 armstub8-gic source."
+#     cd $workdir
+#     git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
+# endfunc
+# }
+
 get_armstub8-gic () {
 startfunc
-    echo "* Get RPI4 armstub8-gic source."
-    cd $workdir
-    git clone --quiet --depth=1 https://github.com/raspberrypi/tools.git rpi-tools
+    local git_branch=
+    local git_repo="https://github.com/raspberrypi/tools.git"
+    local local_path="rpi-tools"
+    mkdir -p $workdir/$local_path
+    
+    local remote_git=$(git_check "$git_repo" "$git_branch")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+    
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_extra_flags $git_repo "
+    local pull_flags=
+    echo "Remote hash: $remote_git"
+    echo "Local hash: $local_git"
+    if [ "$remote_git" = "$local_git" ]; then
+        echo ""
+    else
+        echo "* Refreshing cache from git."
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        cd $src_cache/$local_path
+        git pull $git_flags $pull_flags || true
+    fi
+    echo "* Copying from cache"
+    rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
+
+
+
+
 
 install_armstub8-gic () {
     waitfor "get_armstub8-gic"
@@ -606,15 +637,48 @@ startfunc
 endfunc
 }
 
+# get_non-free_firmware () {
+# startfunc
+#     echo "* Getting non-free firmware."
+#     
+#     cd $workdir
+#     git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree \
+#     firmware-nonfree
+# endfunc
+# }
+
 get_non-free_firmware () {
 startfunc
-    echo "* Getting non-free firmware."
+    local git_branch=
+    local git_repo="https://github.com/RPi-Distro/firmware-nonfree"
+    local local_path="firmware-nonfree"
+    mkdir -p $workdir/$local_path
     
-    cd $workdir
-    git clone --quiet --depth=1 https://github.com/RPi-Distro/firmware-nonfree \
-    firmware-nonfree
+    local remote_git=$(git_check "$git_repo" "$git_branch")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+    
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_extra_flags $git_repo "
+    local pull_flags=
+    echo "Remote hash: $remote_git"
+    echo "Local hash: $local_git"
+    if [ "$remote_git" = "$local_git" ]; then
+        echo ""
+    else
+        echo "* Refreshing cache from git."
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        cd $src_cache/$local_path
+        git pull $git_flags $pull_flags || true
+    fi
+    echo "* Copying from cache"
+    rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
+
 
 install_non-free_firmware () {
     waitfor "get_non-free_firmware"
@@ -644,13 +708,48 @@ startfunc
 endfunc
 }
 
+# get_rpi_userland () {
+# startfunc
+#     echo "* Getting Raspberry Pi userland source."
+#     cd $workdir
+#     git clone --quiet --depth=1 https://github.com/raspberrypi/userland
+# endfunc
+# }
+
 get_rpi_userland () {
 startfunc
-    echo "* Getting Raspberry Pi userland source."
-    cd $workdir
-    git clone --quiet --depth=1 https://github.com/raspberrypi/userland
+    local git_branch=
+    local git_repo="https://github.com/raspberrypi/userland"
+    local local_path="rpi-userland"
+    mkdir -p $workdir/$local_path
+    
+    local remote_git=$(git_check "$git_repo" "$git_branch")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+    
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_extra_flags $git_repo "
+    local pull_flags=
+    echo "Remote hash: $remote_git"
+    echo "Local hash: $local_git"
+    if [ "$remote_git" = "$local_git" ]; then
+        echo ""
+    else
+        echo "* Refreshing cache from git."
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        cd $src_cache/$local_path
+        git pull $git_flags $pull_flags || true
+    fi
+    echo "* Copying from cache"
+    rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
+
+
+
 
 install_rpi_userland () {
     waitfor "get_rpi_userland"
@@ -659,7 +758,7 @@ startfunc
     echo "* Installing Raspberry Pi userland source."
     cd $workdir
     mkdir -p /mnt/opt/vc
-    cd userland/
+    cd rpi-userland/
     CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt
     echo '/opt/vc/lib' > /mnt/etc/ld.so.conf.d/vc.conf 
     mkdir -p /mnt/etc/environment.d
