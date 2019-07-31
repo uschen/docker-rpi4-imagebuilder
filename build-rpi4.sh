@@ -22,12 +22,8 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
-DEBUG=1
+DEBUG=0
 export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
-
-
-# Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
@@ -43,28 +39,31 @@ exec 3>&1 4>&2
 trap 'exec 2>&4 1>&3' 0 1 2 3
 exec 1>$TMPLOG 2>&1
 
-# Use ccache
+# Use ccache.
 PATH=/usr/lib/ccache:$PATH
 CCACHE_DIR=/cache/ccache
 mkdir -p $CCACHE_DIR
 # Change these settings if you need them to be different.
 ccache -M 0 > /dev/null
 ccache -F 0 > /dev/null
-# Show ccache stats
+# Show ccache stats.
 echo "Build ccache stats:"
 ccache -s
-# Create work directory
+# Create work directory.
 workdir=/build/source
 mkdir -p $workdir
 
-# Source cache is on the cache volume
+# Source cache is on the cache volume.
 src_cache=/cache/src_cache
 mkdir -p $src_cache
 
-# Apt cache is on the cache volume
+# Apt cache is on the cache volume.
 apt_cache=/cache/apt_cache
-# This is needed or the startup bails
+# This is needed or the apt has issues.
 mkdir -p $apt_cache/partial 
+
+# Make sure inotify-tools is installed.
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
 
 #cp -a /source-ro/ $workdir
 
