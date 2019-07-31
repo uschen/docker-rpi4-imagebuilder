@@ -805,7 +805,7 @@ endfunc
 export_compressed_image () {
 startfunc
 
-    [[ $XDELTA ]] && xdelta delta -p -V $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
+    
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
     cd $workdir
@@ -825,16 +825,24 @@ startfunc
      $cpcmd
      chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
      echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
-    ### Xdelta
-    if [[ $XDELTA ]]; then
-        xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
-        $xdelta_patchout_compresscmd
-        xdelta_patchout_cpcmd="cp $workdir/patchout.xdelta.$i \
-     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
-        $xdelta_patchout_cpcmd
-        chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
-    fi
     done
+    
+    ### Xdelta
+
+    if [[ $XDELTA ]]; then
+        echo "* Making xdelta binary diffs between today's eoan base image"
+        echo "* and the new images.
+        xdelta delta -p -V $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
+        for i in "${image_compressors[@]}"
+        do
+            xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
+            $xdelta_patchout_compresscmd
+            xdelta_patchout_cpcmd="cp $workdir/patchout.xdelta.$i \
+     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
+            $xdelta_patchout_cpcmd
+            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
+        done
+    fi
 endfunc
 }
 
