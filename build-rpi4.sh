@@ -330,7 +330,7 @@ startfunc
     #[ $remote_git = $local_git ] && echo "* Same git hash." || $git_update_cmd
     echo "remote: $remote_git"
     echo "local: $local_git"
-    if [ $remote_git = $local_git ]; then
+    if [ "$remote_git" == "$local_git" ]; then
         echo "* Same git hash."
     else
         echo "* Refreshing from git."
