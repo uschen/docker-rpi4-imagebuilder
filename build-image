@@ -185,7 +185,7 @@ startcmd='/build-rpi4.sh ; ls -crGg /tmp > /output/build_fail_status.log ; [ -e 
 rm -f $outdir/build_fail.log
 rm -rf $outdir/build_fail_status.log
 rm -rf $outdir/*.install.log
-rm -rf $outdir/*.commpile.log
+rm -rf $outdir/*.compile.log
 
 #cmd="docker run $docker_args $image /bin/bash -c $startcmd"
 
