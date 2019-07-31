@@ -161,13 +161,13 @@ docker_args+="-v $(abspath "$srcdir")/$base_image:/$base_image "
 
 # For ccache
 #docker_args+="-e CCACHE_DIR=/ccache --volumes-from ccache -v ccache:/ccache "
-docker_args+="-e CCACHE_DIR=/ccache -v $cache_volume:/ccache "
+docker_args+="-e CCACHE_DIR=/cache/ccache -v $cache_volume:/cache "
 
 # Store apt-cache on cache volume too
-docker_args+="-v $cache_volume:/apt_cache "
+docker_args+="-e src_cache=/cache/src_cache "
 
 # Store remote src cache on ccache volume too
-docker_args+="-v $cache_volume:/src_cache "
+docker_args+="-e apt_cache=/cache/apt_cache "
 
 # Is an email local variable set?
 [[ -v EMAIL ]] && docker_args+="-e EMAIL=${EMAIL} "

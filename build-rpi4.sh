@@ -27,7 +27,7 @@ export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=/apt_cache install inotify-tools -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
@@ -45,7 +45,8 @@ exec 1>$TMPLOG 2>&1
 
 # Use ccache
 PATH=/usr/lib/ccache:$PATH
-CCACHE_DIR=/ccache
+CCACHE_DIR=/cache/ccache
+mkdir -p $CCACHE_DIR
 # Change these settings if you need them to be different.
 ccache -M 0 > /dev/null
 ccache -F 0 > /dev/null
@@ -57,7 +58,12 @@ workdir=/build/source
 mkdir -p $workdir
 
 # Source cache is on the cache volume
-src_cache=/src_cache
+src_cache=/cache/src_cache
+mkdir -p $src_cache
+
+# Apt cache is on the cache volume
+apt_cache=/cache/apt_cache
+mkdir -p $apt_cache
 
 #cp -a /source-ro/ $workdir
 
@@ -196,7 +202,7 @@ startfunc
 #    mount -t sysfs sys     /mnt/sys/
 #    mount -o bind /dev     /mnt/dev/
     mount -o bind /dev/pts /mnt/dev/pts
-    mount --bind /apt_cache /mnt/var/cache/apt
+    mount --bind $apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
     mkdir /mnt/ccache || ls -aFl /mnt
@@ -216,7 +222,7 @@ startfunc
     echo "* Apt update done."
     echo "* Downloading software for apt upgrade."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt_cache \
+    -o dir::cache::archives=$apt_cache \
     upgrade -d -qq 2>/dev/null
     echo "* Apt upgrade download done."
     #echo "* Starting chroot apt update."
@@ -226,7 +232,7 @@ startfunc
 
     echo "* Downloading software for native kernel build portion."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt_cache \
+    -o dir::cache::archives=$apt_cache \
     install -d -qq --no-install-recommends \
                build-essential \
                bc \
@@ -259,7 +265,7 @@ startfunc
                xz-utils 2>/dev/null
     echo "* Downloading wifi & networking tools."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/apt_cache \
+    -o dir::cache::archives=$apt_cache \
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
     echo "* Apt upgrading image in chroot."
