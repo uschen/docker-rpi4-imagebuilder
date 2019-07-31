@@ -214,7 +214,7 @@ extract_and_mount_image () {
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img
-    [[ $XDELTA ]] && cp $workdir/$base_image $workdir/old_image.img
+    [[ $XDELTA ]] && cp $workdir/$new_image.img $workdir/old_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -805,7 +805,7 @@ endfunc
 export_compressed_image () {
 startfunc
 
-    [[ $XDELTA ]] && xdelta -p delta $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
+    [[ $XDELTA ]] && xdelta delta -p -V $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
     cd $workdir
