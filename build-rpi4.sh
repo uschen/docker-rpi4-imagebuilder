@@ -122,9 +122,11 @@ startfunc
     local git_path="$1"
     #`git -C $git_path rev-parse HEAD`
     local git_output=`git -C $git_path rev-parse HEAD`
-    local git_hash
-    local discard 
-    read git_hash discard< <(echo "$git_output")
+    echo $git_output
+    #local git_hash
+    #local discard 
+    #read git_hash discard< <(echo "$git_output")
+    #echo $git_hash
 endfunc
 }
 
@@ -321,15 +323,13 @@ get_rpi_firmware () {
 startfunc
     local git_branch=
     local git_repo="https://github.com/Hexxeh/rpi-firmware"
-    local local_path=rpi-firmware
+    local local_path="rpi-firmware"
     local cache_path=$src_cache/$local_path
     mkdir -p $cache_path
     mkdir -p $workdir/$local_path
     
-    #git_check "$git_repo"
     local remote_git=$(git_check "$git_repo")
-    #local_check "$cache_path"
-    local local_git=$(local_check "$cache_path")
+    local local_git=$(local_check "$src_cache/$local_path")
     
     #echo "* Downloading current RPI firmware."
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
