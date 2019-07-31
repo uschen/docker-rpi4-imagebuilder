@@ -24,7 +24,7 @@ image_compressors=("lz4" "xz")
 
 # Currently broken if this is unset. I need to fix this. :p
 DEBUG=1
-export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
+GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
@@ -102,8 +102,8 @@ endfunc () {
     # inotifywait is having issues in docker.
     touch /tmp/*
     # debugging
-    [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
-    [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
+    [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
+   # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
     #echo "++ ${FUNCNAME[1]} done."
 }
 
@@ -848,7 +848,6 @@ touch /tmp/ok_to_exit_container_after_build.done
 inotify_touch_events &
 
 checkfor_base_image
-#get_rpi_firmware
 install_rpi_firmware &
 get_kernel_src
 get_armstub8-gic &

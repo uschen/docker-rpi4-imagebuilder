@@ -175,15 +175,15 @@ docker_args+="-e apt_cache=/cache/apt_cache "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
-rm -f $cidfile
 docker_args+="--cidfile=$cidfile "
 
 # If the build script fails, the log is still copied out.
 #[ -e "/tmp/build.log" ] && cat /tmp/build.log > /output/build_fail.log || exit 0
 #startcmd="/build-rpi4.sh ; cat /tmp/build.log > /output/build_fail.log"
-startcmd='/build-rpi4.sh ; [ -e "/tmp/build.log" ] && (cat /tmp/build.log > /output/build_fail.log; chown $USER:$GROUP /output/build_fail.log )  || exit 0'
+startcmd='/build-rpi4.sh ; ls -crGg /tmp > /output/build_fail_status.log ; [ -e "/tmp/build.log" ] && (cat /tmp/build.log > /output/build_fail.log; chown $USER:$GROUP /output/build_fail.log ; chown $USER:$GROUP /output/build_fail_status.log )  || exit 0'
 # Clear old build failure log file.
 rm -f $outdir/build_fail.log
+rm -rf $outdir/build_fail_status.log
 
 #cmd="docker run $docker_args $image /bin/bash -c $startcmd"
 
@@ -196,8 +196,8 @@ docker volume create --name $cache_volume
 
 # docker create -v /mnt/ccache:/ccache --name ccache $image
 echo "Running build in docker:"
-echo "docker run $docker_args $image /bin/bash -c \"$startcmd\""
-docker run $docker_args $image /bin/bash -c "$startcmd"
+echo "rm -f $cidfile ; docker run $docker_args $image /bin/bash -c \"$startcmd\""
+rm -f $cidfile ; docker run $docker_args $image /bin/bash -c "$startcmd"
 build_cid=`cat $cidfile`
 # Following does not work.
 # read build_cid <$cidfile
