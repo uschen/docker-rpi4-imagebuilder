@@ -578,6 +578,7 @@ startfunc
     fi
     if ! grep -qs 'enable_uart=1' /mnt/boot/firmware/config.txt
         then echo "enable_uart=1" >> /mnt/boot/firmware/config.txt
+    fi
 endfunc
 }
 
