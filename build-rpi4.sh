@@ -761,12 +761,12 @@ startfunc
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
     if [ ! -f /tmp/ok_to_unmount_image_after_build.done ]; then
-        echo "** Container paused. **"
+        echo "** Container paused before image unmount. **"
         echo 'Type in "touch /tmp/ok_to_unmount_image_after_build.done"'
         echo "in a shell into this container to continue."
     fi 
      
-    waitfor "ok_to_exit_container_after_build"
+    waitfor "ok_to_unmount_image_after_build"
     umount /mnt/build
     umount /mnt/run
     umount /mnt/ccache
@@ -794,10 +794,11 @@ startfunc
     dmsetup remove_all
     
     if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
-        echo "** Container paused. **"
+        echo "** Image unmounted & container paused. **"
         echo 'Type in "touch /tmp/ok_to_exit_container_after_build.done"'
         echo "in a shell into this container to continue."
     fi 
+    waitfor "ok_to_exit_container_after_build"
 endfunc
 }
 
