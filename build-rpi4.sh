@@ -133,6 +133,7 @@ startfunc
     local git_repo="%1"
     local local_path="%2"
     local git_branch="%3"
+    [ ! -z "$3" ] || git_branch=
     mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
@@ -166,10 +167,6 @@ endfunc
 }
 
 
-
-
-
-
 download_base_image () {
 startfunc
     echo "* Downloading ${base_image} ."
@@ -177,7 +174,6 @@ startfunc
     wget -nv ${base_image_url} -O ${base_image} || wget_fail=1
 endfunc
 }
-
 
 checkfor_base_image () {
 startfunc
@@ -258,7 +254,7 @@ startfunc
     #| grep packages | cut -d '.' -f 1"
     #echo "* Chroot apt update done."
 
-    echo "* Downloading software for native kernel build portion."
+    echo "* Downloading software for building portions of kernel natively on chroot."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     install -d -qq --no-install-recommends \
