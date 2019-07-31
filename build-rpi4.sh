@@ -345,14 +345,14 @@ startfunc
     else
         echo "* Refreshing cache from git."
         cd $src_cache
-        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $cache_path
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path
         git clone $git_flags $clone_flags $local_path || true
         cd $src_cache/$local_path
-        git pull $git_flags $pull_flags
+        git pull $git_flags $pull_flags || true
         #ls $cache_path/$local_path
     fi
     echo "* Copying from cache"
-    rsync -a $cache_path $workdir/
+    rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
 
