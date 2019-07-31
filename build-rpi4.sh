@@ -139,7 +139,7 @@ git_get () {
     local git_repo="$1"
     local local_path="$2"
     local git_branch="$3"
-    [ ! -z "$3" ] || git_branch=
+    [ ! -z "$3" ] || git_branch="master"
     mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
     
@@ -150,7 +150,7 @@ git_get () {
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_repo $git_extra_flags "
-    local pull_flags=
+    local pull_flags="origin/$git_branch"
     echo "${FUNCNAME[1]} remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
     echo "${FUNCNAME[1]}  local hash: $local_git"
@@ -165,7 +165,8 @@ git_get () {
         
         git clone $git_flags $clone_flags $local_path &>> /tmp/${FUNCNAME[1]}.git.log || true
         cd $src_cache/$local_path
-        git pull $git_flags $pull_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
+        git fetch --all $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
+        git reset --hard $pull_flags $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
         echo "* ${FUNCNAME[1]} Last Commit:"
         git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
