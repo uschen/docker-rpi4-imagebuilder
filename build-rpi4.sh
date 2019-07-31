@@ -542,12 +542,10 @@ endfunc
 armstub8-gic () {
     git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
 startfunc    
-    echo "* Installing RPI4 armstub8-gic source."
     cd $workdir/rpi-tools/armstubs
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make armstub8-gic.bin &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
-    cd ../..
-    cp rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
+    cp $workdir/rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
 endfunc
 }
 
@@ -586,7 +584,7 @@ startfunc
     echo "* Installing Raspberry Pi userland source."
     cd $workdir
     mkdir -p /mnt/opt/vc
-    cd rpi-userland/
+    cd $workdir/rpi-userland/
     CROSS_COMPILE=aarch64-linux-gnu- ./buildme --aarch64 /mnt &>> /tmp/${FUNCNAME[0]}.compile.log
     echo '/opt/vc/lib' > /mnt/etc/ld.so.conf.d/vc.conf 
     mkdir -p /mnt/etc/environment.d
@@ -635,7 +633,8 @@ startfunc
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
-    echo "* Installing Andrei Gherzan's RPI uboot fork."
+    echo "* Installing Andrei Gherzan's RPI uboot fork to image."
+    echo "*** u-boot is not yet functional and disabled.***"
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
     chroot /mnt /bin/bash -c "mkimage -A arm64 -O linux -T script \
     -d /etc/flash-kernel/bootscript/bootscr.rpi \
