@@ -31,6 +31,7 @@ RUN set -ex \
                libguestfs-tools \
                libncurses-dev \
                libssl-dev \
+               libxdelta2 \
                linux-image-5.2.0-8-generic \
                linux-modules-5.2.0-8-generic \
                qemu-user-static \
@@ -38,6 +39,7 @@ RUN set -ex \
                rsync \
                sudo \
                wget \
+               xdelta \
                xz-utils \         
     && apt-get build-dep -y linux-image-raspi2 \
     && apt-get build-dep -y linux-image-5.2.0-8-generic \
