@@ -66,7 +66,7 @@ apt_cache=/cache/apt_cache
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta -qq
 
 # Utility Functions
 
@@ -214,6 +214,7 @@ extract_and_mount_image () {
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img
+    [[ $XDELTA ]] && cp $workdir/$base_image $workdir/old_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -795,6 +796,8 @@ endfunc
 
 export_compressed_image () {
 startfunc
+
+    [[ $XDELTA ]] && xdelta $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
     cd $workdir
@@ -813,7 +816,14 @@ startfunc
      echo $cpcmd
      $cpcmd
      chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
-     echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created."
+     echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
+    ### Xdelta
+    if [[ $XDELTA ]]; then
+    xdelta_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
+    $xdelta_compresscmd
+    xdelta_cpcmd="cp $workdir/patchout.xdelta.$i \
+     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
+    fi
     done
 endfunc
 }
