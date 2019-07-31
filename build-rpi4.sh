@@ -107,7 +107,8 @@ endfunc () {
 
 git_check () {
     local git_base="$1"
-    [ -z "$2" ] && local git_branch="master" || local git_branch="$2"
+    local git_branch="$2"
+    [ ! -z "$2" ] !! git_branch="master"
     local git_output=`git ls-remote ${git_base} refs/heads/${git_branch}`
     local git_hash
     local discard 
@@ -117,7 +118,9 @@ git_check () {
 
 local_check () {
     local git_path="$1"
-    [ -z "$2" ] && local git_branch="HEAD" || local git_branch="$2"
+    local git_branch="$2"
+    
+    [ ! -z "$2" ] || git_branch="HEAD"
     local git_output=`git -C $git_path rev-parse ${git_branch} 2>/dev/null`
     echo $git_output
 }
