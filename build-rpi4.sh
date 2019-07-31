@@ -334,7 +334,7 @@ startfunc
     echo "${FUNCNAME[0]} local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ "$remote_git" = "$local_git" ]; then
-        echo ""
+        #echo ""
     else
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
@@ -345,7 +345,8 @@ startfunc
         git pull $git_flags $pull_flags || true
         #ls $cache_path/$local_path
     fi
-    echo "* ${FUNCNAME[0]} copying from cache"
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
     rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
@@ -393,7 +394,7 @@ startfunc
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
-        echo ""
+        #echo ""
     else
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
@@ -403,7 +404,8 @@ startfunc
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
     fi
-    echo "* ${FUNCNAME[0]} copying from cache"
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
     rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
@@ -606,7 +608,7 @@ startfunc
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
-        echo ""
+        #echo ""
     else
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
@@ -616,7 +618,8 @@ startfunc
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
     fi
-    echo "* ${FUNCNAME[0]} copying from cache"
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
     rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
@@ -664,7 +667,7 @@ startfunc
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
-        echo ""
+        #echo ""
     else
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
@@ -674,7 +677,8 @@ startfunc
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
     fi
-    echo "* ${FUNCNAME[0]} copying from cache"
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
     rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
@@ -733,7 +737,7 @@ startfunc
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
-        echo ""
+        #echo ""
     else
         echo "* ${FUNCNAME[0]} refreshing cache from git."
         cd $src_cache
@@ -743,7 +747,8 @@ startfunc
         cd $src_cache/$local_path
         git pull $git_flags $pull_flags || true
     fi
-    echo "* ${FUNCNAME[0]} copying from cache"
+    echo "* ${FUNCNAME[0]} copying from cache."
+    echo ""
     rsync -a $src_cache/$local_path $workdir/
 endfunc
 }
