@@ -797,7 +797,7 @@ endfunc
 export_compressed_image () {
 startfunc
 
-    [[ $XDELTA ]] && xdelta $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
+    [[ $XDELTA ]] && xdelta -p delta $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
     cd $workdir
