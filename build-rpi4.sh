@@ -385,7 +385,7 @@ startfunc
     local local_git=$(local_check "$src_cache/$local_path")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
-    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $branch "
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
