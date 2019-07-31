@@ -760,11 +760,12 @@ startfunc
     echo "* at first boot."
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
-    if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
+    if [ ! -f /tmp/ok_to_unmount_image_after_build.done ]; then
         echo "** Container paused. **"
-        echo 'Type in "touch /tmp/ok_to_exit_container_after_build.done"'
+        echo 'Type in "touch /tmp/ok_to_unmount_image_after_build.done"'
         echo "in a shell into this container to continue."
     fi 
+     
     waitfor "ok_to_exit_container_after_build"
     umount /mnt/build
     umount /mnt/run
@@ -791,6 +792,12 @@ startfunc
     kpartx -dv $workdir/${new_image}.img
     #losetup -d /dev/loop0
     dmsetup remove_all
+    
+    if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
+        echo "** Container paused. **"
+        echo 'Type in "touch /tmp/ok_to_exit_container_after_build.done"'
+        echo "in a shell into this container to continue."
+    fi 
 endfunc
 }
 
@@ -838,6 +845,14 @@ endfunc
 
 # Delete this by connecting to the container using a shell if you want to 
 # debug the container before the image is unmounted.
+# The shell command would be something like this:
+# docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
+# Note that this flag is looked for in the cleanup_image_remove_chroot function
+touch /tmp/ok_to_unmount_image_after_build.done
+
+
+# Delete this by connecting to the container using a shell if you want to 
+# debug the container before the container is exited.
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the cleanup_image_remove_chroot function
