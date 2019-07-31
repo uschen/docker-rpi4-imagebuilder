@@ -27,7 +27,7 @@ image_compressors=("lz4" "xz")
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Set Time Stamp
-now=`date +"%m_%d_%Y_%H%M"`
+now=`date +"%m_%d_%Y_%H%M%Z"`
 
 # Create debug output folder.
 [[ $DEBUG ]] && ( mkdir -p /output/$now/ ; chown $USER:$GROUP /output/$now/ )
@@ -69,6 +69,10 @@ mkdir -p $apt_cache/partial
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof -qq
 
 # Utility Functions
+
+function abspath {
+    echo $(cd "$1" && pwd)
+}
 
 inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
@@ -491,19 +495,16 @@ startfunc
     echo "* Copying compiled ${KERNEL_VERSION} kernel to image."
     df -h
     cd $workdir
-    # Ubuntu defaults to using uBoot, which doesn't work yet for RPI4, as of
-    # July 2019, and puts uboot into /boot/firmware/kernel8.img .
+    # Ubuntu defaults to using uBoot, which now works for RPI4, as of
+    # July 31, 2019, so we copy that into /boot/firmware/kernel8.img later.
     # 
-    # We replacee uboot with kernel, but we're installing the kernel properly as
-    # well so if a working uboot is installed it still works.
-    # Note that the flash-kernel db file installed later works around uboot 
-    # getting installed into kernel8.img on kernel installs.
-    cp $workdir/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img
+    # We replacee uboot with kernel, but we're installing the kernel here as
+    # well. If a working uboot is not available copy this over to kernel8.img
+    cp $workdir/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img.nouboot
     #
-    # Once uboot works, it should be able to use the standard raspberry pi boot
-    # script to boot a compressed kernel on arm64, since linux on arm64 does not
-    # support self-decompression of the kernel, so we copy this in anyways for usage
-    # with a working uboot in the future.
+    # uboot uses uboot & the standard raspberry pi boot script to boot a compressed 
+    # kernel on arm64, since linux on arm64 does not support self-decompression of 
+    # the kernel, so we copy this for use with uboot.
     cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
     /mnt/boot/vmlinuz-${KERNEL_VERSION}
     
@@ -567,9 +568,9 @@ startfunc
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
         then echo "arm_64bit=1" >> /mnt/boot/firmware/config.txt
     fi
-    if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
-        then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
-    fi
+    #if ! grep -qs 'kernel8.bin' /mnt/boot/firmware/config.txt
+    #    then sed -i -r 's/kernel8.bin/kernel8.img/' /mnt/boot/firmware/config.txt
+    #fi
     
     if ! grep -qs 'initramfs' /mnt/boot/firmware/config.txt
         then echo "initramfs initrd.img followkernel" >> /mnt/boot/firmware/config.txt
@@ -634,8 +635,9 @@ startfunc
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
     echo "* Installing Andrei Gherzan's RPI uboot fork to image."
-    echo "*** u-boot is not yet functional and disabled.***"
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
+    cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/kernel8.bin
+    cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/kernel8.img
     chroot /mnt /bin/bash -c "mkimage -A arm64 -O linux -T script \
     -d /etc/flash-kernel/bootscript/bootscr.rpi \
     /boot/firmware/boot.scr"
@@ -665,10 +667,6 @@ fi
 /usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
 /usr/bin/apt update && /usr/bin/apt upgrade -y
 /usr/sbin/update-initramfs -c -k all
-#cd /usr/src
-#/usr/bin/git clone --depth=1 -b $branch $kernelgitrepo \
-#linux-headers-${KERNEL_VERSION}
-#/usr/bin/git checkout $kernelrev
 rm /etc/rc.local
 exit 0
 EOF
@@ -679,35 +677,35 @@ endfunc
 make_kernel_install_scripts () {
     waitfor "extract_and_mount_image"
 startfunc    
-    # This script allows flash-kernel to create the uncompressed kernel file
-    # on the boot partition.
-    echo "* Making kernel install scripts. &"
-    mkdir -p /mnt/etc/kernel/postinst.d
-    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
-    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
-#!/bin/sh -eu
-# Note that this conflicts with using uboot in /boot/firmware/kernel8.img
+## This script allows flash-kernel to create the uncompressed kernel file
+#    # on the boot partition.
+#    echo "* Making kernel install scripts. &"
+#    mkdir -p /mnt/etc/kernel/postinst.d
+#    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
+#    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
+##!/bin/sh -eu
+## Note that this conflicts with using uboot in /boot/firmware/kernel8.img
+##
+## If uboot is working for your hardware, and you have a functional 
+## flash-kernel uboot boot script, you can delete this, and also likely 
+## uncomment out the lines in the Raspberry Pi 4B entry of 
+## /etc/flash-kernel/db to use u-boot.
+##
+#COMMAND="\$1"
+#KERNEL_VERSION="\$2"
+##BOOT_DIR_ABS="\$3"
 #
-# If uboot is working for your hardware, and you have a functional 
-# flash-kernel uboot boot script, you can delete this, and also likely 
-# uncomment out the lines in the Raspberry Pi 4B entry of 
-# /etc/flash-kernel/db to use u-boot.
-#
-COMMAND="\$1"
-KERNEL_VERSION="\$2"
-#BOOT_DIR_ABS="\$3"
-
-gunzip -c -f \$KERNEL_VERSION > /boot/firmware/kernel8.img
-exit 0
-EOF
+#gunzip -c -f \$KERNEL_VERSION > /boot/firmware/kernel8.img
+#exit 0
+#EOF
+#    
+#    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
     
-    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
-    
-    # This allows flash-kernel to copy ther kernel so that it can 
+    # Updated entry for the RPI 4B
     # be copied to the boot partition.
     mkdir -p /mnt/etc/flash-kernel/
     echo "* Creating /mnt/etc/flash-kernel/db ."
-    tee /mnt/etc/flash-kernel/db <<EOF
+    tee -a /mnt/etc/flash-kernel/db <<EOF
 #
 # Raspberry Pi 4 Model B Rev 1.1
 Machine: Raspberry Pi 4 Model B Rev 1.1
@@ -715,9 +713,9 @@ DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
 Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
 Boot-Kernel-Path: /boot/firmware/vmlinuz
 Boot-Initrd-Path: /boot/firmware/initrd.img
-#Boot-Script-Path: /boot/firmware/boot.scr
-#U-Boot-Script-Name: bootscr.rpi
-#Required-Packages: u-boot-tools
+Boot-Script-Path: /boot/firmware/boot.scr
+U-Boot-Script-Name: bootscr.rpi
+Required-Packages: u-boot-tools
 # XXX we should copy the entire overlay dtbs dir too
 
 EOF
@@ -815,30 +813,6 @@ startfunc
     cat $TMPLOG > /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
     chown $USER:$GROUP /output/build-log-${KERNEL_VERSION}-${kernelrev}_${now}.log
 endfunc
-}
-
-function abspath {
-    echo $(cd "$1" && pwd)
-}
-
-no-image-depend-installs () {
-    get_kernel_src &
-    get_rpi_firmware &
-    get_armstub8-gic &
-    get_non-free_firmware &
-    get_rpi_userland &
-
-}
-
-image-dependent-installs () {
-    install_rpi_firmware &
-    install_armstub8-gic &
-    install_non-free_firmware & 
-    configure_rpi_config_txt &
-    install_rpi_userland &
-    modify_wifi_firmware &
-    install_first_start_cleanup_script &
-    make_kernel_install_scripts &
 }
 
 # Delete this by connecting to the container using a shell if you want to 

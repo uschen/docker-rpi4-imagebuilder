@@ -8,6 +8,13 @@
 This creates a docker container to build an Ubuntu 19.10 server image for a Raspberry Pi 4B using unstable/current software.
 A new kernel is compiled, and current firmware is copied into the container.
 
+###Supported:
+## 4Gb of RAM on the 4B
+## u-boot for booting just like a normal ubuntu image
+Note that u-boot in the ubuntu package [u-boot-rpi](https://packages.ubuntu.com/eoan/u-boot-rpi) doesn't yet support the RPI. 
+This u-boot has been compiled from @agherzan's fork here(https://github.com/agherzan/u-boot/tree/ag/rpi4).
+
+
 ## Note that this container runs in PRIVILEGED MODE.
 Feel free to offer suggestions on how to make this setup safer without making the build an order of magnitude slower. :/
 
