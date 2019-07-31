@@ -331,7 +331,7 @@ startfunc
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
-    echo "${FUNCNAME[0]} local hash: $local_git"
+    echo "${FUNCNAME[0]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
 
@@ -391,7 +391,7 @@ startfunc
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
-    echo "${FUNCNAME[0]} local hash: $local_git"
+    echo "${FUNCNAME[0]}  local hash: $local_git"
     if [ ! "$remote_git" = "$local_git" ]; then
 
         echo "* ${FUNCNAME[0]} refreshing cache from git."
@@ -604,7 +604,7 @@ startfunc
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
-    echo "${FUNCNAME[0]} local hash: $local_git"
+    echo "${FUNCNAME[0]}  local hash: $local_git"
     if [ ! "$remote_git" = "$local_git" ]; then
 
         echo "* ${FUNCNAME[0]} refreshing cache from git."
@@ -662,7 +662,7 @@ startfunc
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
-    echo "${FUNCNAME[0]} local hash: $local_git"
+    echo "${FUNCNAME[0]}  local hash: $local_git"
     if [ ! "$remote_git" = "$local_git" ]; then
 
         echo "* ${FUNCNAME[0]} refreshing cache from git."
@@ -731,7 +731,7 @@ startfunc
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "${FUNCNAME[0]} remote hash: $remote_git"
-    echo "${FUNCNAME[0]} local hash: $local_git"
+    echo "${FUNCNAME[0]}  local hash: $local_git"
     if [ ! "$remote_git" = "$local_git" ]; then
 
         echo "* ${FUNCNAME[0]} refreshing cache from git."
