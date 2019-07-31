@@ -344,10 +344,10 @@ startfunc
         echo "* Same git hash."
     else
         echo "* Refreshing cache from git."
-        cd $cache_path
-        [ ! -d "$cache_path/$local_path/.git" ] && rm -rf $cache_path/$local_path
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $cache_path
         git clone $git_flags $clone_flags $local_path || true
-        cd $cache_path/$local_path
+        cd $src_path/$local_path
         git pull $git_flags $pull_flags
         #ls $cache_path/$local_path
     fi
