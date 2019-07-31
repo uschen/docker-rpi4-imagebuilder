@@ -117,13 +117,8 @@ git_check () {
 
 local_check () {
     local git_path="$1"
-    #`git -C $git_path rev-parse HEAD`
-    local git_output=`git -C $git_path rev-parse HEAD`
+    local git_output=`git -C $git_path rev-parse HEAD 2>/dev/null`
     echo $git_output
-    #local git_hash
-    #local discard 
-    #read git_hash discard< <(echo "$git_output")
-    #echo $git_hash
 }
 
 
