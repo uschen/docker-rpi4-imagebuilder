@@ -63,7 +63,8 @@ mkdir -p $src_cache
 
 # Apt cache is on the cache volume
 apt_cache=/cache/apt_cache
-mkdir -p $apt_cache
+# This is needed or the startup bails
+mkdir -p $apt_cache/partial 
 
 #cp -a /source-ro/ $workdir
 
