@@ -306,7 +306,7 @@ startfunc
     echo "* Apt upgrading image in chroot."
     echo "* There may be some errors here due to" 
     echo "* installation happening in a chroot."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags"
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
     echo "* Image apt upgrade done."
     echo "* Installing native kernel build software to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
@@ -343,7 +343,7 @@ startfunc
     echo "* Installing wifi & networking tools to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get \
     install wireless-tools wireless-regdb crda \
-    net-tools network-manager -y $silence_apt_flags"
+    net-tools network-manager -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
     echo "* Wifi & networking tools installed."
 endfunc
 }
@@ -527,7 +527,7 @@ install_kernel_dtbs () {
     waitfor "install_kernel"
 startfunc    
     echo "* Copying compiled ${KERNEL_VERSION} dtbs & dtbos to image."
-    cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/
+    cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/ 
     cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
         
