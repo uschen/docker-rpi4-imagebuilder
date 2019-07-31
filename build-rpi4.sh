@@ -22,6 +22,7 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
+# Currently broken if this is disabled. I need to fix this. :p
 DEBUG=0
 export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
@@ -49,9 +50,11 @@ ccache -F 0 > /dev/null
 # Show ccache stats.
 echo "Build ccache stats:"
 ccache -s
+
 # Create work directory.
 workdir=/build/source
 mkdir -p $workdir
+#cp -a /source-ro/ $workdir
 
 # Source cache is on the cache volume.
 src_cache=/cache/src_cache
@@ -59,13 +62,13 @@ mkdir -p $src_cache
 
 # Apt cache is on the cache volume.
 apt_cache=/cache/apt_cache
-# This is needed or the apt has issues.
+# This is needed or apt has issues.
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
 
-#cp -a /source-ro/ $workdir
+
 
 inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
@@ -124,6 +127,48 @@ local_check () {
     echo $git_output
 }
 
+git_get () {
+startfunc
+    
+    local git_repo="%1"
+    local local_path="%2"
+    local git_branch="%3"
+    mkdir -p $src_cache/$local_path
+    mkdir -p $workdir/$local_path
+    
+    local remote_git=$(git_check "$git_repo" "$git_branch")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+    
+    #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_repo $git_extra_flags "
+    local pull_flags=
+    echo "${FUNCNAME[1]} remote hash: $remote_git"
+    #echo $remote_git > /tmp/remote.git
+    echo "${FUNCNAME[1]}  local hash: $local_git"
+    #echo $local_git > /tmp/local.git
+    if [ ! "$remote_git" = "$local_git" ]; then
+
+        echo "* ${FUNCNAME[1]} refreshing cache from git."
+        cd $src_cache
+        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+        && mkdir -p $src_cache/$local_path
+        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+        cd $src_cache/$local_path
+        git pull $git_flags $pull_flags || true
+        #ls $cache_path/$local_path
+    fi
+    echo "* ${FUNCNAME[1]} copying from cache."
+    echo ""
+    rsync -a $src_cache/$local_path $workdir/
+endfunc
+}
+
+
+
+
+
 
 download_base_image () {
 startfunc
@@ -143,23 +188,6 @@ startfunc
     else
         echo "* Downloaded ${base_image} exists."
     fi
-#         current_output=`curl --silent ${base_url}/SHA1SUMS`
-#         current=${current_output%% *}
-#         local_line=`sha1sum /${base_image}`
-#         local=${local_line%% *}
-#         if [ ! "$local" == "$current" ]; then
-#             echo "local: $local"
-#             echo "current_output: $current_output"
-#             echo "current: $current"
-#             echo "* New base image available."
-#             echo "* Looking for current base image"
-#             download_base_image
-#             [ "$wget_fail" ] && "* Download failed. Using existing image" || \
-#             echo ""
-#         else
-#             echo "* Base image file is current"
-#         fi
-#     fi
     # Symlink existing image
     if [ ! -f $workdir/${base_image} ]; then 
         ln -s /$base_image $workdir/
@@ -175,7 +203,7 @@ startfunc
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
-    losetup -d /dev/loop0 || true
+    losetup -d /dev/loop0 &>/dev/null || true
     dmsetup remove_all
     losetup -a
     cd $workdir
@@ -315,40 +343,48 @@ endfunc
 
 get_rpi_firmware () {
 startfunc
-    local git_branch=
-    local git_repo="https://github.com/Hexxeh/rpi-firmware"
-    local local_path="rpi-firmware"
-    mkdir -p $src_cache/$local_path
-    mkdir -p $workdir/$local_path
-    
-    local remote_git=$(git_check "$git_repo" "$git_branch")
-    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
-    
-    #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
-    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
-    local git_flags=" --quiet --depth=1 "
-    local clone_flags=" $git_repo $git_extra_flags "
-    local pull_flags=
-    echo "${FUNCNAME[0]} remote hash: $remote_git"
-    #echo $remote_git > /tmp/remote.git
-    echo "${FUNCNAME[0]}  local hash: $local_git"
-    #echo $local_git > /tmp/local.git
-    if [ ! "$remote_git" = "$local_git" ]; then
 
-        echo "* ${FUNCNAME[0]} refreshing cache from git."
-        cd $src_cache
-        [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
-        && mkdir -p $src_cache/$local_path
-        git clone $git_flags $clone_flags $local_path 2>/dev/null || true
-        cd $src_cache/$local_path
-        git pull $git_flags $pull_flags || true
-        #ls $cache_path/$local_path
-    fi
-    echo "* ${FUNCNAME[0]} copying from cache."
-    echo ""
-    rsync -a $src_cache/$local_path $workdir/
+    git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
+
 endfunc
 }
+
+# get_rpi_firmware () {
+# startfunc
+#     local git_branch=
+#     local git_repo="https://github.com/Hexxeh/rpi-firmware"
+#     local local_path="rpi-firmware"
+#     mkdir -p $src_cache/$local_path
+#     mkdir -p $workdir/$local_path
+#     
+#     local remote_git=$(git_check "$git_repo" "$git_branch")
+#     local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
+#     
+#     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
+#     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
+#     local git_flags=" --quiet --depth=1 "
+#     local clone_flags=" $git_repo $git_extra_flags "
+#     local pull_flags=
+#     echo "${FUNCNAME[0]} remote hash: $remote_git"
+#     #echo $remote_git > /tmp/remote.git
+#     echo "${FUNCNAME[0]}  local hash: $local_git"
+#     #echo $local_git > /tmp/local.git
+#     if [ ! "$remote_git" = "$local_git" ]; then
+# 
+#         echo "* ${FUNCNAME[0]} refreshing cache from git."
+#         cd $src_cache
+#         [ ! -d "$src_cache/$local_path/.git" ] && rm -rf $src_cache/$local_path \
+#         && mkdir -p $src_cache/$local_path
+#         git clone $git_flags $clone_flags $local_path 2>/dev/null || true
+#         cd $src_cache/$local_path
+#         git pull $git_flags $pull_flags || true
+#         #ls $cache_path/$local_path
+#     fi
+#     echo "* ${FUNCNAME[0]} copying from cache."
+#     echo ""
+#     rsync -a $src_cache/$local_path $workdir/
+# endfunc
+# }
 
 install_rpi_firmware () {
     waitfor "get_rpi_firmware"
