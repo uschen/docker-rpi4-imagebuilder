@@ -609,6 +609,10 @@ ROOTPATH="/opt/vc/bin:/opt/vc/sbin"
 LDPATH="/opt/vc/lib"
 EOF
     chmod +x /mnt/etc/environment.d/10-vcgencmd.conf
+# tee /mnt/etc/profile.d/rpi.sh <<EOF
+# PATH="/opt/vc/bin:/opt/vc/sbin"
+    
+    
     # cd ..
 endfunc
 }
@@ -767,8 +771,9 @@ unmount_image () {
 startfunc
     echo "* Unmounting modified ${new_image}.img"
     sync
-    umount /mnt/boot/firmware
-    umount /mnt || (mount | grep /mnt)
+    umount /mnt/boot/firmware || (sleep 60 ; umount /mnt/boot/firmware)
+    #umount /mnt || (mount | grep /mnt)
+    umount /mnt || (lsof +f -- /mnt ; sleep 60 ; umount /mnt)
     #guestunmount /mnt
 
     
@@ -868,7 +873,6 @@ build_kernel
 install_kernel
 install_kernel_modules &
 install_kernel_dtbs &
-#install_kernel_headers
 cleanup_image_remove_chroot
 unmount_image
 export_compressed_image
