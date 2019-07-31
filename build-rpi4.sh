@@ -634,13 +634,12 @@ endfunc
 install_andrei_gherzan_uboot_fork () {
     git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/v2019.07-rpi4-wip"   
 startfunc    
-    #echo "* Installing RPI4 armstub8-gic source."
+    echo "* Installing Andrei Gherzan's RPI uboot fork."
     cd $workdir/u-boot
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1))
-    cd ../..
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &> /dev/null
+    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &> /dev/null
     waitfor "extract_and_mount_image"
-    cp u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
+    cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
 endfunc
 }
 
