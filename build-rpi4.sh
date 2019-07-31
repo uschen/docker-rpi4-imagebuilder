@@ -350,7 +350,7 @@ endfunc
 }
 
 
-install_rpi_firmware () {
+rpi_firmware () {
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
     waitfor "extract_and_mount_image"
 startfunc    
