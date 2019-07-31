@@ -118,9 +118,9 @@ git_check () {
 local_check () {
 startfunc
     local git_path="$1"
-    `git -C $git_path rev-parse HEAD`
-    #local git_output=`git -C $git_path rev-parse HEAD`
-    #echo $git_output
+    #`git -C $git_path rev-parse HEAD`
+    local git_hash=`git -C $git_path rev-parse HEAD`
+    echo $git_hash
 endfunc
 }
 
