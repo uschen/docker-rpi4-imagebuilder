@@ -166,7 +166,9 @@ git_get () {
         git clone $git_flags $clone_flags $local_path &>> /tmp/${FUNCNAME[1]}.git.log || true
         cd $src_cache/$local_path
         git fetch --all $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
-        git reset --hard $pull_flags $git_flags &>> /tmp/${FUNCNAME[1]}.git.log || true
+        git reset --hard $pull_flags $git_flags 2>> /tmp/${FUNCNAME[1]}.git.log || \
+        ( rm -rf $src_cache/$local_path ; cd $src_cache ; git clone $git_flags $clone_flags $local_path ) 2>> /tmp/${FUNCNAME[1]}.git.log
+        
         printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} Last Commit: *"
         git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
@@ -624,13 +626,21 @@ endfunc
 
 andrei_gherzan_uboot_fork () {
 startfunc
-    git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/v2019.07-rpi4-wip"   
+    git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/rpi4"   
     cd $workdir/u-boot
+    echo "CONFIG_GZIP=y" >> $workdir/u-boot/configs/rpi_4_defconfig
+    echo "CONFIG_BZIP2=y" >> $workdir/u-boot/configs/rpi_4_defconfig
+    echo "CONFIG_SYS_LONGHELP=y" >> $workdir/u-boot/configs/rpi_4_defconfig
+    echo "CONFIG_REGEX=y" >> $workdir/u-boot/configs/rpi_4_defconfig
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &>> /tmp/${FUNCNAME[0]}.compile.log
     waitfor "extract_and_mount_image"
     echo "* Installing Andrei Gherzan's RPI uboot fork."
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
+    chroot /mnt /bin/bash -c "mkimage -A arm64 -O linux -T script \
+    -d /etc/flash-kernel/bootscript/bootscr.rpi \
+    /boot/firmware/boot.scr"
+
 endfunc
 }
 
