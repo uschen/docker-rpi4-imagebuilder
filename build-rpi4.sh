@@ -576,6 +576,8 @@ startfunc
     if ! grep -qs 'initramfs' /mnt/boot/firmware/config.txt
         then echo "initramfs initrd.img followkernel" >> /mnt/boot/firmware/config.txt
     fi
+    if ! grep -qs 'enable_uart=1' /mnt/boot/firmware/config.txt
+        then echo "enable_uart=1" >> /mnt/boot/firmware/config.txt
 endfunc
 }
 
@@ -715,6 +717,7 @@ startfunc
     tee -a /mnt/etc/flash-kernel/db <<EOF
 #
 # Raspberry Pi 4 Model B Rev 1.1
+Machine: Raspberry Pi 4 Model B
 Machine: Raspberry Pi 4 Model B Rev 1.1
 DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
 Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
@@ -842,10 +845,6 @@ rpi_userland &
 andrei_gherzan_uboot_fork &
 # KERNEL_VERSION is set here:
 build_kernel &
-#get_kernel_src
-#get_armstub8-gic &
-#get_non-free_firmware &
-#get_rpi_userland &
 extract_and_mount_image
 setup_arm64_chroot
 configure_rpi_config_txt &
