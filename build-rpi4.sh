@@ -329,9 +329,9 @@ startfunc
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags=
-    echo "Remote hash: $remote_git"
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
-    echo "Local hash: $local_git"
+    echo "${FUNCNAME[0]} local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
@@ -390,8 +390,8 @@ startfunc
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
-    echo "Remote hash: $remote_git"
-    echo "Local hash: $local_git"
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
+    echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
     else
@@ -603,8 +603,8 @@ startfunc
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
-    echo "Remote hash: $remote_git"
-    echo "Local hash: $local_git"
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
+    echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
     else
@@ -661,8 +661,8 @@ startfunc
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
-    echo "Remote hash: $remote_git"
-    echo "Local hash: $local_git"
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
+    echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
     else
@@ -730,8 +730,8 @@ startfunc
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
-    echo "Remote hash: $remote_git"
-    echo "Local hash: $local_git"
+    echo "${FUNCNAME[0]} remote hash: $remote_git"
+    echo "${FUNCNAME[0]} local hash: $local_git"
     if [ "$remote_git" = "$local_git" ]; then
         echo ""
     else
