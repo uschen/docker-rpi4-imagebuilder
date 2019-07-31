@@ -117,7 +117,8 @@ git_check () {
 
 local_check () {
     local git_path="$1"
-    local git_output=`git -C $git_path rev-parse HEAD 2>/dev/null`
+    [ -z "$2" ] && local git_branch="HEAD" || local git_branch="$2"
+    local git_output=`git -C $git_path rev-parse ${git_branch} 2>/dev/null`
     echo $git_output
 }
 
@@ -319,7 +320,7 @@ startfunc
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo")
-    local local_git=$(local_check "$src_cache/$local_path")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
@@ -382,7 +383,7 @@ startfunc
     mkdir -p $workdir/$local_path
     
     local remote_git=$(git_check "$git_repo")
-    local local_git=$(local_check "$src_cache/$local_path")
+    local local_git=$(local_check "$src_cache/$local_path" "$git_branch")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
     [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $git_branch "
