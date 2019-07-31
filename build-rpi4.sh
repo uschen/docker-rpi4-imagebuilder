@@ -91,7 +91,7 @@ waitfor () {
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    echo "-- ${FUNCNAME[1]} start."
+    #echo "-- ${FUNCNAME[1]} start."
 }
 
 endfunc () {
@@ -101,7 +101,7 @@ endfunc () {
     # debugging
     [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
     [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    echo "++ ${FUNCNAME[1]} done."
+    #echo "++ ${FUNCNAME[1]} done."
 }
 
 
