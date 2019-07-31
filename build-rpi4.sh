@@ -22,16 +22,16 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 #image_compressors=("lz4")
 
-# Currently broken if this is disabled. I need to fix this. :p
-DEBUG=0
+# Currently broken if this is unset. I need to fix this. :p
+DEBUG=1
 export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M"`
 
 # Create debug output folder.
-[[ -n $DEBUG ]] && mkdir -p /output/$now/
-[[ -n $DEBUG ]] && chown $USER:$GROUP /output/$now/
+[[ $DEBUG ]] && ( mkdir -p /output/$now/ ; chown $USER:$GROUP /output/$now/ )
+#[[ $DEBUG ]] && chown $USER:$GROUP /output/$now/
 
 # Logging Setup
 TMPLOG=/tmp/build.log
@@ -102,8 +102,8 @@ endfunc () {
     # inotifywait is having issues in docker.
     touch /tmp/*
     # debugging
-    [[ -n $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
-    [[ -n $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
+    [[ $DEBUG ]] && env > /output/$now/${FUNCNAME[1]}.env
+    [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
     #echo "++ ${FUNCNAME[1]} done."
 }
 
