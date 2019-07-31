@@ -68,7 +68,7 @@ mkdir -p $apt_cache/partial
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
 
-
+# Utility Functions
 
 inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
@@ -78,8 +78,6 @@ inotify_touch_events () {
         sleep 1
     done
 }
-
-
 
 waitfor () {
     local waitforit
@@ -127,6 +125,16 @@ local_check () {
     echo $git_output
 }
 
+
+# Standalone get with git function
+# get_software_src () {
+# startfunc
+# 
+#     git_get "gitrepo" "local_path" "git_branch"
+# 
+# endfunc
+# }
+
 git_get () {
     local git_repo="$1"
     local local_path="$2"
@@ -163,6 +171,8 @@ git_get () {
     rsync -a $src_cache/$local_path $workdir/
 }
 
+
+# Main functions
 
 download_base_image () {
 startfunc
@@ -334,14 +344,6 @@ startfunc
 endfunc
 }
 
-# get_rpi_firmware () {
-# startfunc
-# 
-#     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
-# 
-# endfunc
-# }
-
 
 install_rpi_firmware () {
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
@@ -358,17 +360,8 @@ startfunc
 endfunc
 }
 
-get_kernel_src () {
-startfunc
-
-    git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
-
-endfunc
-}
-
-
 build_kernel () {
-    waitfor "get_kernel_src"
+    git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
     waitfor "setup_arm64_chroot"
 startfunc    
     echo "* Building $kernel_branch kernel."
@@ -537,17 +530,8 @@ install_kernel_headers () {
     # /mnt/usr/src/linux-headers-${KERNEL_VERSION}/
 }
 
-get_armstub8-gic () {
-startfunc
-
-    git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
-
-endfunc
-}
-
-
 install_armstub8-gic () {
-    waitfor "get_armstub8-gic"
+    git_get "https://github.com/raspberrypi/tools.git" "rpi-tools"
     waitfor "extract_and_mount_image"
 startfunc    
     echo "* Installing RPI4 armstub8-gic source."
@@ -558,18 +542,8 @@ startfunc
 endfunc
 }
 
-get_non-free_firmware () {
-startfunc
-
-    git_get "https://github.com/RPi-Distro/firmware-nonfree" "firmware-nonfree"
-
-endfunc
-}
-
-
-
 install_non-free_firmware () {
-    waitfor "get_non-free_firmware"
+    git_get "https://github.com/RPi-Distro/firmware-nonfree" "firmware-nonfree"
     waitfor "extract_and_mount_image"
 startfunc    
     cp -avf $workdir/firmware-nonfree/* /mnt/usr/lib/firmware
@@ -596,17 +570,8 @@ startfunc
 endfunc
 }
 
-get_rpi_userland () {
-startfunc
-
-    git_get "https://github.com/raspberrypi/userland" "rpi-userland"
-
-endfunc
-}
-
-
 install_rpi_userland () {
-    waitfor "get_rpi_userland"
+    git_get "https://github.com/raspberrypi/userland" "rpi-userland"
     waitfor "extract_and_mount_image"
 startfunc
     echo "* Installing Raspberry Pi userland source."
@@ -849,17 +814,16 @@ inotify_touch_events &
 
 checkfor_base_image
 install_rpi_firmware &
-get_kernel_src
-get_armstub8-gic &
-get_non-free_firmware &
-get_rpi_userland &
-extract_and_mount_image
-setup_arm64_chroot
-
 install_armstub8-gic &
 install_non-free_firmware & 
-configure_rpi_config_txt &
 install_rpi_userland &
+#get_kernel_src
+#get_armstub8-gic &
+#get_non-free_firmware &
+#get_rpi_userland &
+extract_and_mount_image
+setup_arm64_chroot
+configure_rpi_config_txt &
 modify_wifi_firmware &
 install_first_start_cleanup_script &
 make_kernel_install_scripts &
