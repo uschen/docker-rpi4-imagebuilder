@@ -66,7 +66,7 @@ apt_cache=/cache/apt_cache
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof -qq
 
 # Utility Functions
 
@@ -381,7 +381,7 @@ startfunc
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=$workdir/kernel-build \
-    bcm2711_defconfig
+    bcm2711_defconfig &> /tmp/${FUNCNAME[0]}.compile.log
     
     cd $workdir/kernel-build
     # Use kernel config modification script from sakaki- found at 
@@ -393,7 +393,7 @@ startfunc
     yes "" | make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=.$workdir/kernel-build/ \
-    olddefconfig
+    olddefconfig &> /tmp/${FUNCNAME[0]}.compile.log
     
     cd ..
 
@@ -401,7 +401,7 @@ startfunc
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    -j $(($(nproc) + 1)) O=$workdir/kernel-build
+    -j $(($(nproc) + 1)) O=$workdir/kernel-build &> /tmp/${FUNCNAME[0]}.compile.log
     
     
     KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | \
@@ -422,7 +422,7 @@ startfunc
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
     LOCALVERSION=-${kernelrev} \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build \
-    modules_prepare"
+    modules_prepare" &> /tmp/${FUNCNAME[0]}.compile.log
 
     mkdir -p $workdir/kernel-build/tmp/scripts/mod
     mkdir -p $workdir/kernel-build/tmp/scripts/basic
@@ -445,10 +445,10 @@ startfunc
     # so that qemu-static can just deal with them without library issues during the 
     # packaging process. This two lines may not be needed.
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/basic/fixdep.c -o \
-    $workdir/kernel-build/tmp/scripts/basic/fixdep
+    $workdir/kernel-build/tmp/scripts/basic/fixdep &> /tmp/${FUNCNAME[0]}.compile.log
     
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/recordmcount.c -o \
-    $workdir/kernel-build/tmp/scripts/recordmount
+    $workdir/kernel-build/tmp/scripts/recordmount &> /tmp/${FUNCNAME[0]}.compile.log
 
     
     debcmd="make \
@@ -458,7 +458,7 @@ startfunc
     bindeb-pkg"
     
     echo $debcmd
-    $debcmd
+    $debcmd > /tmp/${FUNCNAME[0]}.compile.log
     echo "* Copying out $KERNEL_VERSION kernel debs."
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
@@ -472,7 +472,7 @@ startfunc
     LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
     -j $(($(nproc) + 1))  O=$workdir/kernel-build \
-    modules_install
+    modules_install &> /tmp/${FUNCNAME[0]}.compile.log
     
 endfunc
 }

@@ -25,6 +25,7 @@ RUN set -ex \
                git \
                inotify-tools \
                kpartx \
+               lsof \
                lz4 \
                libelf-dev \
                libguestfs-tools \
