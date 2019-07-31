@@ -322,9 +322,9 @@ startfunc
     local local_git=$(local_check "$src_cache/$local_path")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
-    [ -z $git_branch ] && git_extra_flags= || git_extra_flags="-b $branch"
-    local git_flags="--quiet --depth=1"
-    local clone_flags="$git_repo $git_extra_flags"
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags=
     echo "Remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
@@ -385,9 +385,9 @@ startfunc
     local local_git=$(local_check "$src_cache/$local_path")
     
     #[[ $git_branch ]] && git_extra_flags= || git_extra_flags="-b $branch"
-    [ -z $git_branch ] && git_extra_flags= || git_extra_flags="-b $branch"
-    local git_flags="--quiet --depth=1"
-    local clone_flags="$git_repo $git_extra_flags"
+    [ -z $git_branch ] && git_extra_flags= || git_extra_flags=" -b $branch "
+    local git_flags=" --quiet --depth=1 "
+    local clone_flags=" $git_extra_flags $git_repo "
     local pull_flags=
     echo "Remote hash: $remote_git"
     #echo $remote_git > /tmp/remote.git
