@@ -130,9 +130,9 @@ local_check () {
 git_get () {
 startfunc
     
-    local git_repo="%1"
-    local local_path="%2"
-    local git_branch="%3"
+    local git_repo="$1"
+    local local_path="$2"
+    local git_branch="$3"
     [ ! -z "$3" ] || git_branch=
     mkdir -p $src_cache/$local_path
     mkdir -p $workdir/$local_path
@@ -337,7 +337,7 @@ startfunc
 endfunc
 }
 
-get_rpi_firmware_new () {
+get_rpi_firmware () {
 startfunc
 
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
@@ -345,7 +345,7 @@ startfunc
 endfunc
 }
 
-get_rpi_firmware () {
+get_rpi_firmware_old () {
 startfunc
     local git_branch=
     local git_repo="https://github.com/Hexxeh/rpi-firmware"
