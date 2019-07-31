@@ -553,7 +553,7 @@ non-free_firmware () {
     git_get "https://github.com/RPi-Distro/firmware-nonfree" "firmware-nonfree"
     waitfor "extract_and_mount_image"
 startfunc    
-    cp -avf $workdir/firmware-nonfree/* /mnt/usr/lib/firmware
+    cp -af $workdir/firmware-nonfree/* /mnt/usr/lib/firmware
 endfunc
 }
 
@@ -561,7 +561,7 @@ endfunc
 configure_rpi_config_txt () {
     waitfor "extract_and_mount_image"
 startfunc    
-    echo "* Making /boot/firmware/config.txt modifications. &"
+    echo "* Making /boot/firmware/config.txt modifications."
     echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
     echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
