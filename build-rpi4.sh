@@ -128,8 +128,6 @@ local_check () {
 }
 
 git_get () {
-startfunc
-    
     local git_repo="$1"
     local local_path="$2"
     local git_branch="$3"
@@ -163,7 +161,6 @@ startfunc
     echo "* ${FUNCNAME[1]} copying from cache."
     echo ""
     rsync -a $src_cache/$local_path $workdir/
-endfunc
 }
 
 
