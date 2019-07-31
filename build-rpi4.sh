@@ -606,7 +606,7 @@ EOF
     tee /mnt/etc/profile.d/98-rpi.sh <<EOF
 # /etc/profile.d/98-rpi.sh
 # Adds Raspberry Pi Foundation userland binaries to path
-export PATH="$PATH:/opt/vc/bin:/opt/vc/sbin"
+export PATH="\$PATH:/opt/vc/bin:/opt/vc/sbin"
 EOF
        chmod +x /mnt/etc/profile.d/98-rpi.sh
        
@@ -826,10 +826,12 @@ startfunc
      echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
     ### Xdelta
     if [[ $XDELTA ]]; then
-    xdelta_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
-    $xdelta_compresscmd
-    xdelta_cpcmd="cp $workdir/patchout.xdelta.$i \
+        xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
+        $xdelta_patchout_compresscmd
+        xdelta_patchout_cpcmd="cp $workdir/patchout.xdelta.$i \
      /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
+        $xdelta_patchout_cpcmd
+        chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
     fi
     done
 endfunc
