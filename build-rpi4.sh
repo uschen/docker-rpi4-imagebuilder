@@ -834,8 +834,8 @@ startfunc
 
     if [[ $XDELTA ]]; then
         echo "* Making xdelta binary diffs between today's eoan base image"
-        echo "* and the new images.
-        xdelta delta -p -V $workdir/old_image.img $workdir/$base_image $workdir/patchout.xdelta
+        echo "* and the new images."
+        xdelta delta -p -V $workdir/old_image.img $workdir/${new_image}.img $workdir/patchout.xdelta
         for i in "${image_compressors[@]}"
         do
             xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
