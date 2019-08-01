@@ -181,7 +181,7 @@ git_get () {
         git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} copying files from cache. *"
+    printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} files copying from cache. *"
     echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
@@ -197,7 +197,7 @@ startfunc
 endfunc
 }
 
-checkfor_base_image () {
+base_image_check () {
 startfunc
     echo "* Checking for downloaded ${base_image} ."
     cd $workdir
@@ -213,8 +213,8 @@ startfunc
 endfunc
 }
 
-extract_and_mount_image () {
-    waitfor "checkfor_base_image"
+image_extract_and_mount () {
+    waitfor "base_image_check"
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img
@@ -238,8 +238,8 @@ startfunc
 endfunc
 }
 
-setup_arm64_chroot () {
-    waitfor "extract_and_mount_image"
+arm64_chroot_setup () {
+    waitfor "image_extract_and_mount"
 startfunc    
     echo "* Setup ARM64 chroot"
     cp /usr/bin/qemu-aarch64-static /mnt/usr/bin
@@ -363,7 +363,7 @@ endfunc
 
 rpi_firmware () {
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
 startfunc    
     cd $workdir
     echo "* Installing current RPI firmware."
@@ -376,7 +376,7 @@ startfunc
 endfunc
 }
 
-build_kernel () {
+kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
     echo "* Building $kernel_branch kernel."
@@ -432,8 +432,8 @@ startfunc
     done
     
     # This is all we can do before the image is mounted.
-    waitfor "extract_and_mount_image"   
-    waitfor "setup_arm64_chroot"
+    waitfor "image_extract_and_mount"   
+    waitfor "arm64_chroot_setup"
     
     chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; make \
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
@@ -496,9 +496,9 @@ startfunc
 endfunc
 }
 
-install_kernel () {
-    waitfor "build_kernel"
-    waitfor "extract_and_mount_image"
+kernel_install () {
+    waitfor "kernel_build"
+    waitfor "image_extract_and_mount"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
     df -h
@@ -531,8 +531,8 @@ startfunc
 endfunc
 }
 
-install_kernel_modules () {
-    waitfor "install_kernel"
+kernel_module_install () {
+    waitfor "kernel_install"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` modules to image."
     # Ubuntu has /lib as a symlink to /usr/lib so we don't want to overwrite that!
@@ -543,8 +543,8 @@ startfunc
 endfunc
 }
 
-install_kernel_dtbs () {
-    waitfor "install_kernel"
+kernel_install_dtbs () {
+    waitfor "kernel_install"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` dtbs & dtbos to image."
     cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/ 
@@ -568,22 +568,22 @@ armstub8-gic () {
 startfunc    
     cd $workdir/rpi-tools/armstubs
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make armstub8-gic.bin &>> /tmp/${FUNCNAME[0]}.compile.log
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
     cp $workdir/rpi-tools/armstubs/armstub8-gic.bin /mnt/boot/firmware/armstub8-gic.bin
 endfunc
 }
 
 non-free_firmware () {
     git_get "https://github.com/RPi-Distro/firmware-nonfree" "firmware-nonfree"
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
 startfunc    
     cp -af $workdir/firmware-nonfree/* /mnt/usr/lib/firmware
 endfunc
 }
 
 
-configure_rpi_config_txt () {
-    waitfor "extract_and_mount_image"
+rpi_config_txt_configuration () {
+    waitfor "image_extract_and_mount"
 startfunc    
     echo "* Making /boot/firmware/config.txt modifications."
     tee -a /mnt/boot/firmware/config.txt <<EOF
@@ -625,7 +625,7 @@ endfunc
 
 rpi_userland () {
     git_get "https://github.com/raspberrypi/userland" "rpi-userland"
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
 startfunc
     echo "* Installing Raspberry Pi userland source."
     cd $workdir
@@ -658,8 +658,8 @@ EOF
 endfunc
 }
 
-modify_wifi_firmware () {
-    waitfor "extract_and_mount_image"
+wifi_firmware_modification () {
+    waitfor "image_extract_and_mount"
     waitfor "install_non-free_firmware"
 startfunc    
     echo "* Modifying wireless firmware."
@@ -682,7 +682,7 @@ startfunc
     echo "CONFIG_REGEX=y" >> $workdir/u-boot/configs/rpi_4_defconfig
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make rpi_4_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- make -j $(($(nproc) + 1)) &>> /tmp/${FUNCNAME[0]}.compile.log
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
     echo "* Installing Andrei Gherzan's RPI uboot fork to image."
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/uboot.bin
     cp $workdir/u-boot/u-boot.bin /mnt/boot/firmware/kernel8.bin
@@ -699,9 +699,9 @@ endfunc
 
 
 
-install_first_start_cleanup_script () {
-    waitfor "extract_and_mount_image"
-    waitfor "build_kernel"
+first_boot_script_setup () {
+    waitfor "image_extract_and_mount"
+    waitfor "kernel_build"
 startfunc    
     echo "* Creating first start cleanup script."
     tee /mnt/etc/rc.local <<EOF
@@ -727,7 +727,7 @@ endfunc
 } 
 
 make_kernel_install_scripts () {
-    waitfor "extract_and_mount_image"
+    waitfor "image_extract_and_mount"
 startfunc    
 ## This script allows flash-kernel to create the uncompressed kernel file
 #    # on the boot partition.
@@ -778,11 +778,11 @@ EOF
 endfunc
 }
 
-cleanup_image_remove_chroot () {
-    waitfor "build_kernel"
-    waitfor "install_kernel"
-    waitfor "install_kernel_modules"
-    waitfor "install_kernel_dtbs"
+image_and_chroot_cleanup () {
+    waitfor "kernel_build"
+    waitfor "kernel_install"
+    waitfor "kernel_module_install"
+    waitfor "kernel_install_dtbs"
 startfunc    
     echo "* Finishing image setup."
     
@@ -816,7 +816,7 @@ startfunc
         echo "in a shell into this container to continue."
     fi 
      
-    waitfor "ok_to_unmount_image_after_build"
+    waitfor "ok_to_umount_image_after_build"
     umount /mnt/build
     umount /mnt/run
     umount /mnt/ccache
@@ -829,7 +829,7 @@ startfunc
 endfunc
 }
 
-unmount_image () {
+image_unmount () {
 startfunc
     echo "* Unmounting modified ${new_image}.img"
     sync
@@ -852,7 +852,7 @@ startfunc
 endfunc
 }
 
-export_compressed_image () {
+compressed_image_export () {
 startfunc
 
     
@@ -879,7 +879,7 @@ startfunc
 endfunc
 }    
 
-export_xdelta_image () {
+xdelta_image_export () {
 startfunc
         echo "* Making xdelta binary diffs between today's eoan base image"
         echo "* and the new images."
@@ -900,7 +900,7 @@ endfunc
 }
 
 export_log () {
-    waitfor "export_compressed_image"
+    waitfor "compressed_image_export"
 startfunc
     echo "* Build log at: build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log"
     cat $TMPLOG > /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
@@ -912,15 +912,15 @@ endfunc
 # debug the container before the image is unmounted.
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
-# Note that this flag is looked for in the cleanup_image_remove_chroot function
-touch /tmp/ok_to_unmount_image_after_build.done
+# Note that this flag is looked for in the image_and_chroot_cleanup function
+touch /tmp/ok_to_umount_image_after_build.done
 
 
 # Delete this by connecting to the container using a shell if you want to 
 # debug the container before the container is exited.
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
-# Note that this flag is looked for in the cleanup_image_remove_chroot function
+# Note that this flag is looked for in the image_and_chroot_cleanup function
 touch /tmp/ok_to_exit_container_after_build.done
 
 # inotify in docker seems to not recognize that files are being 
@@ -928,28 +928,28 @@ touch /tmp/ok_to_exit_container_after_build.done
 # So we will work around it.
 inotify_touch_events &
 
-checkfor_base_image
+base_image_check
 rpi_firmware &
 armstub8-gic &
 non-free_firmware & 
 rpi_userland &
 andrei_gherzan_uboot_fork &
 # KERNEL_VERSION is set here:
-build_kernel &
-extract_and_mount_image
-setup_arm64_chroot
-configure_rpi_config_txt &
-modify_wifi_firmware &
-install_first_start_cleanup_script &
+kernel_build &
+image_extract_and_mount
+arm64_chroot_setup
+rpi_config_txt_configuration &
+wifi_firmware_modification &
+first_boot_script_setup &
 make_kernel_install_scripts &
-install_kernel
-install_kernel_modules &
-install_kernel_dtbs &
-cleanup_image_remove_chroot
-unmount_image
-export_compressed_image &
-[[ $XDELTA ]] && export_xdelta_image
-[[ $XDELTA ]] && waitfor "export_xdelta_image"
+kernel_install
+kernel_module_install &
+kernel_install_dtbs &
+image_and_chroot_cleanup
+image_unmount
+compressed_image_export &
+[[ $XDELTA ]] && xdelta_image_export
+[[ $XDELTA ]] && waitfor "xdelta_image_export"
 export_log
 # This stops the tail process.
 rm $TMPLOG
