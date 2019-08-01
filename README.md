@@ -9,11 +9,19 @@ This creates a docker container to build an Ubuntu 19.10 server image for a Rasp
 A new kernel is compiled, and current firmware is copied into the container.
 
 
-### Supported/Issues seen on the 4Gb RPI4:
-| Boot Option | How to Enable | Issues |
-| --- | --- | --- |
-| u-boot at /boot/firmware/kernel8.img | sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img | Only 1 Gb RAM, USB Works |
-| uncompressed linux kernel at /boot/firmware/kernel8.img | sudo cp /boot/firmware/uboot.bin /boot/firmware/kernel8.img | All 4Gb RAM, No USB |
+### Current capatiblity options on the 4Gb RPI4:
+
+| Boot Option | How to Enable | RAM | USB|
+| --- | --- | --- | --- |
+| u-boot at /boot/firmware/kernel8.img | sudo cp /boot/firmware/uboot.bin /boot/firmware/kernel8.img ; sudo reboot | 1 Gb | **Works** |
+| uncompressed linux kernel at /boot/firmware/kernel8.img | sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img ; sudo reboot | **4Gb** | No |
+| uncompressed linux kernel at /boot/firmware/kernel8.img |  sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img ; [ \`grep -cs "total_mem=" /boot/firmware/config.txt\` -gt 0 ]  && sudo sed  \'s/total_mem=*$/total_mem=3072/\' /boot/firmware/config.txt \|\| echo "total_mem=3072" \| sudo tee -a /boot/firmware/config.txt | 3Gb | **Works** |
+
+
+
+Note that there is a bug opened on this issue here: https://github.com/raspberrypi/linux/issues/3093
+
+
 
 ## Default is booting with u-boot just like a normal ubuntu image.
 
