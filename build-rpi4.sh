@@ -758,6 +758,12 @@ startfunc
     -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
     -d install binfmt-support -qq 2>/dev/null
 
+
+    # I'm not sure where this is needed, but kernel install
+    # craps out without this: /lib/firmware/`uname -r`/device-tree/
+    # So we create it:
+    mkdir -p /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
+    
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
     echo "* Copying compiled kernel debs to image for proper install"
