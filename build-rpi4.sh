@@ -392,14 +392,17 @@ startfunc
     echo "* Building $kernel_branch kernel."
     
     
-        # Get rid of dirty as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
+        # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
-    cd $workdir/rpi-linux
-    git update-index --refresh
-    git diff-index --quiet HEAD
+    sed -i \
+     "s/scripts\/package/scripts\/package\\\|Makefile\\\|scripts\/setlocalversion/g" \
+     $workdir/rpi-linux/scripts/setlocalversion
+
+    #cd $workdir/rpi-linux
+    #git update-index --refresh
+    #git diff-index --quiet HEAD
     
-    
-    kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
+    #kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
     cd $workdir/rpi-linux
     mkdir $workdir/kernel-build
     
@@ -496,6 +499,7 @@ startfunc
     bindeb-pkg"
     #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
+    echo "* Making $KERNEL_VERSION kernel debs."
     echo $debcmd
     $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
     echo "* Copying out $KERNEL_VERSION kernel debs."
