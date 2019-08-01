@@ -100,7 +100,7 @@ waitfor () {
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    printf "%${COLUMNS}s\n" "-- ${FUNCNAME[1]} start."
+    printf "%${COLUMNS}s\n" "|-> ${FUNCNAME[1]} start."
 }
 
 endfunc () {
@@ -110,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "%${COLUMNS}s\n" "++ ${FUNCNAME[1]} done."
+    printf "%${COLUMNS}s\n" "->| ${FUNCNAME[1]} done."
 }
 
 
@@ -159,13 +159,13 @@ git_get () {
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags="origin/$git_branch"
-    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} \
-    remote hash: $remote_git" "local hash: $local_git"
+    printf    "%${COLUMNS}s\n" "--${FUNCNAME[1]} \n "\
+    "remote hash: $remote_git" " \n " "local hash: $local_git"
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
-        printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} refreshing cache files from git. *"
+        printf "%${COLUMNS}s\n"  "🤔 ${FUNCNAME[1]} refreshing cache files from git."
         
         
         cd $src_cache
@@ -179,11 +179,11 @@ git_get () {
         ( rm -rf $src_cache/$local_path ; cd $src_cache ; git clone $git_flags $clone_flags $local_path ) 2>> /tmp/${FUNCNAME[1]}.git.log
         
         local last_commit=`git log -1 --quiet 2> /dev/null`
-        printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} Last Commit: *" " \n " "${last_commit}"
+        printf "%${COLUMNS}s\n"  "*🧐 ${FUNCNAME[1]} Last Commit:" " \n " "${last_commit}"
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "* ${FUNCNAME[1]} files copying from cache. *"
+    printf "%${COLUMNS}s\n"  "😎 ${FUNCNAME[1]} files copying from cache." " \n "
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
