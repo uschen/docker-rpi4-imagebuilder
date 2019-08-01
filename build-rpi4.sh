@@ -179,11 +179,11 @@ git_get () {
         ( rm -rf $src_cache/$local_path ; cd $src_cache ; git clone $git_flags $clone_flags $local_path ) 2>> /tmp/${FUNCNAME[1]}.git.log
         
         local last_commit=`git log -1 --quiet 2> /dev/null`
-        printf "%${COLUMNS}s\n"  "*🧐 ${FUNCNAME[1]} Last Commit:" " \n " "${last_commit}"
+        printf "%${COLUMNS}s\n"  "*🧐 ${FUNCNAME[1]} Last Commit:" "${last_commit}"
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "😎 ${FUNCNAME[1]} files copying from cache." " \n "
+    printf "%${COLUMNS}s\n"  "😎 ${FUNCNAME[1]} files copying from cache."
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
