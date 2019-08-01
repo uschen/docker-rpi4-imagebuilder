@@ -10,8 +10,8 @@ A new kernel is compiled, and current firmware is copied into the container.
 
 
 ### Supported:
-## 4Gb of RAM on the 4B
-## Booting with u-boot just like a normal ubuntu image
+## 4Gb of RAM on the 4B (booting directly with a linux kernel saved as kernel8.img on the boot partition.)
+## Booting with u-boot just like a normal ubuntu image (though this currently limits you to seeing 1Gb of memory.)
 
 Note that u-boot in the ubuntu package [u-boot-rpi](https://packages.ubuntu.com/eoan/u-boot-rpi) doesn't yet support the RPI. 
 This u-boot has been compiled from @agherzan's WIP u-boot [fork here](https://github.com/agherzan/u-boot/tree/ag/rpi4).
