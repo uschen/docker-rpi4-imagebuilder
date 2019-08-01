@@ -551,7 +551,7 @@ startfunc
     #Fix DTB install which for some reason doesn't happen properly in 
     # the generated deb.
     mkdir -p /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
-    rsync -arvm --include="*/" --include="*.dtbo" --include="*.dtb" --exclude="*" \
+    rsync -arm --include="*/" --include="*.dtbo" --include="*.dtb" --exclude="*" \
     $workdir/kernel-build/arch/arm64/boot/dts/ \
     /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
     
