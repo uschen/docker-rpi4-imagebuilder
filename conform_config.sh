@@ -42,6 +42,14 @@ unset_kernel_config() {
 # image otherwise which disallows logins.
 set_kernel_config CONFIG_SQUASHFS y
 
+# Add git tag to version
+set_kernel_config CONFIG_LOCALVERSION_AUTO y
+
+# This should be set automatically, but needed for proper dtb packaging... 
+# But still trying to figure out how to make this work right to put the dtb structure
+# into /lib/kernelver/device-tree/...
+set_kernel_config CONFIG_OF y
+
 # enable basic KVM support; see e.g.
 # https://www.raspberrypi.org/forums/viewtopic.php?f=63&t=210546&start=25#p1300453
 # set_kernel_config CONFIG_VIRTUALIZATION y

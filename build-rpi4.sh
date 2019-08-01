@@ -388,11 +388,12 @@ startfunc
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
+    
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=$workdir/kernel-build \
     bcm2711_defconfig &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     cd $workdir/kernel-build
     # Use kernel config modification script from sakaki- found at 
@@ -402,17 +403,17 @@ startfunc
     # This also enables the BPF syscall for systemd-journald firewalling
     /source-ro/conform_config.sh
     yes "" | make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     O=.$workdir/kernel-build/ \
     olddefconfig &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     cd ..
 
     cd $workdir/rpi-linux
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     # Not sure why setting this isn't working globally. :/
     export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
@@ -437,9 +438,9 @@ startfunc
     
     chroot /mnt /bin/bash -c "cd $workdir/rpi-linux ; make \
     CCACHE_DIR=/ccache PATH=/usr/lib/ccache:$PATH \
-    LOCALVERSION=-${kernelrev} \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build \
     modules_prepare" &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-${kernelrev} \
 
     mkdir -p $workdir/kernel-build/tmp/scripts/mod
     mkdir -p $workdir/kernel-build/tmp/scripts/basic
@@ -470,9 +471,9 @@ startfunc
     
     debcmd="make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     -j $(($(nproc) + 1)) O=$workdir/kernel-build \
     bindeb-pkg"
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     echo $debcmd
     $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
@@ -487,10 +488,11 @@ startfunc
     # first boot.
     mkdir $workdir/kernel-install
     sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
     -j $(($(nproc) + 1))  O=$workdir/kernel-build \
     modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    
     depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     
 endfunc
