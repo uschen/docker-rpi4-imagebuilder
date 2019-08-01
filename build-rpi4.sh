@@ -26,6 +26,10 @@ image_compressors=("lz4" "xz")
 #DEBUG=1
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
+# Needed for display
+COLUMNS="${COLUMNS:-80}"
+
+
 # Set Time Stamp
 now=`date +"%m_%d_%Y_%H%M%Z"`
 
@@ -96,7 +100,7 @@ waitfor () {
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    echo "-- ${FUNCNAME[1]} start."
+    printf "%${COLUMNS}s\n" "-- ${FUNCNAME[1]} start."
 }
 
 endfunc () {
@@ -106,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    echo "++ ${FUNCNAME[1]} done."
+    printf "%${COLUMNS}s\n" "++ ${FUNCNAME[1]} done."
 }
 
 
