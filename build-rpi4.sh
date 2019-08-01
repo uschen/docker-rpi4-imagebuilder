@@ -96,7 +96,7 @@ waitfor () {
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    #echo "-- ${FUNCNAME[1]} start."
+    echo "-- ${FUNCNAME[1]} start."
 }
 
 endfunc () {
@@ -106,7 +106,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    #echo "++ ${FUNCNAME[1]} done."
+    echo "++ ${FUNCNAME[1]} done."
 }
 
 
@@ -487,6 +487,7 @@ startfunc
     DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
     -j $(($(nproc) + 1))  O=$workdir/kernel-build \
     modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
+    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     
 endfunc
 }
@@ -502,7 +503,7 @@ startfunc
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
-    chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
+    #chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
     
     
     
@@ -530,9 +531,9 @@ install_kernel_modules () {
     waitfor "install_kernel"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` modules to image."
-    #rm  -rf $workdir/kernel-install/lib/modules/build
-    cp -avr $workdir/kernel-install/lib/modules/* \
-    /mnt/usr/lib/modules/ &>> /tmp/${FUNCNAME[0]}.install.log
+    # Ubuntu has /lib as a symlink to /usr/lib so we don't want to overwrite that!
+    cp -avr $workdir/kernel-install/lib/* \
+    /mnt/usr/lib/ &>> /tmp/${FUNCNAME[0]}.install.log
     
     rm  -rf /mnt/usr/lib/modules/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/build 
 endfunc
@@ -545,7 +546,15 @@ startfunc
     cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/ 
     cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
-        
+    cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
+    
+    #Fix DTB install which for some reason doesn't happen properly in 
+    # the generated deb.
+    mkdir -p /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
+    rsync -arvm --include="*/" --include="*.dtbo" --include="*.dtb" --exclude="*" \
+    $workdir/kernel-build/arch/arm64/boot/dts/ \
+    /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
+    
     cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb \
     /mnt/etc/flash-kernel/dtbs/    
 endfunc
