@@ -9,12 +9,16 @@ This creates a docker container to build an Ubuntu 19.10 server image for a Rasp
 A new kernel is compiled, and current firmware is copied into the container.
 
 
-### Supported:
-## 4Gb of RAM on the 4B (booting directly with a linux kernel saved as kernel8.img on the boot partition.)
-## Booting with u-boot just like a normal ubuntu image (though this currently limits you to seeing 1Gb of memory.)
+### Supported/Issues seen on the 4Gb RPI4:
+| Boot Option | How to Enable | Issues |
+| --- | --- | --- |
+| u-boot at /boot/firmware/kernel8.img | sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img | Only 1 Gb RAM, USB Works |
+| uncompressed linux kernel at /boot/firmware/kernel8.img | sudo cp /boot/firmware/uboot.bin /boot/firmware/kernel8.img | All 4Gb RAM, No USB |
 
-Note that u-boot in the ubuntu package [u-boot-rpi](https://packages.ubuntu.com/eoan/u-boot-rpi) doesn't yet support the RPI. 
-This u-boot has been compiled from @agherzan's WIP u-boot [fork here](https://github.com/agherzan/u-boot/tree/ag/rpi4).
+## Default is booting with u-boot just like a normal ubuntu image.
+
+Note that the u-boot in the ubuntu package [u-boot-rpi](https://packages.ubuntu.com/eoan/u-boot-rpi) doesn't yet support the RPI. 
+The u-boot here has been compiled from @agherzan's WIP u-boot [fork here](https://github.com/agherzan/u-boot/tree/ag/rpi4).
 
 
 ## Note that this container runs in PRIVILEGED MODE.
