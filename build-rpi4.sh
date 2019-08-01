@@ -231,6 +231,14 @@ startfunc
     kpartx -avs ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
+    
+    if [ ! -f /tmp/ok_to_continue_after_mount_image.done ]; then
+        echo "** Image mount done & container paused. **"
+        echo 'Type in "/tmp/ok_to_continue_after_mount_image.done"'
+        echo "in a shell into this container to continue."
+    fi 
+    waitfor "ok_to_continue_after_mount_image"
+    
     mount /dev/mapper/loop0p2 /mnt
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
     # Guestmount is at least an order of magnitude slower than using loopback device.
@@ -926,6 +934,9 @@ endfunc
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the image_and_chroot_cleanup function
 touch /tmp/ok_to_umount_image_after_build.done
+
+# For debugging.
+touch /tmp/ok_to_continue_after_mount_image.done
 
 
 # Delete this by connecting to the container using a shell if you want to 
