@@ -565,8 +565,20 @@ configure_rpi_config_txt () {
     waitfor "extract_and_mount_image"
 startfunc    
     echo "* Making /boot/firmware/config.txt modifications."
-    echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
-    echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
+    tee -a /mnt/boot/firmware/config.txt <<EOF
+#
+# This image was built on $now using software at
+# https://github.com/satmandu/docker-rpi4-imagebuilder/
+# 
+EOF
+    if ! grep -qs 'armstub=armstub8-gic.bin' /mnt/boot/firmware/config.txt
+        then echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
+    fi
+    
+    if ! grep -qs 'enable_gic=1' /mnt/boot/firmware/config.txt
+        then echo "enable_gic=1" >> /mnt/boot/firmware/config.txt
+    fi
+    
     if ! grep -qs 'arm_64bit=1' /mnt/boot/firmware/config.txt
         then echo "arm_64bit=1" >> /mnt/boot/firmware/config.txt
     fi
@@ -577,9 +589,16 @@ startfunc
     if ! grep -qs 'initramfs' /mnt/boot/firmware/config.txt
         then echo "initramfs initrd.img followkernel" >> /mnt/boot/firmware/config.txt
     fi
+    
     if ! grep -qs 'enable_uart=1' /mnt/boot/firmware/config.txt
         then echo "enable_uart=1" >> /mnt/boot/firmware/config.txt
     fi
+    
+    # 3Gb limitation because USB & devices do not work currently without this.
+     [ `grep -cs "total_mem=" /mnt/boot/firmware/config.txt` -gt 0 ] && \
+     sudo sed 's/total_mem=*$/total_mem=3072/' /mnt/boot/firmware/config.txt || \
+     echo "total_mem=3072" | sudo tee -a /mnt/boot/firmware/config.txt
+     
 endfunc
 }
 
