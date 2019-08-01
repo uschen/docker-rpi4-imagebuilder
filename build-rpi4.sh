@@ -70,7 +70,7 @@ apt_cache=/cache/apt_cache
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta vim -qq
 
 # Utility Functions
 
