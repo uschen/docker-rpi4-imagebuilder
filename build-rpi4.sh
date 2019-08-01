@@ -224,7 +224,7 @@ startfunc
     cd $workdir
     echo "* Mounting: ${new_image}.img"
 
-    kpartx -av ${new_image}.img
+    kpartx -avs ${new_image}.img
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
     mount /dev/mapper/loop0p2 /mnt
