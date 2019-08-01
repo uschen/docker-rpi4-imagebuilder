@@ -473,6 +473,7 @@ startfunc
     echo $debcmd
     $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
     echo "* Copying out $KERNEL_VERSION kernel debs."
+    rm $workdir/linux-libc-dev*.deb
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
 
@@ -497,6 +498,14 @@ startfunc
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
     df -h
     cd $workdir
+    #
+    # Try installing the generated debs in chroot before we do anything else.
+    cp $workdir/*.deb /mnt/tmp/
+    chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
+    chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
+    
+    
+    
     # Ubuntu defaults to using uBoot, which now works for RPI4, as of
     # July 31, 2019, so we copy that into /boot/firmware/kernel8.img later.
     # 
@@ -786,7 +795,7 @@ startfunc
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
     echo "* Copying compiled kernel debs to image for proper install"
-    echo "* at first boot."
+    echo "* at first boot and also so we have a copy locally."
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
     if [ ! -f /tmp/ok_to_unmount_image_after_build.done ]; then
