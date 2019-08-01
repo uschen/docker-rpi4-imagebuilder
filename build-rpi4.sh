@@ -550,7 +550,6 @@ startfunc
     cp $workdir/kernel-build/arch/arm64/boot/dts/broadcom/*.dtb /mnt/boot/firmware/ 
     cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     /mnt/boot/firmware/overlays/
-    cp $workdir/kernel-build/arch/arm64/boot/dts/overlays/*.dtbo \
     
     #Fix DTB install which for some reason doesn't happen properly in 
     # the generated deb.
