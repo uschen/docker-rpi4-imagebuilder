@@ -160,7 +160,7 @@ git_get () {
     local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags="origin/$git_branch"
     printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} \
-    remote hash: $remote_git\n %${COLUMNS}s\n local hash: $local_git"
+    remote hash: $remote_git" "%${COLUMNS}s\n" "local hash: $local_git"
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
