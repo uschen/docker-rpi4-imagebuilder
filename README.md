@@ -92,3 +92,14 @@ Do setup the Time Zone using ```sudo dpkg-reconfigure tzdata``` when you first l
 
 ## Note that running this repeatedly will create much container cruft.
 Consider running ```docker container prune``` on your docker machine to reclaim unused space.
+
+# Credit to:
+
+https://jamesachambers.com/raspberry-pi-ubuntu-server-18-04-2-installation-guide/
+
+https://blog.cloudkernels.net/posts/rpi4-64bit-image/
+
+https://andrei.gherzan.ro/linux/raspbian-rpi-64/
+https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
+
+https://github.com/sakaki-/bcm2711-kernel-bis
