@@ -392,6 +392,7 @@ startfunc
     
         # Get rid of dirty as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
+    cd $workdir/rpi-linux
     git update-index --refresh
     git diff-index --quiet HEAD
     
