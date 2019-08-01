@@ -12,8 +12,8 @@ A new kernel is compiled, and current firmware is copied into the container.
 ### Supported/Issues seen on the 4Gb RPI4:
 | Boot Option | How to Enable | Issues |
 | --- | --- | --- |
-| u-boot at /boot/firmware/kernel8.img | sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img | Only 1 Gb RAM, USB Works |
-| uncompressed linux kernel at /boot/firmware/kernel8.img | sudo cp /boot/firmware/uboot.bin /boot/firmware/kernel8.img | All 4Gb RAM, No USB |
+| u-boot at /boot/firmware/kernel8.img | sudo cp /boot/firmware/uboot.bin /boot/firmware/kernel8.img | Only 1 Gb RAM, USB Works |
+| uncompressed linux kernel at /boot/firmware/kernel8.img | sudo cp /boot/firmware/kernel8.img.nouboot /boot/firmware/kernel8.img  | All 4Gb RAM, No USB |
 
 ## Default is booting with u-boot just like a normal ubuntu image.
 
