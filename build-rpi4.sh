@@ -674,6 +674,7 @@ if [ "\$_IP" ]; then
  printf "My IP address is %s\n" "\$_IP"
 fi
 #
+mkdir -p /lib/firmware/`uname -r`/device-tree/
 /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
 /usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
 /usr/bin/apt update && /usr/bin/apt upgrade -y
