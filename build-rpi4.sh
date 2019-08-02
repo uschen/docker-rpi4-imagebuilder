@@ -94,13 +94,13 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}. ⏭"
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}. ⏸⏭"
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} started. ⏯"
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} started.  ⏯"
 }
 
 endfunc () {
@@ -110,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}    done.⏹"
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}    done.  ⏹"
 }
 
 
@@ -162,13 +162,13 @@ git_get () {
     local a="${FUNCNAME[1]}"
     local b="remote hash: $remote_git"
     local c="local hash: $local_git"
-    printf "%${COLUMNS}s\n$a\n$b\n$c" 
+    printf "%${COLUMNS}s\n$a%${COLUMNS}s\n$b%${COLUMNS}s\n$c" 
       
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
     if [ ! "$remote_git" = "$local_git" ]; then
-        printf "%${COLUMNS}s\n"  "🤔 ${FUNCNAME[1]} refreshing cache files from git."
+        printf "%${COLUMNS}s\n"  "--${FUNCNAME[1]} refreshing cache files from git."
         
         
         cd $src_cache
@@ -186,7 +186,7 @@ git_get () {
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "😎 ${FUNCNAME[1]} files copying from cache."
+    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} files copying from cache.  😎"
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
