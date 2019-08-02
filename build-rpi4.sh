@@ -92,10 +92,11 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /tmp/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waiting for ${1}."
     while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} was waiting for ${1}."
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
@@ -723,33 +724,32 @@ startfunc
 endfunc
 }
 
-
-
-
 first_boot_script_setup () {
     waitfor "image_extract_and_mount"
     waitfor "kernel_build"
 startfunc    
     echo "* Creating first start cleanup script."
-    tee /mnt/etc/rc.local <<EOF
-#!/bin/sh -e
-# 1st Boot Cleanup Script
-#
-# Print the IP address
-_IP=\$(hostname -I) || true
-if [ "\$_IP" ]; then
- printf "My IP address is %s\n" "\$_IP"
-fi
-#
-mkdir -p /lib/firmware/`uname -r`/device-tree/
-/usr/bin/dpkg -i /var/cache/apt/archives/*.deb
-/usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
-/usr/bin/apt update && /usr/bin/apt upgrade -y
-/usr/sbin/update-initramfs -c -k all
-rm /etc/rc.local
-exit 0
-EOF
+    tee /mnt/etc/rc.local <<-'EOF'
+    #!/bin/sh -e
+    # 1st Boot Cleanup Script
+    #
+    # Print the IP address
+    _IP=$(hostname -I) || true
+    if [ "$_IP" ]; then
+        printf "My IP address is %s\n" "$_IP"
+    fi
+    #
+    mkdir -p /lib/firmware/`uname -r`/device-tree/
+    /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
+    /usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
+    /usr/bin/apt update && /usr/bin/apt upgrade -y
+    /usr/sbin/update-initramfs -c -k all
+    rm /etc/rc.local
+    exit 0
+    EOF
+    
     chmod +x /mnt/etc/rc.local
+    
 endfunc
 } 
 
@@ -758,7 +758,7 @@ kernel_install_scripts () {
 startfunc    
 
     ## This script allows flash-kernel to create the uncompressed kernel file
-    #    on the boot partition.
+    #  on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
     echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<-'EOF'
@@ -777,54 +777,56 @@ startfunc
     # If kernel8.img does not look like u-boot, then assume u-boot
     # is not being used.
     file /boot/firmware/kernel8.img | grep -vq "PCX" && \
-    gunzip -c -f \${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
+    gunzip -c -f ${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
     
     exit 0
     EOF
     chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 
-## This script makes the device tree folder that a bunch of kernel debs 
-# never bother installing.
+    ## This script makes the device tree folder that a bunch of kernel debs 
+    # never bother installing.
 
     mkdir -p /etc/kernel/preinst.d/
     echo "* Creating /etc/kernel/preinst.d/rpi4_make_device_tree_folders"
-    tee /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders <<EOF
-#!/bin/sh -eu
-#
-# This script keeps kernel installs from complaining about a missing 
-# device tree folder in /lib/firmware/kernelversion/device-tree
-# This should go in /etc/kernel/preinst.d/
+    tee /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders <<-'EOF'
+    #!/bin/sh -eu
+    #
+    # This script keeps kernel installs from complaining about a missing 
+    # device tree folder in /lib/firmware/kernelversion/device-tree
+    # This should go in /etc/kernel/preinst.d/
+    
+    KERNEL_VERSION="$1"
+    KERNEL_INSTALLED_PATH="$2"
+    
+    mkdir -p /usr/lib/firmware/${KERNEL_VERSION}/device-tree/
 
-KERNEL_VERSION="\$1"
-KERNEL_INSTALLED_PATH="\$2"
-
-mkdir -p /usr/lib/firmware/\${KERNEL_VERSION}/device-tree/
-
-exit 0
-EOF
+    exit 0
+    EOF
+    
     chmod +x /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
 
     
-    # Updated entry for the RPI 4B
-    # be copied to the boot partition.
+    # Updated flash-kernel db entry for the RPI 4B
+
     mkdir -p /mnt/etc/flash-kernel/
     echo "* Creating /mnt/etc/flash-kernel/db ."
-    tee -a /mnt/etc/flash-kernel/db <<EOF
-#
-# Raspberry Pi 4 Model B Rev 1.1
-Machine: Raspberry Pi 4 Model B
-Machine: Raspberry Pi 4 Model B Rev 1.1
-DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
-Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
-Boot-Kernel-Path: /boot/firmware/vmlinuz
-Boot-Initrd-Path: /boot/firmware/initrd.img
-Boot-Script-Path: /boot/firmware/boot.scr
-U-Boot-Script-Name: bootscr.rpi
-Required-Packages: u-boot-tools
-# XXX we should copy the entire overlay dtbs dir too
-# Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
-# not have the required u-boot for the RPI4 yet.
-EOF
+    tee -a /mnt/etc/flash-kernel/db <<-EOF
+    #
+    # Raspberry Pi 4 Model B Rev 1.1
+    Machine: Raspberry Pi 4 Model B
+    Machine: Raspberry Pi 4 Model B Rev 1.1
+    DTB-Id: /etc/flash-kernel/dtbs/bcm2711-rpi-4-b.dtb
+    Boot-DTB-Path: /boot/firmware/bcm2711-rpi-4-b.dtb
+    Boot-Kernel-Path: /boot/firmware/vmlinuz
+    Boot-Initrd-Path: /boot/firmware/initrd.img
+    Boot-Script-Path: /boot/firmware/boot.scr
+    U-Boot-Script-Name: bootscr.rpi
+    Required-Packages: u-boot-tools
+    # XXX we should copy the entire overlay dtbs dir too
+    # Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
+    # not have the required u-boot for the RPI4 yet.
+    EOF
+
 endfunc
 }
 
