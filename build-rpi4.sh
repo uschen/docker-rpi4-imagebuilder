@@ -729,7 +729,7 @@ first_boot_script_setup () {
     waitfor "kernel_build"
 startfunc    
     echo "* Creating first start cleanup script."
-    tee /mnt/etc/rc.local <<-'EOF'
+    cat <<-'EOF' > /mnt/etc/rc.local 
     #!/bin/sh -e
     # 1st Boot Cleanup Script
     #
