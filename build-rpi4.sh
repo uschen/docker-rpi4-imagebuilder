@@ -778,6 +778,29 @@ startfunc
 #EOF
 #    
 #    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
+
+## This script makes the device tree folder that a bunch of kernel debs 
+# never bother installing.
+
+    mkdir -p /etc/kernel/preinst.d/
+    echo "* Creating /etc/kernel/preinst.d/make-lib-device-tree-folders"
+    tee /mnt/etc/kernel/preinst.d/make-lib-device-tree-folders  <<EOF
+#!/bin/bash
+## This script allows kernel installs to create the uncompressed kernel file
+#    # on the boot partition.
+  
+# This should go in /etc/kernel/preinst.d/
+
+kernelver=$1
+
+#mkdir -p /usr/lib/firmware/$1/device-tree/overlays
+mkdir -p /usr/lib/firmware/$1/device-tree/
+
+exit 0
+EOF
+    
+    chmod +x /mnt/etc/kernel/preinst.d/make-lib-device-tree-folders
+
     
     # Updated entry for the RPI 4B
     # be copied to the boot partition.
