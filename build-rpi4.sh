@@ -96,8 +96,7 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]"
-    rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
@@ -180,12 +179,14 @@ git_get () {
         git reset --hard $pull_flags $git_flags 2>> /tmp/${FUNCNAME[1]}.git.log || \
         ( rm -rf $src_cache/$local_path ; cd $src_cache ; git clone $git_flags $clone_flags $local_path ) 2>> /tmp/${FUNCNAME[1]}.git.log
         
-        local last_commit=`git log -1 --quiet 2> /dev/null`
-        printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
+        #local last_commit=`git log -1 --quiet 2> /dev/null`
+        #printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
     echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
+    local last_commit=`git log -1 --quiet 2> /dev/null`
+    printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
@@ -379,9 +380,7 @@ rpi_firmware () {
     waitfor "image_extract_and_mount"
 startfunc    
     cd $workdir/rpi-firmware
-    local last_commit=`git log -1 --quiet 2> /dev/null`
-    echo "* Installing current RPI firmware." && printf "%${COLUMNS}s\n" \
-     "*${FUNCNAME[0]} Last Commit:" "${last_commit}"
+    echo "* Installing current RPI firmware."
     cp bootcode.bin /mnt/boot/firmware/
     cp *.elf /mnt/boot/firmware/
     cp *.dat /mnt/boot/firmware/
@@ -395,9 +394,6 @@ kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
     cd $workdir/rpi-linux
-    local last_commit=`git log -1 --quiet 2> /dev/null`
-    echo "* Building $kernel_branch kernel." && printf "%${COLUMNS}s\n" \
-     "*${FUNCNAME[0]} Last Commit:" "${last_commit}"
         # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
     sed -i \
