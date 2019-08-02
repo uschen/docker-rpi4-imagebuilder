@@ -527,8 +527,8 @@ kernel_install () {
     waitfor "image_extract_and_mount"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
-    df -h
-    cd $workdir
+    #df -h
+    #cd $workdir
     #
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
