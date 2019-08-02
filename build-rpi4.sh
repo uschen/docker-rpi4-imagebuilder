@@ -22,6 +22,9 @@ silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
 [[ $NOXZ ]] && image_compressors=("lz4")
 
+# Let's see if the inotify issues go away by moving function status
+#  files onto /build.
+mkdir /flag
 
 #DEBUG=1
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
@@ -81,7 +84,7 @@ function abspath {
 
 inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
-    while [ ! -f "/tmp/done.export_log" ]
+    while [ ! -f "/flag/done.export_log" ]
     do
         touch /tmp/*
         sleep 1
@@ -91,23 +94,24 @@ inotify_touch_events () {
 waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
-    touch /tmp/wait.${FUNCNAME[1]}_for_${1}
+    touch /flag/wait.${FUNCNAME[1]}_for_${1}
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
     while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
-    touch /tmp/start.${FUNCNAME[1]}
+    touch /flag/start.${FUNCNAME[1]}
     printf "%${COLUMNS}s\n" "Started: ${FUNCNAME[1]} [ ]"
 }
 
 endfunc () {
-    mv /tmp/start.${FUNCNAME[1]} /tmp/done.${FUNCNAME[1]}
+    mv /flag/start.${FUNCNAME[1]} /flag/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
-    touch /tmp/*
+    # Let's see if this needs to be done.
+    #touch /flag/*
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
@@ -136,11 +140,11 @@ local_check () {
 
 
 arbitrary_wait () {
-    # To stop here "rm /tmp/done.ok_to_continue_after_here".
+    # To stop here "rm /flag/done.ok_to_continue_after_here".
     # Arbitrary build pause for debugging
-    if [ ! -f /tmp/done.ok_to_continue_after_here ]; then
+    if [ ! -f /flag/done.ok_to_continue_after_here ]; then
         echo "** Build Paused. **"
-        echo 'Type in "touch /tmp/done.ok_to_continue_after_here"'
+        echo 'Type in "touch /flag/done.ok_to_continue_after_here"'
         echo "in a shell into this container to continue."
     fi 
     waitfor "ok_to_continue_after_here"
@@ -251,10 +255,10 @@ startfunc
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
     
-    # To stop here "rm /tmp/done.ok_to_continue_after_mount_image".
-    if [ ! -f /tmp/done.ok_to_continue_after_mount_image ]; then
+    # To stop here "rm /flag/done.ok_to_continue_after_mount_image".
+    if [ ! -f /flag/done.ok_to_continue_after_mount_image ]; then
         echo "** Image mount done & container paused. **"
-        echo 'Type in "/tmp/done.ok_to_continue_after_mount_image"'
+        echo 'Type in "/flag/done.ok_to_continue_after_mount_image"'
         echo "in a shell into this container to continue."
     fi 
     waitfor "ok_to_continue_after_mount_image"
@@ -907,10 +911,10 @@ startfunc
     echo "* at first boot and also so we have a copy locally."
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
-    # To stop here "rm /tmp/done.ok_to_unmount_image_after_build".
-    if [ ! -f /tmp/done.ok_to_unmount_image_after_build ]; then
+    # To stop here "rm /flag/done.ok_to_unmount_image_after_build".
+    if [ ! -f /flag/done.ok_to_unmount_image_after_build ]; then
         echo "** Container paused before image unmount. **"
-        echo 'Type in "touch /tmp/done.ok_to_unmount_image_after_build"'
+        echo 'Type in "touch /flag/done.ok_to_unmount_image_after_build"'
         echo "in a shell into this container to continue."
     fi 
      
@@ -941,10 +945,10 @@ startfunc
     #losetup -d /dev/loop0
     dmsetup remove_all
     
-    # To stop here "rm /tmp/done.ok_to_exit_container_after_build".
-    if [ ! -f /tmp/done.ok_to_exit_container_after_build ]; then
+    # To stop here "rm /flag/done.ok_to_exit_container_after_build".
+    if [ ! -f /flag/done.ok_to_exit_container_after_build ]; then
         echo "** Image unmounted & container paused. **"
-        echo 'Type in "touch /tmp/done.ok_to_exit_container_after_build"'
+        echo 'Type in "touch /flag/done.ok_to_exit_container_after_build"'
         echo "in a shell into this container to continue."
     fi 
     waitfor "ok_to_exit_container_after_build"
@@ -1019,20 +1023,20 @@ endfunc
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the image_and_chroot_cleanup function
-touch /tmp/done.ok_to_umount_image_after_build
+touch /flag/done.ok_to_umount_image_after_build
 
 # For debugging.
-touch /tmp/done.ok_to_continue_after_mount_image
+touch /flag/done.ok_to_continue_after_mount_image
 
 # Arbitrary pause for debugging.
-touch /tmp/done.ok_to_continue_after_here
+touch /flag/done.ok_to_continue_after_here
 
 # Delete this by connecting to the container using a shell if you want to 
 # debug the container before the container is exited.
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the image_and_chroot_cleanup function
-touch /tmp/done.ok_to_exit_container_after_build
+touch /flag/done.ok_to_exit_container_after_build
 
 # inotify in docker seems to not recognize that files are being 
 # created unless they are touched. Not sure where this bug is.
