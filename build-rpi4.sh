@@ -390,21 +390,20 @@ kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
     echo "* Building $kernel_branch kernel."
-    
-    
         # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
     sed -i \
      "s/scripts\/package/scripts\/package\\\|Makefile\\\|scripts\/setlocalversion/g" \
      $workdir/rpi-linux/scripts/setlocalversion
 
-    #cd $workdir/rpi-linux
-    #git update-index --refresh
-    #git diff-index --quiet HEAD
+    cd $workdir/rpi-linux
+    git update-index --refresh
+    git diff-index --quiet HEAD
     
     #kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
-    cd $workdir/rpi-linux
     mkdir $workdir/kernel-build
+    cd $workdir/rpi-linux
+    
     
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
