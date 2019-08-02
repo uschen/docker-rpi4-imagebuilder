@@ -236,6 +236,7 @@ startfunc
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
     
+    # To stop here "rm /tmp/done.ok_to_continue_after_mount_image".
     if [ ! -f /tmp/done.ok_to_continue_after_mount_image ]; then
         echo "** Image mount done & container paused. **"
         echo 'Type in "/tmp/done.ok_to_continue_after_mount_image"'
@@ -535,7 +536,7 @@ startfunc
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
     
-    
+    # To stop here "rm /tmp/done.ok_to_continue_after_here".
     # Arbitrary build pause for debugging
     if [ ! -f /tmp/done.ok_to_continue_after_here ]; then
         echo "** Build Paused. **"
@@ -872,6 +873,7 @@ startfunc
     echo "* at first boot and also so we have a copy locally."
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
+    # To stop here "rm /tmp/done.ok_to_unmount_image_after_build".
     if [ ! -f /tmp/done.ok_to_unmount_image_after_build ]; then
         echo "** Container paused before image unmount. **"
         echo 'Type in "touch /tmp/done.ok_to_unmount_image_after_build"'
@@ -905,6 +907,7 @@ startfunc
     #losetup -d /dev/loop0
     dmsetup remove_all
     
+    # To stop here "rm /tmp/done.ok_to_exit_container_after_build".
     if [ ! -f /tmp/done.ok_to_exit_container_after_build ]; then
         echo "** Image unmounted & container paused. **"
         echo 'Type in "touch /tmp/done.ok_to_exit_container_after_build"'
