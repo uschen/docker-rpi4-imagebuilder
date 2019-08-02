@@ -86,7 +86,7 @@ inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
     while [ ! -f "/flag/done.export_log" ]
     do
-        touch /tmp/*
+        touch /flag/*
         sleep 1
     done
 }
@@ -108,10 +108,11 @@ startfunc () {
 }
 
 endfunc () {
-    mv /flag/start.${FUNCNAME[1]} /flag/done.${FUNCNAME[1]}
+    rm /flag/start.${FUNCNAME[1]} 
+    touch /flag/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
     # Let's see if this needs to be done.
-    #touch /flag/*
+    touch /flag/*
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
@@ -275,6 +276,7 @@ startfunc
     mount /dev/mapper/loop0p1 /mnt/boot/firmware
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
+    
 endfunc
 }
 
