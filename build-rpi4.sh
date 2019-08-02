@@ -534,6 +534,16 @@ startfunc
     #
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
+    
+    
+    # Arbitrary build pause for debugging
+    if [ ! -f /tmp/done.ok_to_continue_after_mount_image ]; then
+        echo "** Build Paused. **"
+        echo 'Type in "/tmp/done.ok_to_continue_after_here"'
+        echo "in a shell into this container to continue."
+    fi 
+    waitfor "ok_to_continue_after_mount_image"
+    
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     #chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
     
@@ -972,6 +982,8 @@ touch /tmp/done.ok_to_umount_image_after_build
 # For debugging.
 touch /tmp/done.ok_to_continue_after_mount_image
 
+# Arbitrary pause for debugging.
+touch /tmp/done.ok_to_continue_after_here
 
 # Delete this by connecting to the container using a shell if you want to 
 # debug the container before the container is exited.
@@ -1011,3 +1023,4 @@ export_log
 # This stops the tail process.
 rm $TMPLOG
 echo "**** Done."
+
