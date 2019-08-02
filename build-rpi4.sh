@@ -201,10 +201,13 @@ git_get () {
         #ls $cache_path/$local_path
     fi
     echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
-    local last_commit=`cd $src_cache/$local_path ; git log --pretty=oneline \
-     -1 --quiet 2> /dev/null`
+    cd $src_cache/$local_path 
+    echo "*${FUNCNAME[1]} Last Commit:" && git log --graph \
+    --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) \
+    %C(bold blue)<%an>%Creset' --abbrev-commit \
+    --quiet 2> /dev/null`
     #printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" && echo "${last_commit}"
-    echo "*${FUNCNAME[1]} Last Commit:" && echo "${last_commit}"
+    #echo "*${FUNCNAME[1]} Last Commit:" 
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
@@ -431,9 +434,6 @@ startfunc
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     
-
-    
-    
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=$workdir/kernel-build \
@@ -464,14 +464,6 @@ startfunc
     export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     ###
     echo "* Kernel version is ${KERNEL_VERSION} *"
-    
-     # Don't remake debs if they already exist in output.
-   #  if [ -f "/output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
-#     [ -f "/output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]; then
-#     echo "Using existing $KERNEL_VERSION debs."
-#     cp /output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
-#     cp /output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
-#     else
     
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
@@ -522,9 +514,39 @@ startfunc
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/recordmcount.c -o \
     $workdir/kernel-build/tmp/scripts/recordmount &>> /tmp/${FUNCNAME[0]}.compile.log
 
+    kernel_debs
+
+    # Now that we have the kernel packages, let us go ahead and make a local 
+    # install anyways so that we can manually copy the required files over for
+    # first boot.
+    #mkdir $workdir/kernel-install
+    #sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    #DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
+    #-j $(($(nproc) + 1))  O=$workdir/kernel-build \
+    #modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
+#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    
+endfunc
+}
+
+kernel_debs () {
+startfunc
+   # Don't remake debs if they already exist in output.
+   echo "Looking for $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb \
+   and $apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb ."
+    if [ -f "$apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
+    [ -f "$apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]
+    then
+    echo "Using existing $KERNEL_VERSION debs."
+    cp $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+    cp $apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+    else
    
+        mk_kernel_debs
         echo "* Making $KERNEL_VERSION kernel debs."
+        cd $workdir/rpi-linux
         debcmd="make \
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
         -j $(($(nproc) + 1)) O=$workdir/kernel-build \
@@ -535,42 +557,28 @@ startfunc
         $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
         echo "* Copying out $KERNEL_VERSION kernel debs."
         rm $workdir/linux-libc-dev*.deb
+        cp $workdir/*.deb $apt_cache/
         cp $workdir/*.deb /output/ 
         chown $USER:$GROUP /output/*.deb
-   # fi
-
-
-    # Now that we have the kernel packages, let us go ahead and make a local 
-    # install anyways so that we can manually copy the required files over for
-    # first boot.
-    mkdir $workdir/kernel-install
-    sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
-    -j $(($(nproc) + 1))  O=$workdir/kernel-build \
-    modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
-    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    fi
+    # Try installing the generated debs in chroot before we do anything else.
+    cp $workdir/*.deb /mnt/tmp/
     
-#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    
+    chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
+    
+    arbitrary_wait
     
 endfunc
 }
+
+
 
 kernel_install () {
     waitfor "kernel_build"
     waitfor "image_extract_and_mount"
 startfunc    
     echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
-    #df -h
-    #cd $workdir
-    #
-    # Try installing the generated debs in chroot before we do anything else.
-    cp $workdir/*.deb /mnt/tmp/
-    
-    
-    chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
-    #chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
-    
-    
     
     # Ubuntu defaults to using uBoot, which now works for RPI4, as of
     # July 31, 2019, so we copy that into /boot/firmware/kernel8.img later.
