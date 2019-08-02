@@ -591,28 +591,29 @@ endfunc
 
 
 kernel_install () {
-    waitfor "kernel_build"
+    waitfor "kernel_debs"
     waitfor "image_extract_and_mount"
 startfunc    
-    echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
+    #echo "* Copying compiled `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'` kernel to image."
     
     # Ubuntu defaults to using uBoot, which now works for RPI4, as of
     # July 31, 2019, so we copy that into /boot/firmware/kernel8.img later.
     # 
     # We replacee uboot with kernel, but we're installing the kernel here as
     # well. If a working uboot is not available copy this over to kernel8.img
-    cp $workdir/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img.nouboot
+    #cp $workdir/kernel-build/arch/arm64/boot/Image /mnt/boot/firmware/kernel8.img.nouboot
+    gunzip -c -f /mnt/boot/vmlinuz > /mnt/boot/firmware/kernel8.img.nouboot
     #
     # uboot uses uboot & the standard raspberry pi boot script to boot a compressed 
     # kernel on arm64, since linux on arm64 does not support self-decompression of 
     # the kernel, so we copy this for use with uboot.
-    cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
-    /mnt/boot/vmlinuz-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    #cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
+    #/mnt/boot/vmlinuz-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     
-    cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
-    /mnt/boot/firmware/vmlinuz
+    #cp $workdir/kernel-build/arch/arm64/boot/Image.gz \
+    #/mnt/boot/firmware/vmlinuz
     
-    cp $workdir/kernel-build/.config /mnt/boot/config-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    #cp $workdir/kernel-build/.config /mnt/boot/config-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
 endfunc
 }
 
@@ -1131,8 +1132,8 @@ wifi_firmware_modification &
 first_boot_script_setup &
 added_scripts &
 kernel_install
-kernel_module_install &
-kernel_install_dtbs &
+#kernel_module_install
+#kernel_install_dtbs &
 image_and_chroot_cleanup
 image_unmount
 compressed_image_export &
