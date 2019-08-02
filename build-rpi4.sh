@@ -110,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}    done."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done."
 }
 
 
