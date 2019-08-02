@@ -202,13 +202,18 @@ git_get () {
     fi
     echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
     cd $src_cache/$local_path 
-    echo "*${FUNCNAME[1]} Last Commit:" && git log --graph \
+    last_commit=`git log --graph \
     --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) \
     %C(bold blue)<%an>%Creset' --abbrev-commit -2 \
-    --quiet 2> /dev/null
+    --quiet 2> /dev/null`
+    #echo "*${FUNCNAME[1]} Last Commit:" && git log --graph \
+    #--pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) \
+    #%C(bold blue)<%an>%Creset' --abbrev-commit -2 \
+    #--quiet 2> /dev/null
     #printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" && echo "${last_commit}"
     #echo "*${FUNCNAME[1]} Last Commit:" 
     #echo ""
+    echo -e "*${FUNCNAME[1]} Last Commits:\n$last_commit\n"
     rsync -a $src_cache/$local_path $workdir/
 }
 
