@@ -614,11 +614,12 @@ rpi_config_txt_configuration () {
     waitfor "image_extract_and_mount"
 startfunc    
     echo "* Making /boot/firmware/config.txt modifications."
-    tee -a /mnt/boot/firmware/config.txt <<EOF
-#
-# This image was built on $now using software at
-# https://github.com/satmandu/docker-rpi4-imagebuilder/
-# 
+    
+    cat <<-EOF >> /mnt/boot/firmware/config.txt
+    #
+    # This image was built on $now using software at
+    # https://github.com/satmandu/docker-rpi4-imagebuilder/
+    # 
 EOF
     if ! grep -qs 'armstub=armstub8-gic.bin' /mnt/boot/firmware/config.txt
         then echo "armstub=armstub8-gic.bin" >> /mnt/boot/firmware/config.txt
@@ -646,7 +647,7 @@ EOF
     # 3Gb limitation because USB & devices do not work currently without this.
      [ `grep -cs "total_mem=" /mnt/boot/firmware/config.txt` -gt 0 ] && \
      sudo sed 's/total_mem=*$/total_mem=3072/' /mnt/boot/firmware/config.txt || \
-     echo "total_mem=3072" | sudo tee -a /mnt/boot/firmware/config.txt
+     echo "total_mem=3072" >> /mnt/boot/firmware/config.txt
      
 endfunc
 }
