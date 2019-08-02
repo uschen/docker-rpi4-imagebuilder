@@ -723,7 +723,7 @@ EOF
     mkdir -p /etc/sudoers.d
     echo "* Adding rpi util path to sudo."
     cat <<-EOF >> /mnt/etc/sudoers.d/rpi
-	Defaults secure_path="$secure_path:/opt/vc/bin:/opt/vc/sbin"
+	#Defaults secure_path="$secure_path:/opt/vc/bin:/opt/vc/sbin"
 EOF
 	chmod 0440 /mnt/etc/sudoers.d/rpi
 endfunc
