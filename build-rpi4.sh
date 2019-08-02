@@ -70,7 +70,8 @@ apt_cache=/cache/apt_cache
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim \
+-qq 2>/dev/null
 
 # Utility Functions
 
@@ -80,7 +81,7 @@ function abspath {
 
 inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
-    while [ ! -f "/tmp/export_log.done" ]
+    while [ ! -f "/tmp/done.export_log" ]
     do
         touch /tmp/*
         sleep 1
@@ -91,7 +92,7 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /tmp/wait.${FUNCNAME[1]}_for_${1}
-    while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
+    while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}."
@@ -99,12 +100,12 @@ waitfor () {
 }
 
 startfunc () {
-    touch /tmp/${FUNCNAME[1]}.start
+    touch /tmp/start.${FUNCNAME[1]}
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} started."
 }
 
 endfunc () {
-    mv /tmp/${FUNCNAME[1]}.start /tmp/${FUNCNAME[1]}.done
+    mv /tmp/start.${FUNCNAME[1]} /tmp/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
     touch /tmp/*
     # debugging
@@ -234,9 +235,9 @@ startfunc
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
     
-    if [ ! -f /tmp/ok_to_continue_after_mount_image.done ]; then
+    if [ ! -f /tmp/done.ok_to_continue_after_mount_image ]; then
         echo "** Image mount done & container paused. **"
-        echo 'Type in "/tmp/ok_to_continue_after_mount_image.done"'
+        echo 'Type in "/tmp/done.ok_to_continue_after_mount_image"'
         echo "in a shell into this container to continue."
     fi 
     waitfor "ok_to_continue_after_mount_image"
@@ -755,31 +756,31 @@ endfunc
 make_kernel_install_scripts () {
     waitfor "image_extract_and_mount"
 startfunc    
-## This script allows flash-kernel to create the uncompressed kernel file
-#    on the boot partition.
-#    echo "* Making kernel install scripts. &"
+
+    ## This script allows flash-kernel to create the uncompressed kernel file
+    #    on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
     echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
-    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
-#!/bin/sh -eu
-#
-# If u-boot is not being used, then uncompresses the arm64 kernel to 
-# kernel8.img
-#
-# First exit if we aren't running an ARM64 kernel.
-#
-[ `uname -m` != aarch64 ] && exit 0
-#
-KERNEL_VERSION="\$1"
-KERNEL_INSTALLED_PATH="\$2"
-
-# If kernel8.img does not look like u-boot, then assume u-boot
-# is not being used.
-file /boot/firmware/kernel8.img | grep -vq "PCX" && \
-gunzip -c -f \${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
-
-exit 0
-EOF
+    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<-'EOF'
+    #!/bin/sh -eu
+    #
+    # If u-boot is not being used, then uncompresses the arm64 kernel to 
+    # kernel8.img
+    #
+    # First exit if we aren't running an ARM64 kernel.
+    #
+    [ `uname -m` != aarch64 ] && exit 0
+    #
+    KERNEL_VERSION="$1"
+    KERNEL_INSTALLED_PATH="$2"
+    
+    # If kernel8.img does not look like u-boot, then assume u-boot
+    # is not being used.
+    file /boot/firmware/kernel8.img | grep -vq "PCX" && \
+    gunzip -c -f \${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
+    
+    exit 0
+    EOF
     chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 
 ## This script makes the device tree folder that a bunch of kernel debs 
@@ -823,8 +824,6 @@ Required-Packages: u-boot-tools
 # XXX we should copy the entire overlay dtbs dir too
 # Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
 # not have the required u-boot for the RPI4 yet.
-
-
 EOF
 endfunc
 }
@@ -861,9 +860,9 @@ startfunc
     echo "* at first boot and also so we have a copy locally."
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
-    if [ ! -f /tmp/ok_to_unmount_image_after_build.done ]; then
+    if [ ! -f /tmp/done.ok_to_unmount_image_after_build ]; then
         echo "** Container paused before image unmount. **"
-        echo 'Type in "touch /tmp/ok_to_unmount_image_after_build.done"'
+        echo 'Type in "touch /tmp/done.ok_to_unmount_image_after_build"'
         echo "in a shell into this container to continue."
     fi 
      
@@ -894,9 +893,9 @@ startfunc
     #losetup -d /dev/loop0
     dmsetup remove_all
     
-    if [ ! -f /tmp/ok_to_exit_container_after_build.done ]; then
+    if [ ! -f /tmp/done.ok_to_exit_container_after_build ]; then
         echo "** Image unmounted & container paused. **"
-        echo 'Type in "touch /tmp/ok_to_exit_container_after_build.done"'
+        echo 'Type in "touch /tmp/done.ok_to_exit_container_after_build"'
         echo "in a shell into this container to continue."
     fi 
     waitfor "ok_to_exit_container_after_build"
@@ -966,10 +965,10 @@ endfunc
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the image_and_chroot_cleanup function
-touch /tmp/ok_to_umount_image_after_build.done
+touch /tmp/done.ok_to_umount_image_after_build
 
 # For debugging.
-touch /tmp/ok_to_continue_after_mount_image.done
+touch /tmp/done.ok_to_continue_after_mount_image
 
 
 # Delete this by connecting to the container using a shell if you want to 
@@ -977,7 +976,7 @@ touch /tmp/ok_to_continue_after_mount_image.done
 # The shell command would be something like this:
 # docker exec -it `cat ~/docker-rpi4-imagebuilder/build.cid` /bin/bash
 # Note that this flag is looked for in the image_and_chroot_cleanup function
-touch /tmp/ok_to_exit_container_after_build.done
+touch /tmp/done.ok_to_exit_container_after_build
 
 # inotify in docker seems to not recognize that files are being 
 # created unless they are touched. Not sure where this bug is.
