@@ -719,8 +719,13 @@ EOF
     cat  <<-EOF > /mnt/etc/ld.so.conf.d/00-vmcs.conf
 	/opt/vc/lib
 EOF
-
-
+    # Add path to sudo
+    mkdir -p /etc/sudoers.d
+    echo "* Adding rpi util path to sudo."
+    cat <<-EOF >> /mnt/etc/sudoers.d/rpi
+	Defaults secure_path="$secure_path:/opt/vc/bin:/opt/vc/sbin"
+EOF
+	chmod 0440 /mnt/etc/sudoers.d/rpi
 endfunc
 }
 
@@ -789,14 +794,14 @@ EOF
 endfunc
 } 
 
-kernel_install_scripts () {
+added_scripts () {
     waitfor "image_extract_and_mount"
 startfunc    
 
     ## This script allows flash-kernel to create the uncompressed kernel file
     #  on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
-    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
+    echo "* Creating /etc/kernel/postinst.d/zzzz_rpi4_kernel ."
     cat <<-'EOF' > /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 	#!/bin/sh -eu
 	#
@@ -843,7 +848,7 @@ EOF
     # Updated flash-kernel db entry for the RPI 4B
 
     mkdir -p /mnt/etc/flash-kernel/
-    echo "* Creating /mnt/etc/flash-kernel/db ."
+    echo "* Creating /etc/flash-kernel/db ."
     cat <<-EOF >> /mnt/etc/flash-kernel/db
 	#
 	# Raspberry Pi 4 Model B Rev 1.1
@@ -860,6 +865,7 @@ EOF
 	# Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
 	# not have the required u-boot for the RPI4 yet.
 EOF
+
 
 endfunc
 }
@@ -1040,7 +1046,7 @@ rpi_config_txt_configuration &
 rpi_cmdline_txt_configuration &
 wifi_firmware_modification &
 first_boot_script_setup &
-kernel_install_scripts &
+added_scripts &
 kernel_install
 kernel_module_install &
 kernel_install_dtbs &
