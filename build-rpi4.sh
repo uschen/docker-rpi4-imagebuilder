@@ -397,8 +397,8 @@ startfunc
      $workdir/rpi-linux/scripts/setlocalversion
 
     cd $workdir/rpi-linux
-    git update-index --refresh
-    git diff-index --quiet HEAD
+    git update-index --refresh &>> /tmp/${FUNCNAME[0]}.compile.log || true
+    git diff-index --quiet HEAD &>> /tmp/${FUNCNAME[0]}.compile.log || true
     
     #kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
     mkdir $workdir/kernel-build
