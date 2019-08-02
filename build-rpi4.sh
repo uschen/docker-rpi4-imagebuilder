@@ -756,50 +756,52 @@ make_kernel_install_scripts () {
     waitfor "image_extract_and_mount"
 startfunc    
 ## This script allows flash-kernel to create the uncompressed kernel file
-#    # on the boot partition.
+#    on the boot partition.
 #    echo "* Making kernel install scripts. &"
-#    mkdir -p /mnt/etc/kernel/postinst.d
-#    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
-#    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
-##!/bin/sh -eu
-## Note that this conflicts with using uboot in /boot/firmware/kernel8.img
-##
-## If uboot is working for your hardware, and you have a functional 
-## flash-kernel uboot boot script, you can delete this, and also likely 
-## uncomment out the lines in the Raspberry Pi 4B entry of 
-## /etc/flash-kernel/db to use u-boot.
-##
-#COMMAND="\$1"
-#KERNEL_VERSION="\$2"
-##BOOT_DIR_ABS="\$3"
+    mkdir -p /mnt/etc/kernel/postinst.d
+    echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
+    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<EOF
+#!/bin/sh -eu
 #
-#gunzip -c -f \$KERNEL_VERSION > /boot/firmware/kernel8.img
-#exit 0
-#EOF
-#    
-#    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
+# If u-boot is not being used, then uncompresses the arm64 kernel to 
+# kernel8.img
+#
+# First exit if we aren't running an ARM64 kernel.
+#
+[ `uname -m` != aarch64 ] && exit 0
+#
+KERNEL_VERSION="\$1"
+KERNEL_INSTALLED_PATH="\$2"
+
+# If kernel8.img does not look like u-boot, then assume u-boot
+# is not being used.
+file /boot/firmware/kernel8.img | grep -vq "PCX" && \
+gunzip -c -f \${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
+
+exit 0
+EOF
+    chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 
 ## This script makes the device tree folder that a bunch of kernel debs 
 # never bother installing.
 
     mkdir -p /etc/kernel/preinst.d/
-    echo "* Creating /etc/kernel/preinst.d/make-lib-device-tree-folders"
-    tee /mnt/etc/kernel/preinst.d/make-lib-device-tree-folders  <<EOF
-#!/bin/bash
-## This script allows kernel installs to create the uncompressed kernel file
-#    # on the boot partition.
-  
+    echo "* Creating /etc/kernel/preinst.d/rpi4_make_device_tree_folders"
+    tee /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders <<EOF
+#!/bin/sh -eu
+#
+# This script keeps kernel installs from complaining about a missing 
+# device tree folder in /lib/firmware/kernelversion/device-tree
 # This should go in /etc/kernel/preinst.d/
 
-kernelver=$1
+KERNEL_VERSION="\$1"
+KERNEL_INSTALLED_PATH="\$2"
 
-#mkdir -p /usr/lib/firmware/$1/device-tree/overlays
-mkdir -p /usr/lib/firmware/$1/device-tree/
+mkdir -p /usr/lib/firmware/\${KERNEL_VERSION}/device-tree/
 
 exit 0
 EOF
-    
-    chmod +x /mnt/etc/kernel/preinst.d/make-lib-device-tree-folders
+    chmod +x /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
 
     
     # Updated entry for the RPI 4B
