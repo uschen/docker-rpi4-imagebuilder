@@ -996,11 +996,11 @@ startfunc
              $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
             xdelta_patchout_cpcmd="cp $workdir/patch.xdelta.$i \
-     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
+     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i"
             $xdelta_patchout_cpcmd
-            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
+            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i
             echo "Xdelta3 file exported to:"
-            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
+            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i"
         done
 endfunc
 }
