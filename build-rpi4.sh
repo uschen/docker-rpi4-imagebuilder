@@ -978,7 +978,7 @@ xdelta3_image_export () {
 startfunc
         echo "* Making xdelta3 binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta3 -e -S none -I 0 -B 1812725760 -W 1812725760 -vfs \
+        xdelta3 -e -S none -I 0 -B 1812725760 -W 16777216 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
