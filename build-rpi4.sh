@@ -715,7 +715,8 @@ EOF
 		#dtparam=pwr_led_trigger=none
 		#dtparam=pwr_led_activelow=off
 EOF
-
+    fi
+    
     if ! grep -qs 'dtparam=act_led_trigger' /mnt/boot/firmware/config.txt
         cat <<-EOF >> /mnt/boot/firmware/config.txt
 		# Disable the Activity LED
