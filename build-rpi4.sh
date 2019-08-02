@@ -92,17 +92,17 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /tmp/wait.${FUNCNAME[1]}_for_${1}
-    printf "%${COLUMNS}s\n" "_${FUNCNAME[1]} waiting for ${1}."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
     while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "+${FUNCNAME[1]} was waiting for ${1}."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]"
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
     touch /tmp/start.${FUNCNAME[1]}
-    printf "%${COLUMNS}s\n" "+${FUNCNAME[1]} started."
+    printf "%${COLUMNS}s\n" "Started: ${FUNCNAME[1]} [ ]"
 }
 
 endfunc () {
@@ -112,7 +112,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "%${COLUMNS}s\n" "--${FUNCNAME[1]} done."
+    printf "%${COLUMNS}s\n" "Done: ${FUNCNAME[1]} [X]"
 }
 
 
@@ -329,8 +329,8 @@ startfunc
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
     echo "* Apt upgrading image in chroot."
-    echo "* There may be some errors here due to" 
-    echo "* installation happening in a chroot."
+    #echo "* There may be some errors here due to" 
+    #echo "* installation happening in a chroot."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
     echo "* Image apt upgrade done."
     echo "* Installing native kernel build software to image."
@@ -948,7 +948,7 @@ xdelta_image_export () {
 startfunc
         echo "* Making xdelta binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta3 -e -S none -I 0 -B 1G -v -s \
+        xdelta3 -e -S none -I 0 -B 1812725760 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
