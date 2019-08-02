@@ -746,7 +746,7 @@ startfunc
     /usr/sbin/update-initramfs -c -k all
     rm /etc/rc.local
     exit 0
-    EOF
+EOF
     
     chmod +x /mnt/etc/rc.local
     
