@@ -183,7 +183,7 @@ git_get () {
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} files copying from cache.  😎" && echo ""
+    echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
