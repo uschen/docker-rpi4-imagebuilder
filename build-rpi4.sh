@@ -553,10 +553,10 @@ kernel_debs () {
 startfunc
 
    # Don't remake debs if they already exist in output.
-   echo "Looking for $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb \
-   and $apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb ."
-    if [ -f "$apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
-    [ -f "$apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]
+   echo -e "Looking for $apt_cache/linux-image-${KERNEL_VERSION}_${KERNEL_VERSION}-1_arm64.deb \n \
+   and $apt_cache/linux-headers-${KERNEL_VERSION}_${KERNEL_VERSION}-1_arm64.deb ."
+    if [[ -f $apt_cache/linux-image-${KERNEL_VERSION}_${KERNEL_VERSION}-1_arm64.deb ]] && \
+    [[ -f $apt_cache/linux-headers-${KERNEL_VERSION}_${KERNEL_VERSION}-1_arm64.deb ]]
     then
     echo "Using existing $KERNEL_VERSION debs."
     cp $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
