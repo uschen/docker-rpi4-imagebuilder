@@ -32,10 +32,11 @@ The u-boot here has been compiled from @agherzan's WIP u-boot [fork here](https:
 ## Note that this container runs in PRIVILEGED MODE.
 Feel free to offer suggestions on how to make this setup safer without making the build an order of magnitude slower. :/
 
+ ## To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
+
 ## 1. Clone Build build environment
 
-Clone the
-[docker-rpi4-imagebuilder](https://github.com/satmandu/docker-rpi4-imagebuilder)
+Clone the [docker-rpi4-imagebuilder](https://github.com/satmandu/docker-rpi4-imagebuilder)
 (the repository you are reading now) and run the build script to see
 usage:
 
@@ -48,32 +49,29 @@ usage:
       -i IMAGE  Name of the docker image (including tag) to use as package build environment.
       -o DIR    Destination directory to store output compressed image to.
 
-## 2. Create Docker Build container
+## 2.  Create Docker Build container 
+*(This only has to be done once every several days.)*
 
 Build a container that will act as package build environment:
 
     docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
-In this example the target is Ubuntu 19.10 but you can create and
-modify `Dockerfile-nnn` to match your target environment. (I have only tested with Ubuntu 19.10, 
-since that is what the source image is built from.)
+In this example the target is Ubuntu 19.10 but you can create and modify `Dockerfile-nnn` to match your target environment. 
+(I have only tested with Ubuntu 19.10, since that is what the source image is built from.)
 
-## 3. Building packages
+## 3.  Create destination directory to store the build results
 
-
-To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
-
-   # create destination directory to store the build results
     mkdir output
 
-   # build package from source directory
+
+## 4.  Build package from inside source directory
+
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
     git pull ; time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
 A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache if I have xz compression disabled and just use lz4 for image compression, or 25 min if I use both.
 
 (xz compression be toggled at the top of the build-rpi4.sh file.) 
-
 
 
 After a successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img___kernel___timestamp.lz4` 
