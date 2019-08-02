@@ -109,10 +109,15 @@ startfunc () {
 
 endfunc () {
     rm /flag/start.${FUNCNAME[1]} 
-    touch /flag/done.${FUNCNAME[1]}
+    for i in {0..5}
+        do
+            touch /flag/done.${FUNCNAME[1]}
+            echo "sleep 1"
+    done
+    #touch /flag/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
     # Let's see if this needs to be done.
-    touch /tmp/*
+    #touch /tmp/*
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
