@@ -712,7 +712,9 @@ startfunc
     
     # There are still DMA memory issues with >1Gb memory access so do this as per
     # https://github.com/raspberrypi/linux/issues/3032#issuecomment-511214995
-    # This disables SD card DMA, so hopefully this is only a temporary workaround.
+    # This disables logging of the SD card DMA getting disabled, which happens
+    # anyways, so hopefully this is only a temporary workaround to having logspam
+    # in dmesg until this issue is actually addressed.
     if ! grep -qs 'sdhci.debug_quirks=96' /mnt/boot/firmware/cmdline.txt
         then sed -i 's/rootwait/rootwait sdhci.debug_quirks=96/' \
         /mnt/boot/firmware/cmdline.txt
