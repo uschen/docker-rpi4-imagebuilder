@@ -537,12 +537,12 @@ startfunc
     
     
     # Arbitrary build pause for debugging
-    if [ ! -f /tmp/done.ok_to_continue_after_mount_image ]; then
+    if [ ! -f /tmp/done.ok_to_continue_after_here ]; then
         echo "** Build Paused. **"
-        echo 'Type in "/tmp/done.ok_to_continue_after_here"'
+        echo 'Type in "touch /tmp/done.ok_to_continue_after_here"'
         echo "in a shell into this container to continue."
     fi 
-    waitfor "ok_to_continue_after_mount_image"
+    waitfor "ok_to_continue_after_here"
     
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     #chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
