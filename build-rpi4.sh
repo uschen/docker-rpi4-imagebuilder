@@ -94,13 +94,13 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "⏸ ⏭ %${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}."
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    printf "⏯ %${COLUMNS}s\n" "${FUNCNAME[1]} started."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} started."
 }
 
 endfunc () {
@@ -110,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "⏹ %${COLUMNS}s\n" "${FUNCNAME[1]}    done."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}    done."
 }
 
 
