@@ -533,6 +533,7 @@ endfunc
 
 kernel_debs () {
 startfunc
+
    # Don't remake debs if they already exist in output.
    echo "Looking for $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb \
    and $apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb ."
@@ -549,7 +550,6 @@ startfunc
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
         -j $(($(nproc) + 1)) O=$workdir/kernel-build \
         bindeb-pkg"
-        #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
         echo $debcmd
         $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
@@ -565,7 +565,7 @@ startfunc
     
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
-    arbitrary_wait
+    #arbitrary_wait
     
 endfunc
 }
