@@ -162,7 +162,7 @@ git_get () {
     local a="${FUNCNAME[1]}"
     local b="remote hash: $remote_git"
     local c="local hash: $local_git"
-    printf "%${COLUMNS}s\n$a%${COLUMNS}s\n$b%${COLUMNS}s\n$c" 
+    printf "%${COLUMNS}s\n" "$a" "%${COLUMNS}s\n" "$b" "%${COLUMNS}s\n" "$c" 
       
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
