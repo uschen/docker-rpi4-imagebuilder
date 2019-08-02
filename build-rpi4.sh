@@ -1082,9 +1082,11 @@ endfunc
 export_log () {
     waitfor "compressed_image_export"
 startfunc
+
     echo "* Build log at: build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log"
     cat $TMPLOG > /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
     chown $USER:$GROUP /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
+    
 endfunc
 }
 
