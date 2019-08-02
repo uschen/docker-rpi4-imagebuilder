@@ -780,7 +780,7 @@ startfunc
     gunzip -c -f ${KERNEL_INSTALLED_PATH} > /boot/firmware/kernel8.img
     
     exit 0
-    EOF
+EOF
     chmod +x /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
 
     ## This script makes the device tree folder that a bunch of kernel debs 
@@ -801,7 +801,7 @@ startfunc
     mkdir -p /usr/lib/firmware/${KERNEL_VERSION}/device-tree/
 
     exit 0
-    EOF
+EOF
     
     chmod +x /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
 
@@ -825,7 +825,7 @@ startfunc
     # XXX we should copy the entire overlay dtbs dir too
     # Note as of July 31, 2019 the Ubuntu u-boot-rpi does 
     # not have the required u-boot for the RPI4 yet.
-    EOF
+EOF
 
 endfunc
 }
