@@ -719,11 +719,14 @@ EOF
     cat  <<-EOF > /mnt/etc/ld.so.conf.d/00-vmcs.conf
 	/opt/vc/lib
 EOF
+    local SUDOPATH=`sed -n 's/\(^.*secure_path="\)//p' /mnt/etc/sudoers | sed s'/.$//'`
+    SUDOPATH="${SUDOPATH:-/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin}"
+    SUDOPATH+=":/opt/vc/bin:/opt/vc/sbin"
     # Add path to sudo
     mkdir -p /etc/sudoers.d
     echo "* Adding rpi util path to sudo."
     cat <<-EOF >> /mnt/etc/sudoers.d/rpi
-	#Defaults secure_path="$secure_path:/opt/vc/bin:/opt/vc/sbin"
+	Defaults secure_path=$SUDOPATH
 EOF
 	chmod 0440 /mnt/etc/sudoers.d/rpi
 endfunc
