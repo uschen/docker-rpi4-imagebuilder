@@ -378,21 +378,26 @@ rpi_firmware () {
     git_get "https://github.com/Hexxeh/rpi-firmware" "rpi-firmware"
     waitfor "image_extract_and_mount"
 startfunc    
-    cd $workdir
-    echo "* Installing current RPI firmware."
-    cp rpi-firmware/bootcode.bin /mnt/boot/firmware/
-    cp rpi-firmware/*.elf /mnt/boot/firmware/
-    cp rpi-firmware/*.dat /mnt/boot/firmware/
-    cp rpi-firmware/*.dat /mnt/boot/firmware/
-    cp rpi-firmware/*.dtb /mnt/boot/firmware/
-    cp rpi-firmware/overlays/*.dtbo /mnt/boot/firmware/overlays/
+    cd $workdir/rpi-firmware
+    local last_commit=`git log -1 --quiet 2> /dev/null`
+    echo "* Installing current RPI firmware." && printf "%${COLUMNS}s\n" \
+     "*${FUNCNAME[0]} Last Commit:" "${last_commit}"
+    cp bootcode.bin /mnt/boot/firmware/
+    cp *.elf /mnt/boot/firmware/
+    cp *.dat /mnt/boot/firmware/
+    cp *.dat /mnt/boot/firmware/
+    cp *.dtb /mnt/boot/firmware/
+    cp overlays/*.dtbo /mnt/boot/firmware/overlays/
 endfunc
 }
 
 kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
-    echo "* Building $kernel_branch kernel."
+    cd $workdir/rpi-linux
+    local last_commit=`git log -1 --quiet 2> /dev/null`
+    echo "* Building $kernel_branch kernel." && printf "%${COLUMNS}s\n" \
+     "*${FUNCNAME[0]} Last Commit:" "${last_commit}"
         # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
     sed -i \
@@ -944,15 +949,18 @@ startfunc
 endfunc
 }    
 
-xdelta_image_export () {
+xdelta3_image_export () {
 startfunc
-        echo "* Making xdelta binary diffs between today's eoan base image"
+        echo "* Making xdelta3 binary diffs between today's eoan base image"
         echo "* and the new images."
         xdelta3 -e -S none -I 0 -B 1812725760 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
         do
+            echo "* Compressing patch.xdelta with $i and exporting"
+            echo "  out of container to:"
+            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
             compress_flags=""
             [ "$i" == "lz4" ] && compress_flags="-m"
             xdelta_patchout_compresscmd="$i -v -k $compress_flags \
@@ -1020,8 +1028,8 @@ kernel_install_dtbs &
 image_and_chroot_cleanup
 image_unmount
 compressed_image_export &
-[[ $DELTA ]] && xdelta_image_export
-[[ $DELTA ]] && waitfor "xdelta_image_export"
+[[ $DELTA ]] && xdelta3_image_export
+[[ $DELTA ]] && waitfor "xdelta3_image_export"
 export_log
 # This stops the tail process.
 rm $TMPLOG
