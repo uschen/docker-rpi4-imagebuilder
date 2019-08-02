@@ -464,6 +464,15 @@ startfunc
     export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     ###
     echo "* Kernel version is ${KERNEL_VERSION} *"
+    
+     # Don't remake debs if they already exist in output.
+   #  if [ -f "/output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
+#     [ -f "/output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]; then
+#     echo "Using existing $KERNEL_VERSION debs."
+#     cp /output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+#     cp /output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+#     else
+    
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, due to module install files being installed into the target system in
@@ -514,13 +523,7 @@ startfunc
     $workdir/kernel-build/tmp/scripts/recordmount &>> /tmp/${FUNCNAME[0]}.compile.log
 
     
-    # Don't remake debs if they already exist in output.
-    if [ -f "/output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
-    [ -f "/output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]; then
-    echo "Using existing $KERNEL_VERSION debs."
-    cp /output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
-    cp /output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
-    else
+   
         echo "* Making $KERNEL_VERSION kernel debs."
         debcmd="make \
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
@@ -534,7 +537,7 @@ startfunc
         rm $workdir/linux-libc-dev*.deb
         cp $workdir/*.deb /output/ 
         chown $USER:$GROUP /output/*.deb
-    fi
+   # fi
 
 
     # Now that we have the kernel packages, let us go ahead and make a local 
@@ -547,7 +550,7 @@ startfunc
     modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
     #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
-    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     
 endfunc
 }
