@@ -185,7 +185,7 @@ git_get () {
         #ls $cache_path/$local_path
     fi
     echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
-    local last_commit=`git log -1 --quiet 2> /dev/null`
+    local last_commit=`cd $src_cache/$local_path ; git log -1 --quiet 2> /dev/null`
     printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
