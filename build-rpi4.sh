@@ -956,9 +956,9 @@ startfunc
     cd $workdir
     for i in "${image_compressors[@]}"
     do
-     echo "* Compressing ${new_image} with $i and exporting"
-     echo "  out of container to:"
-     echo "${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
+     echo "* Compressing ${new_image} with $i and exporting."
+     #echo "  out of container to:"
+     #echo "${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
      compress_flags=""
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
@@ -966,10 +966,10 @@ startfunc
      /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
      echo $compresscmd
      $compresscmd
-     echo $cpcmd
+     #echo $cpcmd
      $cpcmd
      chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
-     echo "/output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
+     echo "${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
     done
 endfunc
 }    
@@ -983,9 +983,9 @@ startfunc
         $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
         do
-            echo "* Compressing patch.xdelta with $i and exporting"
-            echo "  out of container to:"
-            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
+            echo "* Compressing patch.xdelta with $i and exporting."
+            #echo "  out of container to:"
+            #echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
             compress_flags=""
             [ "$i" == "lz4" ] && compress_flags="-m"
             xdelta_patchout_compresscmd="$i -v -k $compress_flags \
@@ -995,6 +995,8 @@ startfunc
      /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
             $xdelta_patchout_cpcmd
             chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
+            echo "Xdelta3 file exported to:"
+            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
         done
 endfunc
 }
