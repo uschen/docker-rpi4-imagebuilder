@@ -753,7 +753,7 @@ EOF
 endfunc
 } 
 
-make_kernel_install_scripts () {
+kernel_install_scripts () {
     waitfor "image_extract_and_mount"
 startfunc    
 
@@ -996,7 +996,7 @@ arm64_chroot_setup
 rpi_config_txt_configuration &
 wifi_firmware_modification &
 first_boot_script_setup &
-make_kernel_install_scripts &
+kernel_install_scripts &
 kernel_install
 kernel_module_install &
 kernel_install_dtbs &
