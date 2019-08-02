@@ -165,7 +165,7 @@ git_get () {
     "
     #local b="remote hash: $remote_git"
     #local c="local hash: $local_git"
-    printf "%${COLUMNS}s\n" "$a"
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}" && echo "\n" && printf "%${COLUMNS}s\n" "remote hash: $remote_git" && echo "\n" && printf "%${COLUMNS}s\n" "local hash: $local_git"
       
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
@@ -189,7 +189,7 @@ git_get () {
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
-    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} files copying from cache.  😎"
+    printf "%${COLUMNS}s\n"  "${FUNCNAME[1]} files copying from cache.  😎" && echo "\n"
     #echo ""
     rsync -a $src_cache/$local_path $workdir/
 }
