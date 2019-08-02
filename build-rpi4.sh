@@ -514,19 +514,27 @@ startfunc
     $workdir/kernel-build/tmp/scripts/recordmount &>> /tmp/${FUNCNAME[0]}.compile.log
 
     
-    debcmd="make \
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    -j $(($(nproc) + 1)) O=$workdir/kernel-build \
-    bindeb-pkg"
-    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    # Don't remake debs if they already exist in output.
+    if [ -f "/output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ] && \
+    [ -f "/output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb" ]; then
+    echo "Using existing $KERNEL_VERSION debs."
+    cp /output/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+    cp /output/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+    else
+        echo "* Making $KERNEL_VERSION kernel debs."
+        debcmd="make \
+        ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+        -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+        bindeb-pkg"
+        #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
-    echo "* Making $KERNEL_VERSION kernel debs."
-    echo $debcmd
-    $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
-    echo "* Copying out $KERNEL_VERSION kernel debs."
-    rm $workdir/linux-libc-dev*.deb
-    cp $workdir/*.deb /output/ 
-    chown $USER:$GROUP /output/*.deb
+        echo $debcmd
+        $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
+        echo "* Copying out $KERNEL_VERSION kernel debs."
+        rm $workdir/linux-libc-dev*.deb
+        cp $workdir/*.deb /output/ 
+        chown $USER:$GROUP /output/*.deb
+    fi
 
 
     # Now that we have the kernel packages, let us go ahead and make a local 
