@@ -20,7 +20,7 @@ new_image="eoan-preinstalled-server-arm64+raspi4"
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
 silence_apt_update_flags="-o Dpkg::Use-Pty=0 < /dev/null > /dev/null "
 image_compressors=("lz4" "xz")
-#image_compressors=("lz4")
+[[ $NOXZ ]] && image_compressors=("lz4")
 
 
 #DEBUG=1

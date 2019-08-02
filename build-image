@@ -169,6 +169,9 @@ docker_args+="-e src_cache=/cache/src_cache "
 # Store remote src cache on ccache volume too
 docker_args+="-e apt_cache=/cache/apt_cache "
 
+# Let XZ be disabled.
+[[ -v NOXZ ]] && docker_args+="-e NOXZ=${NOXZ} "
+
 # Is an email local variable set?
 [[ -v EMAIL ]] && docker_args+="-e EMAIL=${EMAIL} "
 
