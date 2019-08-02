@@ -94,13 +94,13 @@ waitfor () {
     while read waitforit; do if [ "$waitforit" = ${1}.done ]; then break; \
     fi; done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
-    printf "%${COLUMNS}s\n" "++ ${FUNCNAME[1]} no longer waiting for ${1} to finish.++"
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} done waiting for ${1}. ⏭"
     rm -f /tmp/wait.${FUNCNAME[1]}_for_${1}
 }
 
 startfunc () {
     touch /tmp/${FUNCNAME[1]}.start
-    printf "%${COLUMNS}s\n" "|------> ${FUNCNAME[1]} start."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} started. ⏯"
 }
 
 endfunc () {
@@ -110,7 +110,7 @@ endfunc () {
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
-    printf "%${COLUMNS}s\n" "------>| ${FUNCNAME[1]} done."
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]}    done.⏹"
 }
 
 
@@ -159,8 +159,11 @@ git_get () {
     local git_flags=" --quiet --depth=1 "
     local clone_flags=" $git_repo $git_extra_flags "
     local pull_flags="origin/$git_branch"
-    printf    "%${COLUMNS}s\n" "--${FUNCNAME[1]} \n "\
-    "remote hash: $remote_git" " \n " "local hash: $local_git"
+    local a="${FUNCNAME[1]}"
+    local b="remote hash: $remote_git"
+    local c="local hash: $local_git"
+    printf "%${COLUMNS}s\n$a\n$b\n$c" 
+      
     #echo $remote_git > /tmp/remote.git
     #printf "%${COLUMNS}s\n"  "${FUNCNAME[1]}  local hash: $local_git"
     #echo $local_git > /tmp/local.git
@@ -179,7 +182,7 @@ git_get () {
         ( rm -rf $src_cache/$local_path ; cd $src_cache ; git clone $git_flags $clone_flags $local_path ) 2>> /tmp/${FUNCNAME[1]}.git.log
         
         local last_commit=`git log -1 --quiet 2> /dev/null`
-        printf "%${COLUMNS}s\n"  "*🧐 ${FUNCNAME[1]} Last Commit:" "${last_commit}"
+        printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
     fi
