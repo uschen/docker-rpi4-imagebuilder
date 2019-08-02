@@ -726,7 +726,6 @@ endfunc
 
 first_boot_script_setup () {
     waitfor "image_extract_and_mount"
-    waitfor "kernel_build"
 startfunc    
     echo "* Creating first start cleanup script."
     cat <<-'EOF' > /mnt/etc/rc.local 
@@ -739,7 +738,7 @@ startfunc
         printf "My IP address is %s\n" "$_IP"
     fi
     #
-    mkdir -p /lib/firmware/`uname -r`/device-tree/
+    #mkdir -p /lib/firmware/`uname -r`/device-tree/
     /usr/bin/dpkg -i /var/cache/apt/archives/*.deb
     /usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
     /usr/bin/apt update && /usr/bin/apt upgrade -y
@@ -747,7 +746,6 @@ startfunc
     rm /etc/rc.local
     exit 0
 EOF
-    
     chmod +x /mnt/etc/rc.local
     
 endfunc
@@ -761,7 +759,7 @@ startfunc
     #  on the boot partition.
     mkdir -p /mnt/etc/kernel/postinst.d
     echo "* Creating /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel ."
-    tee /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel <<-'EOF'
+    cat <<-'EOF' > /mnt/etc/kernel/postinst.d/zzzz_rpi4_kernel
     #!/bin/sh -eu
     #
     # If u-boot is not being used, then uncompresses the arm64 kernel to 
@@ -788,7 +786,7 @@ EOF
 
     mkdir -p /etc/kernel/preinst.d/
     echo "* Creating /etc/kernel/preinst.d/rpi4_make_device_tree_folders"
-    tee /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders <<-'EOF'
+    cat <<-'EOF' > /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
     #!/bin/sh -eu
     #
     # This script keeps kernel installs from complaining about a missing 
@@ -802,15 +800,13 @@ EOF
 
     exit 0
 EOF
-    
     chmod +x /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
 
-    
     # Updated flash-kernel db entry for the RPI 4B
 
     mkdir -p /mnt/etc/flash-kernel/
     echo "* Creating /mnt/etc/flash-kernel/db ."
-    tee -a /mnt/etc/flash-kernel/db <<-EOF
+    cat <<-EOF >> /mnt/etc/flash-kernel/db
     #
     # Raspberry Pi 4 Model B Rev 1.1
     Machine: Raspberry Pi 4 Model B
