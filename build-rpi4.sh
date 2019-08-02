@@ -702,7 +702,7 @@ EOF
     fi
     
     if ! grep -qs 'dtparam=eth_led0' /mnt/boot/firmware/config.txt
-        cat <<-EOF >> /mnt/boot/firmware/config.txt
+        then cat <<-EOF >> /mnt/boot/firmware/config.txt
 		# Disable Ethernet LEDs
 		#dtparam=eth_led0=14
 		#dtparam=eth_led1=14
@@ -710,7 +710,7 @@ EOF
     fi
     
     if ! grep -qs 'dtparam=pwr_led_trigger' /mnt/boot/firmware/config.txt
-        cat <<-EOF >> /mnt/boot/firmware/config.txt
+        then cat <<-EOF >> /mnt/boot/firmware/config.txt
 		# Disable the PWR LED
 		#dtparam=pwr_led_trigger=none
 		#dtparam=pwr_led_activelow=off
@@ -718,7 +718,7 @@ EOF
     fi
     
     if ! grep -qs 'dtparam=act_led_trigger' /mnt/boot/firmware/config.txt
-        cat <<-EOF >> /mnt/boot/firmware/config.txt
+        then cat <<-EOF >> /mnt/boot/firmware/config.txt
 		# Disable the Activity LED
 		#dtparam=act_led_trigger=none
 		#dtparam=act_led_activelow=off
