@@ -86,7 +86,7 @@ inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
     while [ ! -f "/flag/done.export_log" ]
     do
-        touch /flag/*
+        touch /tmp/*
         sleep 1
     done
 }
@@ -98,7 +98,7 @@ waitfor () {
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
     while read waitforit; do if [ "$waitforit" = done.${1} ]; then break; \
     fi; done \
-   < <(inotifywait  -e create,open,access --format '%f' --quiet /tmp --monitor)
+   < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
@@ -112,7 +112,7 @@ endfunc () {
     touch /flag/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
     # Let's see if this needs to be done.
-    touch /flag/*
+    touch /tmp/*
     # debugging
    # [[ $DEBUG ]] && ( [[ -d "/output/$now/" ]] && ( env > /output/$now/${FUNCNAME[1]}.env ; chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env ))
    # [[ $DEBUG ]] && chown $USER:$GROUP /output/$now/${FUNCNAME[1]}.env
