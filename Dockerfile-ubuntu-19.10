@@ -44,7 +44,7 @@ RUN set -ex \
                vim-common \
                vim-runtime \
                wget \
-               xdelta \
+               xdelta3 \
                xxd \
                xz-utils \         
     && apt-get build-dep -y linux-image-raspi2 \

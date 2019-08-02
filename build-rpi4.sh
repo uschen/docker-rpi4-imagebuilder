@@ -70,7 +70,7 @@ apt_cache=/cache/apt_cache
 mkdir -p $apt_cache/partial 
 
 # Make sure inotify-tools is installed.
-apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta vim -qq
+apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim -qq
 
 # Utility Functions
 
@@ -220,7 +220,7 @@ image_extract_and_mount () {
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img
-    [[ $XDELTA ]] && cp $workdir/$new_image.img $workdir/old_image.img
+    [[ $DELTA ]] && cp $workdir/$new_image.img $workdir/old_image.img
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
@@ -934,15 +934,17 @@ xdelta_image_export () {
 startfunc
         echo "* Making xdelta binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta delta -p -V $workdir/old_image.img $workdir/${new_image}.img \
-        $workdir/patchout.xdelta
+        xdelta3 -e -S none -I 0 -B 1G -v -s \
+        $workdir/old_image.img $workdir/${new_image}.img \
+        $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
         do
             compress_flags=""
             [ "$i" == "lz4" ] && compress_flags="-m"
-            xdelta_patchout_compresscmd="$i -v -k $compress_flags $workdir/patchout.xdelta"
+            xdelta_patchout_compresscmd="$i -v -k $compress_flags \
+             $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
-            xdelta_patchout_cpcmd="cp $workdir/patchout.xdelta.$i \
+            xdelta_patchout_cpcmd="cp $workdir/patch.xdelta.$i \
      /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
             $xdelta_patchout_cpcmd
             chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
@@ -1002,8 +1004,8 @@ kernel_install_dtbs &
 image_and_chroot_cleanup
 image_unmount
 compressed_image_export &
-[[ $XDELTA ]] && xdelta_image_export
-[[ $XDELTA ]] && waitfor "xdelta_image_export"
+[[ $DELTA ]] && xdelta_image_export
+[[ $DELTA ]] && waitfor "xdelta_image_export"
 export_log
 # This stops the tail process.
 rm $TMPLOG
