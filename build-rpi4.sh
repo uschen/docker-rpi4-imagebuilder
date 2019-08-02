@@ -135,6 +135,18 @@ local_check () {
 }
 
 
+arbitrary_wait () {
+    # To stop here "rm /tmp/done.ok_to_continue_after_here".
+    # Arbitrary build pause for debugging
+    if [ ! -f /tmp/done.ok_to_continue_after_here ]; then
+        echo "** Build Paused. **"
+        echo 'Type in "touch /tmp/done.ok_to_continue_after_here"'
+        echo "in a shell into this container to continue."
+    fi 
+    waitfor "ok_to_continue_after_here"
+}
+
+
 # Standalone get with git function
 # get_software_src () {
 # startfunc
@@ -539,14 +551,6 @@ startfunc
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
     
-    # To stop here "rm /tmp/done.ok_to_continue_after_here".
-    # Arbitrary build pause for debugging
-    if [ ! -f /tmp/done.ok_to_continue_after_here ]; then
-        echo "** Build Paused. **"
-        echo 'Type in "touch /tmp/done.ok_to_continue_after_here"'
-        echo "in a shell into this container to continue."
-    fi 
-    waitfor "ok_to_continue_after_here"
     
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     #chroot /mnt /bin/bash -c "depmod -a `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`" &>> /tmp/${FUNCNAME[0]}.install.log
@@ -1062,4 +1066,5 @@ export_log
 # This stops the tail process.
 rm $TMPLOG
 echo "**** Done."
+
 
