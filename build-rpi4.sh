@@ -662,11 +662,29 @@ EOF
     
     # 3Gb limitation because USB & devices do not work currently without this.
      [ `grep -cs "total_mem=" /mnt/boot/firmware/config.txt` -gt 0 ] && \
-     sudo sed 's/total_mem=*$/total_mem=3072/' /mnt/boot/firmware/config.txt || \
+     sed -i 's/total_mem=*$/total_mem=3072/' /mnt/boot/firmware/config.txt || \
      echo "total_mem=3072" >> /mnt/boot/firmware/config.txt
      
 endfunc
 }
+
+rpi_cmdline_txt_configuration () {
+    waitfor "image_extract_and_mount"
+startfunc    
+    echo "* Making /boot/firmware/cmdline.txt modifications."
+    
+    # Seeing possible sdcard issues, so be safe for now.
+    if ! grep -qs 'fsck.repair=yes' /mnt/boot/firmware/cmdline.txt
+        then sed -i 's/rootwait/rootwait fsck.repair=yes/' /mnt/boot/firmware/cmdline.txt
+    fi
+    
+    if ! grep -qs 'fsck.mode=force' /mnt/boot/firmware/cmdline.txt
+        then sed -i 's/rootwait/rootwait fsck.mode=force/' /mnt/boot/firmware/cmdline.txt
+    fi
+    
+endfunc
+}
+
 
 rpi_userland () {
     git_get "https://github.com/raspberrypi/userland" "rpi-userland"
@@ -953,21 +971,21 @@ xdelta3_image_export () {
 startfunc
         echo "* Making xdelta3 binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta3 -e -S none -I 0 -B 1812725760 -vfs \
+        xdelta3 -e -S none -I 0 -B 1812725760 -W 1812725760 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
         for i in "${image_compressors[@]}"
         do
             echo "* Compressing patch.xdelta with $i and exporting"
             echo "  out of container to:"
-            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
+            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
             compress_flags=""
             [ "$i" == "lz4" ] && compress_flags="-m"
             xdelta_patchout_compresscmd="$i -v -k $compress_flags \
              $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
             xdelta_patchout_cpcmd="cp $workdir/patch.xdelta.$i \
-     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i"
+     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
             $xdelta_patchout_cpcmd
             chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta.$i
         done
@@ -1019,6 +1037,7 @@ kernel_build &
 image_extract_and_mount
 arm64_chroot_setup
 rpi_config_txt_configuration &
+rpi_cmdline_txt_configuration &
 wifi_firmware_modification &
 first_boot_script_setup &
 kernel_install_scripts &
