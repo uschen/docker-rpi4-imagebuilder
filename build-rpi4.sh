@@ -580,7 +580,7 @@ startfunc
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
     
-    
+    echo "* Installing $KERNEL_VERSION kernel debs to image."
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
     #arbitrary_wait
@@ -700,6 +700,30 @@ EOF
     if ! grep -qs 'enable_uart=1' /mnt/boot/firmware/config.txt
         then echo "enable_uart=1" >> /mnt/boot/firmware/config.txt
     fi
+    
+    if ! grep -qs 'dtparam=eth_led0' /mnt/boot/firmware/config.txt
+        cat <<-EOF >> /mnt/boot/firmware/config.txt
+		# Disable Ethernet LEDs
+		#dtparam=eth_led0=14
+		#dtparam=eth_led1=14
+EOF
+    fi
+    
+    if ! grep -qs 'dtparam=pwr_led_trigger' /mnt/boot/firmware/config.txt
+        cat <<-EOF >> /mnt/boot/firmware/config.txt
+		# Disable the PWR LED
+		#dtparam=pwr_led_trigger=none
+		#dtparam=pwr_led_activelow=off
+EOF
+
+    if ! grep -qs 'dtparam=act_led_trigger' /mnt/boot/firmware/config.txt
+        cat <<-EOF >> /mnt/boot/firmware/config.txt
+		# Disable the Activity LED
+		#dtparam=act_led_trigger=none
+		#dtparam=act_led_activelow=off
+EOF
+    fi
+    
     
     # 3Gb limitation because USB & devices do not work currently without this.
      [ `grep -cs "total_mem=" /mnt/boot/firmware/config.txt` -gt 0 ] && \
