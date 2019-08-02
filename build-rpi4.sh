@@ -205,7 +205,7 @@ git_get () {
     echo "*${FUNCNAME[1]} Last Commit:" && git log --graph \
     --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) \
     %C(bold blue)<%an>%Creset' --abbrev-commit \
-    --quiet 2> /dev/null`
+    --quiet 2> /dev/null
     #printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" && echo "${last_commit}"
     #echo "*${FUNCNAME[1]} Last Commit:" 
     #echo ""
