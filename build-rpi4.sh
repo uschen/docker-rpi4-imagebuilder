@@ -86,7 +86,7 @@ inotify_touch_events () {
     # Since inotifywait seems to need help in docker. :/
     while [ ! -f "/flag/done.export_log" ]
     do
-        touch /tmp/*
+        touch /flag/*
         sleep 1
     done
 }
@@ -103,13 +103,13 @@ waitfor () {
 }
 
 startfunc () {
-    for i in {0..2}
-        do
-            [ ! -f "/flag/done.${FUNCNAME[1]}" ] && \
-            touch /flag/start.${FUNCNAME[1]}
-            sleep 1
-    done
-    #touch /flag/start.${FUNCNAME[1]}
+    #for i in {0..2}
+    #    do
+    #        [ ! -f "/flag/done.${FUNCNAME[1]}" ] && \
+    #        touch /flag/start.${FUNCNAME[1]}
+    #        sleep 1
+    #done
+    touch /flag/start.${FUNCNAME[1]}
     printf "%${COLUMNS}s\n" "Started: ${FUNCNAME[1]} [ ]"
 }
 
