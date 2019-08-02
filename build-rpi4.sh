@@ -107,7 +107,7 @@ startfunc () {
         do
             [ ! -f "/flag/done.${FUNCNAME[1]}" ] && \
             touch /flag/start.${FUNCNAME[1]}
-            echo "sleep 1"
+            sleep 1
     done
     #touch /flag/start.${FUNCNAME[1]}
     printf "%${COLUMNS}s\n" "Started: ${FUNCNAME[1]} [ ]"
@@ -118,7 +118,7 @@ endfunc () {
     for i in {0..5}
         do
             touch /flag/done.${FUNCNAME[1]}
-            echo "sleep 1"
+            sleep 1
     done
     #touch /flag/done.${FUNCNAME[1]}
     # inotifywait is having issues in docker.
