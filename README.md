@@ -32,16 +32,7 @@ The u-boot here has been compiled from @agherzan's WIP u-boot [fork here](https:
 ## Note that this container runs in PRIVILEGED MODE.
 Feel free to offer suggestions on how to make this setup safer without making the build an order of magnitude slower. :/
 
-## Create build environment
-
-Start by building a container that will act as package build environment:
-
-    docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
-
-In this example the target is Ubuntu 19.10 but you can create and
-modify `Dockerfile-nnn` to match your target environment.
-
-## Building packages
+## 1. Clone Build build environment
 
 Clone the
 [docker-rpi4-imagebuilder](https://github.com/satmandu/docker-rpi4-imagebuilder)
@@ -57,13 +48,23 @@ usage:
       -i IMAGE  Name of the docker image (including tag) to use as package build environment.
       -o DIR    Destination directory to store output compressed image to.
 
+## 2. Create Docker Build container
+
+Build a container that will act as package build environment:
+
+    docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
+
+In this example the target is Ubuntu 19.10 but you can create and
+modify `Dockerfile-nnn` to match your target environment. (I have only tested with Ubuntu 19.10, 
+since that is what the source image is built from.)
+
+## 3. Building packages
+
+
 To build an Ubuntu Eoan Raspberry Pi 4B image run following commands:
 
    # create destination directory to store the build results
     mkdir output
-    
-   # MAKE SURE YOU HAVE ALREADY MADE YOUR BUILD ENVIRONMENT CONTAINER like thus:
-    docker build -t docker-rpi4-imagebuilder:19.10 -f Dockerfile-ubuntu-19.10 .
 
    # build package from source directory
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
@@ -81,7 +82,7 @@ file in your specified `output` directory. (Failure will lead to a build_fail.lo
 Currently the images are under 700Mb compressed with xz, or about 1.3Gb compressed with lz4.
 The xz images are about 50 Mb larger than the base ubuntu images.
 
-## Installing image to sd card
+## 4. Installing image to sd card
 
 Use the instructions here: https://ubuntu.com/download/iot/installation-media
 
