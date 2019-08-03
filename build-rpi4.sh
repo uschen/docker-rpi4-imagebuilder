@@ -450,8 +450,10 @@ startfunc
     extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
     extraversion_nohyphen="${extraversion//-}"
     PKGVER="$majorversion.$patchlevel.$sublevel"
+    echo "PKGVER: $PKGVER"
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
     KERNEL_VERS="$PKGVER-$kernelrev"
+    echo "KERNEL_VERS: $KERNEL_VERS"
     #echo $kernelrev
     
     cd $workdir/rpi-linux
