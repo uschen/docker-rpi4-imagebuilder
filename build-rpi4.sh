@@ -30,7 +30,8 @@ mkdir /flag
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Needed for display
-echo "columns: $columns COLUMNS: $COLUMNS"
+echo "columns: $columns COLUMNS: $COLUMNS" > /tmp/columns
+env > /tmp/env
 COLUMNS="${columns:-80}"
 
 
@@ -436,7 +437,7 @@ kernel_build () {
 startfunc    
     
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
-    echo $kernelrev
+    #echo $kernelrev
     
     cd $workdir/rpi-linux
         # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
