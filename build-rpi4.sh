@@ -823,7 +823,7 @@ endfunc
 
 wifi_firmware_modification () {
     waitfor "image_extract_and_mount"
-    waitfor "install_non-free_firmware"
+    waitfor "non-free_firmware"
 startfunc    
     echo "* Modifying wireless firmware."
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
@@ -965,8 +965,8 @@ endfunc
 image_and_chroot_cleanup () {
     waitfor "kernel_build"
     waitfor "kernel_install"
-    waitfor "kernel_module_install"
-    waitfor "kernel_install_dtbs"
+    #waitfor "kernel_module_install"
+    #waitfor "kernel_install_dtbs"
 startfunc    
     echo "* Finishing image setup."
     
