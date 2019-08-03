@@ -433,7 +433,7 @@ kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
     
-    kernelrev=`git -C $apt_cache/rpi-linux rev-parse --short HEAD`
+    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     echo $kernelrev
     
     cd $workdir/rpi-linux
@@ -556,7 +556,7 @@ endfunc
 kernel_debs () {
 startfunc
 
-    kernelrev=`git -C $apt_cache/rpi-linux rev-parse --short HEAD`
+    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     echo $kernelrev
    # Don't remake debs if they already exist in output.
    echo -e "Looking for cached ${kernelrev} kernel debs ."
