@@ -327,13 +327,14 @@ image_extract_and_mount () {
     waitfor "base_image_check"
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
-    xzcat $workdir/$base_image > $workdir/$new_image.img &
-    while true; do
-        xzcat_pid=$(pgrep ^xzcat)
-        kill -10 ${xzcat_pid}
-        sleep 1
-    done
-    wait ${xzcat_pid}
+    pv -pet $workdir/$base_image | xzcat > $workdir/$new_image.img
+    #xzcat_pid=$(pgrep ^xzcat)
+    #while true; do
+    #    pgrep ^xzcat > /dev/null
+    #    kill -10 ${xzcat_pid}
+    #    sleep 1
+    #done
+    #wait ${xzcat_pid}
     [[ $DELTA ]] && (cp $workdir/$new_image.img $workdir/old_image.img &)
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
