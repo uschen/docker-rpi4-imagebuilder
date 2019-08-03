@@ -140,8 +140,8 @@ waitfor () {
         2 ) j="|" ;;
         3 ) j="/" ;;
     esac
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1} \r[$j"
-    sleep 0.5
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1} [$j]"
+    sleep 1
     ((i=i+1))
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
