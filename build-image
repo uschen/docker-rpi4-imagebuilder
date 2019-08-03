@@ -178,10 +178,11 @@ docker_args+="-e apt_cache=/cache/apt_cache "
 # Is a XDELTA local variable set? (Can not use XDELTA since XDELTA uses that itself.)
 [[ -v DELTA ]] && docker_args+="-e DELTA=${DELTA} "
 
-columns=$(tput cols)
+console_cols=$(tput cols)
+console_cols={console_cols:-80}
  
 # Send in columns for display. This should always work.
-[[ -z $columns ]] && docker_args+="-e columns=${columns} "
+docker_args+="-e columns=${console_cols} "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
@@ -238,7 +239,7 @@ echo "(Some renices are expected to fail.)"
 sudo renice -n 20 -p $PID_LIST &> /dev/null || true
 echo -e "Note that the command to open a shell into this docker instance would be:\n"
 echo -e "docker exec -it `cat ~/rpi4-build/docker-rpi4-imagebuilder/build.cid` /bin/bash\n"
-echo "columns: $columns COLUMNS: $COLUMNS"
+#echo "columns: $columns COLUMNS: $COLUMNS"
 echo "Tailing build log:"
 tail_log_cmd="docker exec -it $build_cid tail -F /tmp/build.log" 
 echo $tail_log_cmd
