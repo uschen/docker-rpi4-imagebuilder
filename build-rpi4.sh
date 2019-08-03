@@ -335,8 +335,9 @@ startfunc
     losetup -a
     cd $workdir
     echo "* Mounting: ${new_image}.img"
-
-    read kpartx_a kpartx_b kpartx c < <`kpartx -avs ${new_image}.img`
+    
+    kpartx_output=`kpartx -avs ${new_image}.img`
+    read kpartx_a kpartx_b kpartx c < <(echo "$kpartx_output")
     loop_device=`echo $kpartx_c |sed 's/p1//p'`
     
     #e2fsck -f /dev/loop0p2
