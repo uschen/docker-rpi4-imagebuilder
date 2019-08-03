@@ -178,10 +178,10 @@ docker_args+="-e apt_cache=/cache/apt_cache "
 # Is a XDELTA local variable set? (Can not use XDELTA since XDELTA uses that itself.)
 [[ -v DELTA ]] && docker_args+="-e DELTA=${DELTA} "
 
-INVOKE_COLUMNS=`echo $COLUMNS`
+columns=$(tput cols)
  
 # Send in columns for display. This should always work.
-[[ -z $INVOKE_COLUMNS ]] && docker_args+="-e INVOKE_COLUMNS=${INVOKE_COLUMNS} "
+[[ -z $columns ]] && docker_args+="-e columns=${columns} "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
