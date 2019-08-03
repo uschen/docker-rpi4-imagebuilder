@@ -444,16 +444,16 @@ endfunc
 kernelbuild_setup () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
-    majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    extraversion_nohyphen="${extraversion//-}"
-    PKGVER="$majorversion.$patchlevel.$sublevel"
-    echo "PKGVER: $PKGVER"
+    #majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    #patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    #sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    #extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    #extraversion_nohyphen="${extraversion//-}"
+    #PKGVER="$majorversion.$patchlevel.$sublevel"
+    #echo "PKGVER: $PKGVER"
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
-    KERNEL_VERS="$PKGVER-$kernelrev"
-    echo "KERNEL_VERS: $KERNEL_VERS"
+    #KERNEL_VERS="$PKGVER-$kernelrev"
+    #echo "KERNEL_VERS: $KERNEL_VERS"
     #echo $kernelrev
     
     cd $workdir/rpi-linux
@@ -591,9 +591,18 @@ startfunc
 kernel_debs () {
 	    waitfor "kernelbuild_setup"
 startfunc
-
-    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
-    echo $kernelrev
+    majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    extraversion_nohyphen="${extraversion//-}"
+    PKGVER="$majorversion.$patchlevel.$sublevel"
+    echo "PKGVER: $PKGVER"
+    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
+    KERNEL_VERS="$PKGVER-$kernelrev"
+    echo "KERNEL_VERS: $KERNEL_VERS"
+    #kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
+    #echo $kernelrev
    # Don't remake debs if they already exist in output.
    echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
