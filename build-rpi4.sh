@@ -444,8 +444,14 @@ endfunc
 kernelbuild_setup () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
-    
+    majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    extraversion_nohyphen="${extraversion//-}"
+    PKGVER=$majorversion.$patchlevel.$sublevel
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
+    KERNEL_VERS=$PKGVER-$kernelrev
     #echo $kernelrev
     
     cd $workdir/rpi-linux
@@ -587,7 +593,7 @@ startfunc
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     echo $kernelrev
    # Don't remake debs if they already exist in output.
-   echo -e "Looking for cached ${kernelrev} kernel debs ."
+   echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
      [ -e "$f" ] && havedebs=1 || unset havedebs
      break
@@ -598,12 +604,12 @@ startfunc
     done
     if [[ $havedebs ]]
     then
-    echo "Using existing *${kernelrev}* debs."
+    echo "Using existing $KERNEL_VERS debs."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     else
         waitfor "kernel_build"
-	echo "* Making git *${kernelrev}* kernel debs."
+	echo "* Making $KERNEL_VERS kernel debs."
 	nativebuild
         ext_mod_build_infrastructure
 	cd $workdir/rpi-linux
@@ -627,7 +633,7 @@ startfunc
     
     waitfor "added_scripts"
     
-    echo "* Installing git *${kernelrev}* kernel debs to image."
+    echo "* Installing $KERNEL_VERS debs to image."
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
     #arbitrary_wait
