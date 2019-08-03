@@ -30,9 +30,8 @@ mkdir /flag
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Needed for display
-INVOKE_COLUMNS="${INVOKE_COLUMNS:-80}"
-#COLUMNS="${COLUMNS:-80}"
-COLUMNS=${INVOKE_COLUMNS}
+COLUMNS="${columns:-80}"
+
 
 
 # Set Time Stamp
