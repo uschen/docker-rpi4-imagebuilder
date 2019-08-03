@@ -81,7 +81,7 @@ mkdir -p $apt_cache/partial
 
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim \
--qq 2>/dev/null
+e2fsprogs -qq 2>/dev/null
 
 # Utility script
 # Apt concurrency manager wrapper via
@@ -1197,7 +1197,7 @@ startfunc
     sync
     umount /mnt/boot/firmware || (lsof +f -- /mnt/boot/firmware ; sleep 60 ; umount /mnt/boot/firmware)
     #umount /mnt || (mount | grep /mnt)
-    #e4defrag /mnt
+    e4defrag /mnt
     umount /mnt || (lsof +f -- /mnt ; sleep 60 ; umount /mnt)
     #guestunmount /mnt
 
