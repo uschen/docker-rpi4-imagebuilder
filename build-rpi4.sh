@@ -443,13 +443,18 @@ EOF
     chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     -d install  \
-    qemu-user-static -qq 2>/dev/null
+    qemu-user-binfmt qemu-user qemu libc6-amd64-cross -qq 2>/dev/null
     # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
     # from image to build container in case they are needed during this install.
-    cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
-    cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
-    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y --no-install-recommends \
-               qemu-user-static $silence_apt_flags"
+    #mkdir -p /mnt/lib64/
+    #mkdir -p /mnt/lib/x86_64-linux-gnu/
+    #cp /lib64/ld-linux-x86-64.so.2 /mnt/lib64/
+    #cp /lib/x86_64-linux-gnu/libc.so.6 /mnt/lib/x86_64-linux-gnu/
+    #cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
+    #cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y \
+    --no-install-recommends \
+    qemu-user-binfmt qemu-user qemu libc6-amd64-cross $silence_apt_flags"
                
     echo "* Apt upgrading image in chroot."
     #echo "* There may be some errors here due to" 
@@ -744,10 +749,12 @@ startfunc
     chown $USER:$GROUP /output/*.deb
     else
         kernel_build &
-    spinnerwaitfor "kernel_build"
-    echo "* Making $KERNEL_VERS kernel debs."
-    #ext_mod_build_infrastructure
-    cd $workdir/rpi-linux
+        spinnerwaitfor "kernel_build"
+        echo "* Making $KERNEL_VERS kernel debs."
+        # Enable this if we want certain kernel install files compiled in
+        # arm64 chroot
+        #ext_mod_build_infrastructure
+        cd $workdir/rpi-linux
         debcmd="make \
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
         -j $(($(nproc) + 1)) O=$workdir/kernel-build \
@@ -1174,11 +1181,11 @@ startfunc
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
-    umount /mnt/var/cache/apt
-    echo "Installing binfmt-support files for install at first boot."
-    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
-    -d install binfmt-support -qq 2>/dev/null
+    #umount /mnt/var/cache/apt
+    #echo "Installing binfmt-support files for install at first boot."
+    #chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
+    #-o dir::cache::archives=/mnt/var/cache/apt/archives/ \
+    #-d install binfmt-support -qq 2>/dev/null
 
 
     # I'm not sure where this is needed, but kernel install
