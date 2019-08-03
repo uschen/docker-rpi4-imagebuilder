@@ -142,12 +142,12 @@ spinnerwaitfor () {
         3 ) j="/" ;;
     esac
     tput rc
-    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
+    printf "%${COLUMNS}s\r\n\n\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
     sleep 1
     ((i=i+1))
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r\n\n\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 waitfor () {
@@ -337,8 +337,9 @@ startfunc
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
     echo "* Clearing existing loopback mounts."
-    losetup -d /dev/loop0 &>/dev/null || true
-    dmsetup remove_all
+    # This is dangerous as this may not be the relevant loop device.
+    #losetup -d /dev/loop0 &>/dev/null || true
+    #dmsetup remove_all
     losetup -a
     cd $workdir
     echo "* Mounting: ${new_image}.img"
