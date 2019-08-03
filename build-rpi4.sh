@@ -1047,7 +1047,7 @@ image_and_chroot_cleanup () {
     waitfor "non-free_firmware"
     waitfor "rpi_userland"
     waitfor "andrei_gherzan_uboot_fork"
-[[ ! $havedebs ]] && waitfor "kernel_build"
+[[ $havedebs ]] && echo "No Kernel Build was needed!" || waitfor "kernel_build"
     waitfor "kernel_install"
     waitfor "kernel_debs"
     #waitfor "kernel_module_install"
