@@ -656,12 +656,16 @@ startfunc
 
 
 kernel_debs () {
-	    waitfor "kernelbuild_setup"
+    waitfor "kernelbuild_setup"
 startfunc
-    majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
-    extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
+    majorversion=`grep VERSION $src_cache/rpi-linux/Makefile | \
+    head -1 | awk -F ' = ' '{print $2}'`
+    patchlevel=`grep PATCHLEVEL $src_cache/rpi-linux/Makefile | \
+    head -1 | awk -F ' = ' '{print $2}'`
+    sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | \
+    head -1 | awk -F ' = ' '{print $2}'`
+    extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | \
+    head -1 | awk -F ' = ' '{print $2}'`
     extraversion_nohyphen="${extraversion//-}"
     PKGVER="$majorversion.$patchlevel.$sublevel"
     #echo "PKGVER: $PKGVER"
@@ -671,6 +675,7 @@ startfunc
     #kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     #echo $kernelrev
    # Don't remake debs if they already exist in output.
+   arbitrary_wait
    echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
      [ -e "$f" ] && havedebs=1 || unset havedebs
@@ -682,18 +687,19 @@ startfunc
     done
     if [[ $havedebs ]]
     then
-    echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo kernel needs to be built."
+    echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo \
+    kernel needs to be built."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
     else
         kernel_build
-	#waitfor "kernel_build"
-	echo "* Making $KERNEL_VERS kernel debs."
-	nativebuild
-        ext_mod_build_infrastructure
-	cd $workdir/rpi-linux
+    #waitfor "kernel_build"
+    echo "* Making $KERNEL_VERS kernel debs."
+    nativebuild
+    #ext_mod_build_infrastructure
+    cd $workdir/rpi-linux
         debcmd="make \
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
         -j $(($(nproc) + 1)) O=$workdir/kernel-build \
@@ -961,6 +967,7 @@ andrei_gherzan_uboot_fork () {
 startfunc
     git_get "https://github.com/agherzan/u-boot.git" "u-boot" "ag/rpi4"   
     cd $workdir/u-boot
+    echo "CONFIG_LZ4=y" >> $workdir/u-boot/configs/rpi_4_defconfig
     echo "CONFIG_GZIP=y" >> $workdir/u-boot/configs/rpi_4_defconfig
     echo "CONFIG_BZIP2=y" >> $workdir/u-boot/configs/rpi_4_defconfig
     echo "CONFIG_SYS_LONGHELP=y" >> $workdir/u-boot/configs/rpi_4_defconfig
@@ -1206,7 +1213,7 @@ startfunc
         xdelta3 -e -S none -I 0 -B 1812725760 -W 16777216 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
-	KERNEL_VERS=`cat /tmp/KERNEL_VERS`
+        KERNEL_VERS=`cat /tmp/KERNEL_VERS`
         for i in "${image_compressors[@]}"
         do
             echo "* Compressing patch.xdelta with $i and exporting."
