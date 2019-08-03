@@ -1212,7 +1212,7 @@ endfunc
 export_log () {
     waitfor "compressed_image_export"
 startfunc
-    KERNEL_VERS=`cat /tmp/KERNEL_VERS
+    KERNEL_VERS=`cat /tmp/KERNEL_VERS`
     echo "* Build log at: build-log-$KERNEL_VERS_${now}.log"
     cat $TMPLOG > /output/build-log-$KERNEL_VERS_${now}.log
     chown $USER:$GROUP /output/build-log-$KERNEL_VERS_${now}.log
