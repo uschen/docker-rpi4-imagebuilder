@@ -326,8 +326,9 @@ image_extract_and_mount () {
 startfunc    
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img &
-    kill -10 $(pgrep ^xzcat)
-    wait (pgrep ^xzcat)
+    xzcat_pid=$(pgrep ^xzcat)
+    kill -10 $(xzcat_pid)
+    wait $(xzcat_pid)
     [[ $DELTA ]] && (cp $workdir/$new_image.img $workdir/old_image.img &)
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
