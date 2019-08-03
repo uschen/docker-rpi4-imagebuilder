@@ -327,8 +327,8 @@ startfunc
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img &
     xzcat_pid=$(pgrep ^xzcat)
-    kill -10 $(xzcat_pid)
-    wait $(xzcat_pid)
+    kill -10 ${xzcat_pid}
+    wait ${xzcat_pid}
     [[ $DELTA ]] && (cp $workdir/$new_image.img $workdir/old_image.img &)
     #echo "* Increasing image size by 200M"
     #dd if=/dev/zero bs=1M count=200 >> $workdir/$new_image.img
@@ -340,8 +340,8 @@ startfunc
     echo "* Mounting: ${new_image}.img"
     
     arbitrary_wait
-    loop_device=`kpartx -avs ${new_image}.img \
-    | sed -n 's/\(^.*map\ \)// ; s/p1\ (.*//p'`
+    loop_device=$(kpartx -avs ${new_image}.img \
+    | sed -n 's/\(^.*map\ \)// ; s/p1\ (.*//p')
     
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
@@ -556,7 +556,7 @@ startfunc
     #extraversion_nohyphen="${extraversion//-}"
     #PKGVER="$majorversion.$patchlevel.$sublevel"
     #echo "PKGVER: $PKGVER"
-    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
+    kernelrev=$(git -C $src_cache/rpi-linux rev-parse --short HEAD)
     #KERNEL_VERS="$PKGVER-$kernelrev"
     #echo "KERNEL_VERS: $KERNEL_VERS"
     #echo $kernelrev
