@@ -338,7 +338,7 @@ startfunc
     
     arbitrary_wait
     kpartx -avs ${new_image}.img > /tmp/kpartx_output
-    read kpartx_a kpartx_b kpartx c < <(sed -n 's/p1//p'` /tmp/kpartx_output)
+    read kpartx_a kpartx_b kpartx c < <(sed -n 's/p1//p' /tmp/kpartx_output)
     loop_device=`echo $kpartx_c |sed -n 's/p1//p'`
     
     #e2fsck -f /dev/loop0p2
