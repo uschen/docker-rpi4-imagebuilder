@@ -161,7 +161,7 @@ waitfor () {
     fi; 
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\r\n\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r\n\r" "${FUNCNAME[1]} noticed: ${1} [\]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 
@@ -343,7 +343,6 @@ startfunc
     cd $workdir
     echo "* Mounting: ${new_image}.img"
     
-    arbitrary_wait
     loop_device=$(kpartx -avs ${new_image}.img \
     | sed -n 's/\(^.*map\ \)// ; s/p1\ (.*//p')
     
@@ -719,7 +718,7 @@ startfunc
     #kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     #echo $kernelrev
    # Don't remake debs if they already exist in output.
-   arbitrary_wait
+   #arbitrary_wait
    echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
      [ -e "$f" ] && (echo -e "Preexisting linux-image deb on cache volume. 😎\n"\
@@ -1000,7 +999,7 @@ wifi_firmware_modification () {
     waitfor "image_extract_and_mount"
     waitfor "non-free_firmware"
 startfunc    
-    echo "* Modifying wireless firmware."
+    #echo "* Modifying wireless firmware."
     # as per https://andrei.gherzan.ro/linux/raspbian-rpi4-64/
     if ! grep -qs 'boardflags3=0x44200100' \
     /mnt/usr/lib/firmware/brcm/brcmfmac43455-sdio.txt
