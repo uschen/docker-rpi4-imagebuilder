@@ -1175,7 +1175,7 @@ startfunc
     chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper \
     autoclean -y $silence_apt_flags"
     
-    # binfmt-support wreaks havoc with container, so let it get 
+    # binfmt wreaks havoc with the container AND THE HOST, so let it get 
     # installed at first boot.
     umount /mnt/var/cache/apt
     echo "Installing binfmt-support files for install at first boot."
