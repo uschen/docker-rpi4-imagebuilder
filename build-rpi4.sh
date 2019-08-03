@@ -81,7 +81,8 @@ mkdir -p $apt_cache/partial
 
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim \
-e2fsprogs qemu-user-static pv -qq 2>/dev/null
+e2fsprogs qemu-user-static \
+libc6-arm64-cross pv -qq 2>/dev/null
 
 # Utility script
 # Apt concurrency manager wrapper via
@@ -694,8 +695,8 @@ startfunc
     
     # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
     # from image to build container in case they are needed during this install.
-    cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
-    cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    #cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
+    #cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
     
     # Maybe this can all be worked around by statically compiling these files
     # so that qemu-static can just deal with them without library issues during the 

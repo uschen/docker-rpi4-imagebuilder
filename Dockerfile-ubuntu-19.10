@@ -29,6 +29,7 @@ RUN set -ex \
                libgpm2 \
                lsof \
                lz4 \
+               libc6-arm64-cross \
                libelf-dev \
                libguestfs-tools \
                libncurses-dev \
