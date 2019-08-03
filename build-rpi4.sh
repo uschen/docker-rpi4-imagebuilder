@@ -30,6 +30,10 @@ mkdir /flag
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Needed for display
+shopt -s checkwinsize 
+size=$(stty size) 
+lines=${size% *}
+columns=${size#* }
 echo "columns: $columns COLUMNS: $COLUMNS" > /tmp/columns
 env > /tmp/env
 COLUMNS="${columns:-80}"
