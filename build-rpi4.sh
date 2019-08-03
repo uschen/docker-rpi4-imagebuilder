@@ -124,7 +124,7 @@ inotify_touch_events () {
     done
 }
 
-waitfor () {
+spinnerwaitfor () {
     local waitforit
     local i=0
     # waitforit file is written in the function "endfunc"
@@ -148,19 +148,19 @@ waitfor () {
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
-#waitfor () {
-#    local waitforit
-#    # waitforit file is written in the function "endfunc"
-#    touch /flag/wait.${FUNCNAME[1]}_for_${1}
-#    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
-#    while read waitforit; do 
-#    if [ "$waitforit" = done.${1} ]; 
-#        then break; \
-#    fi; 
-#    done \
-#   < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-#    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f #/flag/wait.${FUNCNAME[1]}_for_${1}
-#}
+waitfor () {
+    local waitforit
+    # waitforit file is written in the function "endfunc"
+    touch /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
+    while read waitforit; do 
+    if [ "$waitforit" = done.${1} ]; 
+        then break; \
+    fi; 
+    done \
+   < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
+    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+}
 
 
 startfunc () {
@@ -728,8 +728,8 @@ startfunc
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
     else
-        kernel_build
-    #waitfor "kernel_build"
+        kernel_build &
+    spinnerwaitfor "kernel_build"
     echo "* Making $KERNEL_VERS kernel debs."
     #ext_mod_build_infrastructure
     cd $workdir/rpi-linux
