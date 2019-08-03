@@ -336,9 +336,10 @@ startfunc
     cd $workdir
     echo "* Mounting: ${new_image}.img"
     
-    kpartx_output=`kpartx -avs ${new_image}.img`
-    read kpartx_a kpartx_b kpartx c < <(echo "$kpartx_output")
-    loop_device=`echo $kpartx_c |sed 's/p1//p'`
+    arbitrary_wait
+    kpartx -avs ${new_image}.img > /tmp/kpartx_output
+    read kpartx_a kpartx_b kpartx c < <(sed -n 's/p1//p'` /tmp/kpartx_output)
+    loop_device=`echo $kpartx_c |sed -n 's/p1//p'`
     
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
