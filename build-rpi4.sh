@@ -490,6 +490,7 @@ chmod +x /mnt/usr/local/bin/chroot-dpkg-wrapper
     #echo "* Downloading qemu-user-static"
     # qemu-user-binfmt needs to be installed after reboot though otherwise there 
     # are container problems.
+    echo "* chroot 1"
     chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     -d install  \
@@ -502,10 +503,11 @@ chmod +x /mnt/usr/local/bin/chroot-dpkg-wrapper
     #cp /lib/x86_64-linux-gnu/libc.so.6 /mnt/lib/x86_64-linux-gnu/
     #cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
     #cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    echo "* chroot 2"
     chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y \
     --no-install-recommends \
     qemu-user qemu libc6-amd64-cross $silence_apt_flags"
-               
+
     echo "* Apt upgrading image in chroot."
     #echo "* There may be some errors here due to" 
     #echo "* installation happening in a chroot."
