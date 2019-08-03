@@ -178,11 +178,12 @@ docker_args+="-e apt_cache=/cache/apt_cache "
 # Is a XDELTA local variable set? (Can not use XDELTA since XDELTA uses that itself.)
 [[ -v DELTA ]] && docker_args+="-e DELTA=${DELTA} "
 
-console_cols=$(tput cols)
-console_cols={console_cols:-80}
- 
-# Send in columns for display. This should always work.
-docker_args+="-e columns=${console_cols} "
+# Send in columns for display.
+shopt -s checkwinsize 
+size=$(stty size) 
+lines=${size% *}
+console_cols=${size#* }
+docker_args+="-e COLS=${console_cols} "
 
 # Export container id
 cidfile="$(cd $PROG_DIR; pwd)/build.cid"
