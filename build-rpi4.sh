@@ -757,6 +757,7 @@ startfunc
     else
         kernel_build &
         waitfor "kernel_build"
+        arbitrary_wait
 
         echo "* Copying out git *${kernelrev}* kernel debs."
         rm $workdir/linux-libc-dev*.deb
