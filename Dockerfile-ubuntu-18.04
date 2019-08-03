@@ -36,8 +36,8 @@ RUN set -ex \
                libssl-dev \
                libxdelta2 \
                libpython3.7 \
-               linux-image-5.2.0-8-generic \
-               linux-modules-5.2.0-8-generic \
+               linux-image-$(uname -r) \
+               linux-modules-$(uname -r) \
                qemu-user-static \
                patch \
                pv \
