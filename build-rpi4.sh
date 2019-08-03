@@ -594,9 +594,9 @@ startfunc
     }
     
 kernel_build () {
-	waitfor "kernelbuild_setup"
+    waitfor "kernelbuild_setup"
 startfunc
-	cd $workdir/rpi-linux
+    cd $workdir/rpi-linux
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=$workdir/kernel-build \
@@ -615,32 +615,19 @@ startfunc
     olddefconfig &>> /tmp/${FUNCNAME[0]}.compile.log
     #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
-    cd ..
+    #cd ..
 
-    cd $workdir/rpi-linux
-    make \
-    ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    -j $(($(nproc) + 1)) O=$workdir/kernel-build &>> /tmp/${FUNCNAME[0]}.compile.log
+    #cd $workdir/rpi-linux
+    #make \
+    #ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    #-j $(($(nproc) + 1)) O=$workdir/kernel-build &>> /tmp/${FUNCNAME[0]}.compile.log
     #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     # Not sure why setting this isn't working globally. :/
-    export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    #export KERNEL_VERSION=`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
     ###
-    echo "* Kernel version is ${KERNEL_VERSION} *"
-    
-
-    # Now that we have the kernel packages, let us go ahead and make a local 
-    # install anyways so that we can manually copy the required files over for
-    # first boot.
-    #mkdir $workdir/kernel-install
-    #sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    #DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
-    #-j $(($(nproc) + 1))  O=$workdir/kernel-build \
-    #modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
-    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
-    
-#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
-    
+    #echo "* Kernel version is ${KERNEL_VERSION} *"
+        
 endfunc
 }
 
