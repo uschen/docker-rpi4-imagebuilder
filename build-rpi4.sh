@@ -641,7 +641,7 @@ startfunc
     done
     if [[ $havedebs ]]
     then
-    echo "Using existing $KERNEL_VERS debs."
+    echo -e "Using existing $KERNEL_VERS debs from cache volume.\n No kernel needs to be built."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     else
@@ -1047,7 +1047,6 @@ image_and_chroot_cleanup () {
     waitfor "non-free_firmware"
     waitfor "rpi_userland"
     waitfor "andrei_gherzan_uboot_fork"
-[[ $havedebs ]] && echo "No Kernel Build was needed!" || waitfor "kernel_build"
     waitfor "kernel_install"
     waitfor "kernel_debs"
     #waitfor "kernel_module_install"
