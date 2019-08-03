@@ -630,8 +630,10 @@ ext_mod_build_infrastructure () {
     waitfor "arm64_chroot_setup"
     waitfor "kernelbuild_setup"
 startfunc
-	cd $workdir/rpi-linux
+
+    cd $workdir/rpi-linux
     echo "* Regenerating broken cross-compile module installation infrastructure."
+    nativebuild
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, due to module install files being installed into the target system in
     # the cross-compile build host architecture, so let's fix this with natively 
@@ -729,7 +731,6 @@ startfunc
         kernel_build
     #waitfor "kernel_build"
     echo "* Making $KERNEL_VERS kernel debs."
-    nativebuild
     #ext_mod_build_infrastructure
     cd $workdir/rpi-linux
         debcmd="make \
