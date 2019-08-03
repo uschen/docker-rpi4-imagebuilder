@@ -756,7 +756,7 @@ startfunc
     chown $USER:$GROUP /output/*.deb
     else
         kernel_build &
-        spinnerwaitfor "kernel_build"
+        waitfor "kernel_build"
 
         echo "* Copying out git *${kernelrev}* kernel debs."
         rm $workdir/linux-libc-dev*.deb
