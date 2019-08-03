@@ -1036,29 +1036,40 @@ startfunc
 endfunc
 }
 
-first_boot_script_setup () {
+first_boot_scripts_setup () {
     waitfor "image_extract_and_mount"
 startfunc    
     echo "* Creating first start cleanup script."
-    cat <<-'EOF' > /mnt/etc/rc.local 
+    cat <<-'EOF' > /mnt/etc/rc.local.temp
 	#!/bin/sh -e
-	# 1st Boot Cleanup Script
 	#
 	# Print the IP address
 	    _IP=$(hostname -I) || true
 	if [ "$_IP" ]; then
 	    printf "My IP address is %s\n" "$_IP"
 	fi
+	# Disable wifi power saving, which causes wifi instability.
+	iwconfig wlan0 power off
 	#
-	#mkdir -p /lib/firmware/`uname -r`/device-tree/
+	/etc/rc.local.temp &
+	exit 0
+EOF
+    chmod +x /mnt/etc/rc.local
+
+
+    cat <<-'EOF' > /mnt/etc/rc.local.temp
+	#!/bin/sh -e
+	# 1st Boot Cleanup Script
+	#
 	/usr/bin/dpkg -i /var/cache/apt/archives/*.deb
 	/usr/local/bin/chroot-apt-wrapper remove linux-image-raspi2 linux-image*-raspi2 -y --purge
 	/usr/local/bin/chroot-apt-wrapper update && /usr/local/bin/chroot-apt-wrapper upgrade -y
 	/usr/sbin/update-initramfs -c -k all
-	rm /etc/rc.local
+	sed -i 's/\/etc\/rc.local.temp\ \&//' /etc/rc.local 
+	rm -- "$0"
 	exit 0
 EOF
-    chmod +x /mnt/etc/rc.local
+    chmod +x /mnt/etc/rc.local.temp
     
 endfunc
 } 
@@ -1152,7 +1163,7 @@ image_and_chroot_cleanup () {
     waitfor "rpi_config_txt_configuration"
     waitfor "rpi_cmdline_txt_configuration"
     waitfor "wifi_firmware_modification"
-    waitfor "first_boot_script_setup"
+    waitfor "first_boot_scripts_setup"
     waitfor "added_scripts"
 startfunc    
     echo "* Finishing image setup."
@@ -1332,7 +1343,7 @@ image_extract_and_mount
 rpi_config_txt_configuration &
 rpi_cmdline_txt_configuration &
 wifi_firmware_modification &
-first_boot_script_setup &
+first_boot_scripts_setup &
 added_scripts &
 kernel_install &
 arm64_chroot_setup
