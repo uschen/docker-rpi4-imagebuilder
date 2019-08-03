@@ -67,11 +67,11 @@ In this example the target is Ubuntu 19.10 but you can create and modify `Docker
 ## 4.  Build package from inside source directory
 
     # ./build-image -i docker-rpi4-imagebuilder:19.10 -o output ~/directory_with_the_scripts
-    git pull ; time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
+    git pull ; NOXZ=1 time ./build-image -i docker-rpi4-imagebuilder:19.10 -o output .
     
 A first build takes about 30 min on my Skylake build machine. A second build takes about 10 min due to the use of ccache if I have xz compression disabled and just use lz4 for image compression, or 25 min if I use both.
 
-(xz compression be toggled at the top of the build-rpi4.sh file.) 
+(xz compression be toggled by dropping NOXZ=1 from the command line.) 
 
 
 After a successful build you will find the `eoan-preinstalled-server-arm64+raspi4.img___kernel___timestamp.lz4` 

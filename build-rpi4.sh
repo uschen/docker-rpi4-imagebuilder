@@ -457,7 +457,7 @@ EOF
     #cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
     chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y \
     --no-install-recommends \
-    qemu-user-binfmt qemu-user qemu libc6-amd64-cross $silence_apt_flags"
+    qemu-user qemu libc6-amd64-cross $silence_apt_flags"
                
     echo "* Apt upgrading image in chroot."
     #echo "* There may be some errors here due to" 
