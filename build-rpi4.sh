@@ -329,7 +329,10 @@ startfunc
     echo "* Extracting: ${base_image} to ${new_image}.img"
     xzcat $workdir/$base_image > $workdir/$new_image.img &
     xzcat_pid=$(pgrep ^xzcat)
-    kill -10 ${xzcat_pid}
+    while true; do
+        kill -10 ${xzcat_pid}
+        sleep 1
+    done
     wait ${xzcat_pid}
     [[ $DELTA ]] && (cp $workdir/$new_image.img $workdir/old_image.img &)
     #echo "* Increasing image size by 200M"
