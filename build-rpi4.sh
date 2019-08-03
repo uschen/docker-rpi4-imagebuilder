@@ -600,7 +600,7 @@ startfunc
     then
     echo "Using existing *${kernelrev}* debs."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
-    cp $apt_cache/linux-headers-$*${kernelrev}*arm64.deb $workdir/
+    cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     else
         waitfor "kernel_build"
 	echo "* Making git *${kernelrev}* kernel debs."
