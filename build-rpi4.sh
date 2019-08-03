@@ -127,6 +127,7 @@ inotify_touch_events () {
 spinnerwaitfor () {
     local waitforit
     local i=0
+    tput sc
     # waitforit file is written in the function "endfunc"
     touch /flag/wait.${FUNCNAME[1]}_for_${1}
     #printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
@@ -140,6 +141,7 @@ spinnerwaitfor () {
         2 ) j="|" ;;
         3 ) j="/" ;;
     esac
+    tput rc
     printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1} [$j]"
     sleep 1
     ((i=i+1))
@@ -710,16 +712,18 @@ startfunc
    arbitrary_wait
    echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
-     [ -e "$f" ] && (echo -e "Preexisting linux-image deb on cache volume. 😎\n" ; havedebs=1) \
-     || unset havedebs
+     [ -e "$f" ] && (echo -e "Preexisting linux-image deb on cache volume. 😎\n"\
+      ; echo 1 > /tmp/nodebs) \
+     || rm /tmp/nodebs
      break
     done
     for f in $apt_cache/linux-headers-*${kernelrev}*; do
-     [ -e "$f" ] && (echo -e "Preexisting linux-headers deb on cache volume. 😎\n" ; havedebs=1) \
-     || unset havedebs
+     [ -e "$f" ] && (echo -e "Preexisting linux-headers deb on cache volume. 😎\n"\
+      ; echo 1> /tmp/nodebs) \
+     || rm /tmp/nodebs
      break
     done
-    if [[ $havedebs ]]
+    if [[ -e /tmp/nodebs ]]
     then
     # echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo \
     # kernel needs to be built."
