@@ -15,6 +15,7 @@ RUN set -ex \
                devscripts \
                dkms \
                dpkg-dev \
+               e2fsprogs \
                equivs \
                fakeroot \
                flex \
@@ -38,6 +39,7 @@ RUN set -ex \
                linux-modules-5.2.0-8-generic \
                qemu-user-static \
                patch \
+               pv \
                rsync \
                sudo \
                vim \

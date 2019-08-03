@@ -156,14 +156,14 @@ waitfor () {
     touch /flag/wait.${FUNCNAME[1]}_for_${1}
     waitmsg="${FUNCNAME[1]} waits for: ${1} "
     slashbox="[/]"
-    printf "%${COLUMNS}s\n" "$waitmsg" "${slashbox}\r"
+    printf "%${COLUMNS}s\r" "$waitmsg" "${slashbox}"
     while read waitforit; do 
     if [ "$waitforit" = done.${1} ]; 
         then break; \
     fi; 
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]\r" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 
@@ -1209,7 +1209,7 @@ startfunc
     sync
     umount /mnt/boot/firmware || (lsof +f -- /mnt/boot/firmware ; sleep 60 ; umount /mnt/boot/firmware)
     #umount /mnt || (mount | grep /mnt)
-    e4defrag /mnt
+    e4defrag /mnt >/dev/null
     umount /mnt || (lsof +f -- /mnt ; sleep 60 ; umount /mnt)
     #guestunmount /mnt
 
@@ -1270,7 +1270,7 @@ startfunc
             #echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}_xdelta3.$i"
             compress_flags=""
             [ "$i" == "lz4" ] && compress_flags="-m"
-            xdelta_patchout_compresscmd="$i -v -k $compress_flags \
+            xdelta_patchout_compresscmd="$i -k $compress_flags \
              $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
             cp "$workdir/patch.xdelta.$i" \
