@@ -336,7 +336,9 @@ startfunc
     cd $workdir
     echo "* Mounting: ${new_image}.img"
 
-    kpartx -avs ${new_image}.img
+    read kpartx_a kpartx_b kpartx c < <`kpartx -avs ${new_image}.img`
+    loop_device=`echo $kpartx_c |sed 's/p1//p'`
+    
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
     
@@ -348,8 +350,8 @@ startfunc
     fi 
     waitfor "ok_to_continue_after_mount_image"
     
-    mount /dev/mapper/loop0p2 /mnt
-    mount /dev/mapper/loop0p1 /mnt/boot/firmware
+    mount /dev/mapper/${loop_device}p2 /mnt
+    mount /dev/mapper/${loop_device}p1 /mnt/boot/firmware
     # Guestmount is at least an order of magnitude slower than using loopback device.
     #guestmount -a ${new_image}.img -m /dev/sda2 -m /dev/sda1:/boot/firmware --rw /mnt -o dev
     
@@ -1247,7 +1249,7 @@ xdelta3_image_export () {
 startfunc
         echo "* Making xdelta3 binary diffs between today's eoan base image"
         echo "* and the new images."
-        xdelta3 -e -S none -I 0 -B 1812725760 -W 16777216 -vfs \
+        xdelta3 -e -S none -I 0 -B 1812725760 -W 16777216 -fs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
         KERNEL_VERS=`cat /tmp/KERNEL_VERS`
