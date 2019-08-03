@@ -345,12 +345,38 @@ startfunc
     cp /etc/resolv.conf /run/systemd/resolve/stub-resolv.conf
     rsync -avh --devices --specials /run/systemd/resolve /mnt/run/systemd > /dev/null
     
+    
+    # Apt concurrency manager wrapper via
+    # https://askubuntu.com/posts/375031/revisions
+    mkdir -p /mnt/usr/local/bin
+    cat <<'EOF'> /mnt/usr/local/bin/chroot-apt-wrapper
+#!/bin/bash
+
+i=0
+tput sc
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    case $(($i % 4)) in
+        0 ) j="-" ;;
+        1 ) j="\\" ;;
+        2 ) j="|" ;;
+        3 ) j="/" ;;
+    esac
+    tput rc
+    echo -en "\r[$j] Waiting for other apt instances to finish..." 
+    sleep 0.5
+    ((i=i+1))
+done 
+
+/usr/bin/apt-get "$@"
+EOF
+    chmod +x /mnt/usr/local/bin/chroot-apt-wrapper
+
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
     echo "* ARM64 chroot setup is complete." 
     
     echo "* Starting apt update."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     update 2>/dev/null | grep packages | cut -d '.' -f 1 
     echo "* Apt update done."
     echo "* Downloading software for apt upgrade."
@@ -370,10 +396,10 @@ startfunc
     echo "* Apt upgrading image in chroot."
     #echo "* There may be some errors here due to" 
     #echo "* installation happening in a chroot."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
     echo "* Image apt upgrade done."
     echo "* Installing wifi & networking tools to image."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper \
     install wireless-tools wireless-regdb crda \
     net-tools network-manager -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
     echo "* Wifi & networking tools installed." 
@@ -417,7 +443,7 @@ startfunc
                wget \
                xz-utils 2>/dev/null
     echo "* Installing native kernel build software to image."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y --no-install-recommends \
                build-essential \
                bc \
                bison \
@@ -626,7 +652,7 @@ startfunc
     #echo "PKGVER: $PKGVER"
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
     KERNEL_VERS="$PKGVER-$kernelrev"
-    #echo "KERNEL_VERS: $KERNEL_VERS"
+    echo "KERNEL_VERS: $KERNEL_VERS" > /tmp/KERNEL_VERS
     #kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     #echo $kernelrev
    # Don't remake debs if they already exist in output.
@@ -954,8 +980,8 @@ startfunc
 	#
 	#mkdir -p /lib/firmware/`uname -r`/device-tree/
 	/usr/bin/dpkg -i /var/cache/apt/archives/*.deb
-	/usr/bin/apt remove linux-image-raspi2 linux-image*-raspi2 -y --purge
-	/usr/bin/apt update && /usr/bin/apt upgrade -y
+	/usr/local/bin/chroot-apt-wrapper remove linux-image-raspi2 linux-image*-raspi2 -y --purge
+	/usr/local/bin/chroot-apt-wrapper update && /usr/local/bin/chroot-apt-wrapper upgrade -y
 	/usr/sbin/update-initramfs -c -k all
 	rm /etc/rc.local
 	exit 0
@@ -1060,7 +1086,7 @@ startfunc
     echo "* Finishing image setup."
     
     echo "* Cleaning up ARM64 chroot"
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper \
     autoclean -y $silence_apt_flags"
     
     # binfmt-support wreaks havoc with container, so let it get 
@@ -1144,13 +1170,13 @@ startfunc
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
      cpcmd="cp $workdir/${new_image}.img.$i \
-     /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i"
+     /output/${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i"
      echo $compresscmd
      $compresscmd
      #echo $cpcmd
      $cpcmd
-     chown $USER:$GROUP /output/${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i
-     echo "${new_image}-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.img.$i created." 
+     chown $USER:$GROUP /output/${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i
+     echo "${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i created." 
     done
 endfunc
 }    
@@ -1173,11 +1199,11 @@ startfunc
              $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
             xdelta_patchout_cpcmd="cp $workdir/patch.xdelta.$i \
-     /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i"
+     /output/eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i"
             $xdelta_patchout_cpcmd
-            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i
+            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i
             echo "Xdelta3 file exported to:"
-            echo "eoan-daily-preinstalled-server_`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`${now}.xdelta3.$i"
+            echo "eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i"
         done
 endfunc
 }
@@ -1186,9 +1212,9 @@ export_log () {
     waitfor "compressed_image_export"
 startfunc
 
-    echo "* Build log at: build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log"
-    cat $TMPLOG > /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
-    chown $USER:$GROUP /output/build-log-`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`_${now}.log
+    echo "* Build log at: build-log-`cat /tmp/KERNEL_VERS'`_${now}.log"
+    cat $TMPLOG > /output/build-log-`cat /tmp/KERNEL_VERS`_${now}.log
+    chown $USER:$GROUP /output/build-log-`cat /tmp/KERNEL_VERS`_${now}.log
     
 endfunc
 }
