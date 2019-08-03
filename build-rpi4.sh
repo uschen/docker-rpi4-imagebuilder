@@ -565,8 +565,8 @@ startfunc
     if [[ $havedebs ]]
     then
     echo "Using existing $KERNEL_VERSION debs."
-    cp $apt_cache/linux-image-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
-    cp $apt_cache/linux-headers-$KERNEL_VERSION_$KERNEL_VERSION-1_arm64.deb $workdir/
+    cp $apt_cache/linux-image-$KERNEL_VERSION*arm64.deb $workdir/
+    cp $apt_cache/linux-headers-$KERNEL_VERSION*arm64.deb $workdir/
     else
         echo "* Making $KERNEL_VERSION kernel debs."
         cd $workdir/rpi-linux
