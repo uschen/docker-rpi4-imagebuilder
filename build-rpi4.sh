@@ -10,11 +10,11 @@ kernelgitrepo="https://github.com/raspberrypi/linux.git"
 #branch=bcm2711-initial-v5.2
 #kernelgitrepo="https://github.com/lategoodbye/rpi-zero.git"
 # This should be the image we want to modify.
-base_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/"
-base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
+base_url="http://cdimage.ubuntu.com/ubuntu-server/bionic/daily-preinstalled/current/"
+base_image="bionic-preinstalled-server-arm64+raspi3.img.xz"
 base_image_url="${base_url}/${base_image}"
 # This is the base name of the image we are creating.
-new_image="eoan-preinstalled-server-arm64+raspi4"
+new_image="chen-preinstalled-server-arm64+raspi4"
 # Comment out the following if apt is throwing errors silently.
 # Note that these only work for the chroot commands.
 silence_apt_flags="-o Dpkg::Use-Pty=0 -qq < /dev/null > /dev/null "
@@ -638,7 +638,7 @@ startfunc
     
     
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
-    wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
+    wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-4.19.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
     endfunc
     }

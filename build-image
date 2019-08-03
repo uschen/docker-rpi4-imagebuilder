@@ -45,10 +45,10 @@ while getopts "i:o:h" opt; do
 done
 
 shift $(($OPTIND - 1))
-
+# http://cdimage.ubuntu.com/ubuntu-server/bionic/daily-preinstalled/current/bionic-preinstalled-server-arm64+raspi3.img.xz
 # This should be the image we want to modify.
-base_url="http://cdimage.ubuntu.com/ubuntu-server/daily-preinstalled/current/"
-base_image="eoan-preinstalled-server-arm64+raspi3.img.xz"
+base_url="http://cdimage.ubuntu.com/ubuntu-server/bionic/daily-preinstalled/current/"
+base_image="bionic-preinstalled-server-arm64+raspi3.img.xz"
 base_image_url="${base_url}/${base_image}"
 cache_volume=rpi4-imagebuilder-cache
 
