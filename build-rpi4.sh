@@ -641,7 +641,7 @@ startfunc
     done
     if [[ $havedebs ]]
     then
-    echo -e "Using existing $KERNEL_VERS debs from cache volume.\n No kernel needs to be built."
+    echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo kernel needs to be built."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     else
