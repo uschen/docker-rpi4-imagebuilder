@@ -724,13 +724,13 @@ startfunc
     for f in $apt_cache/linux-image-*${kernelrev}*; do
      [ -e "$f" ] && (echo -e "Preexisting linux-image deb on cache volume. 😎\n"\
       ; echo 1 > /tmp/nodebs) \
-     || rm /tmp/nodebs
+     || ( rm /tmp/nodebs || true)
      break
     done
     for f in $apt_cache/linux-headers-*${kernelrev}*; do
      [ -e "$f" ] && (echo -e "Preexisting linux-headers deb on cache volume. 😎\n"\
       ; echo 1> /tmp/nodebs) \
-     || rm /tmp/nodebs
+     || ( rm /tmp/nodebs || true)
      break
     done
     if [[ -e /tmp/nodebs ]]
