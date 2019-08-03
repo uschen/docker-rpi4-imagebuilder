@@ -84,7 +84,8 @@ apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vi
 -qq 2>/dev/null
 
 # Utility script
-
+# Apt concurrency manager wrapper via
+# https://askubuntu.com/posts/375031/revisions
 cat <<'EOF'> /usr/bin/chroot-apt-wrapper
 #!/bin/bash
 
@@ -98,7 +99,7 @@ while fuser /mnt/var/lib/dpkg/lock >/dev/null 2>&1 ; do
         3 ) j="/" ;;
     esac
     tput rc
-    echo -en "\r[$j] Waiting for other software managers to finish..." 
+    echo -en "\r[$j] Waiting for other apt instances to finish..." 
     sleep 0.5
     ((i=i+1))
 done 
@@ -644,7 +645,8 @@ startfunc
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     else
-        waitfor "kernel_build"
+        kernel_build
+	#waitfor "kernel_build"
 	echo "* Making $KERNEL_VERS kernel debs."
 	nativebuild
         ext_mod_build_infrastructure
@@ -1045,7 +1047,7 @@ image_and_chroot_cleanup () {
     waitfor "non-free_firmware"
     waitfor "rpi_userland"
     waitfor "andrei_gherzan_uboot_fork"
-    waitfor "kernel_build"
+[[ ! $havedebs ]] && waitfor "kernel_build"
     waitfor "kernel_install"
     waitfor "kernel_debs"
     #waitfor "kernel_module_install"
@@ -1226,7 +1228,7 @@ andrei_gherzan_uboot_fork &
 # KERNEL_VERSION is set here:
 kernelbuild_setup &
 kernel_debs &
-kernel_build &
+#kernel_build &
 image_extract_and_mount
 rpi_config_txt_configuration &
 rpi_cmdline_txt_configuration &
