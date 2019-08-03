@@ -336,7 +336,27 @@ startfunc
     #chroot /mnt /bin/bash -c "/usr/bin/apt update 2>/dev/null \
     #| grep packages | cut -d '.' -f 1"
     #echo "* Chroot apt update done."
+    echo "* Downloading wifi & networking tools."
+    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=$apt_cache \
+    -d install wireless-tools wireless-regdb crda \
+    net-tools network-manager -qq 2>/dev/null
+    echo "* Apt upgrading image in chroot."
+    #echo "* There may be some errors here due to" 
+    #echo "* installation happening in a chroot."
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
+    echo "* Image apt upgrade done."
+    echo "* Installing wifi & networking tools to image."
+    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
+    install wireless-tools wireless-regdb crda \
+    net-tools network-manager -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
+    echo "* Wifi & networking tools installed." 
+endfunc
+}
 
+nativebuild () {
+    waitfor "arm64_chroot_setup"
+startfunc
     echo "* Downloading software for building portions of kernel natively on chroot."
     apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
@@ -370,16 +390,6 @@ startfunc
                sudo \
                wget \
                xz-utils 2>/dev/null
-    echo "* Downloading wifi & networking tools."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
-    -o dir::cache::archives=$apt_cache \
-    -d install wireless-tools wireless-regdb crda \
-    net-tools network-manager -qq 2>/dev/null
-    echo "* Apt upgrading image in chroot."
-    #echo "* There may be some errors here due to" 
-    #echo "* installation happening in a chroot."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get upgrade -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
-    echo "* Image apt upgrade done."
     echo "* Installing native kernel build software to image."
     chroot /mnt /bin/bash -c "/usr/bin/apt-get install -y --no-install-recommends \
                build-essential \
@@ -412,11 +422,6 @@ startfunc
                wget \
                xz-utils $silence_apt_flags"
     echo "* Native kernel build software installed."
-    echo "* Installing wifi & networking tools to image."
-    chroot /mnt /bin/bash -c "/usr/bin/apt-get \
-    install wireless-tools wireless-regdb crda \
-    net-tools network-manager -y $silence_apt_flags" &>> /tmp/${FUNCNAME[0]}.install.log
-    echo "* Wifi & networking tools installed."
 endfunc
 }
 
@@ -436,7 +441,7 @@ startfunc
 endfunc
 }
 
-kernel_build () {
+kernelbuild_setup () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
     
@@ -462,7 +467,13 @@ startfunc
     [ ! -f arch/arm64/configs/bcm2711_defconfig ] && \
     wget https://raw.githubusercontent.com/raspberrypi/linux/rpi-5.2.y/arch/arm64/configs/bcm2711_defconfig \
     -O arch/arm64/configs/bcm2711_defconfig
+    endfunc
+    }
     
+kernel_build () {
+	waitfor "kernelbuild_setup"
+startfunc
+	cd $workdir/rpi-linux
     make \
     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=$workdir/kernel-build \
@@ -494,6 +505,27 @@ startfunc
     ###
     echo "* Kernel version is ${KERNEL_VERSION} *"
     
+
+    # Now that we have the kernel packages, let us go ahead and make a local 
+    # install anyways so that we can manually copy the required files over for
+    # first boot.
+    #mkdir $workdir/kernel-install
+    #sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+    #DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
+    #-j $(($(nproc) + 1))  O=$workdir/kernel-build \
+    #modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
+    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
+    
+#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
+    
+endfunc
+}
+
+ext_mod_build_infrastructure () {
+    waitfor "arm64_chroot_setup"
+    waitfor "kernelbuild_setup"
+startfunc
+	cd $workdir/rpi-linux
     echo "* Regenerating broken cross-compile module installation infrastructure."
     # Cross-compilation of kernel wreaks havoc with building out of kernel modules
     # later, due to module install files being installed into the target system in
@@ -542,25 +574,14 @@ startfunc
     
     aarch64-linux-gnu-gcc -static $workdir/rpi-linux/scripts/recordmcount.c -o \
     $workdir/kernel-build/tmp/scripts/recordmount &>> /tmp/${FUNCNAME[0]}.compile.log
-
-    kernel_debs
-
-    # Now that we have the kernel packages, let us go ahead and make a local 
-    # install anyways so that we can manually copy the required files over for
-    # first boot.
-    #mkdir $workdir/kernel-install
-    #sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-    #DEPMOD=echo INSTALL_MOD_PATH=$workdir/kernel-install \
-    #-j $(($(nproc) + 1))  O=$workdir/kernel-build \
-    #modules_install &>> /tmp/${FUNCNAME[0]}.compile.log
-    #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
-#    depmod --basedir $workdir/kernel-install `cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`
-    
-endfunc
-}
+    endfunc
+    }
+
+
 
 kernel_debs () {
+	    waitfor "kernelbuild_setup"
 startfunc
 
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
@@ -581,8 +602,11 @@ startfunc
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-$*${kernelrev}*arm64.deb $workdir/
     else
-        echo "* Making $KERNEL_VERSION kernel debs."
-        cd $workdir/rpi-linux
+        waitfor "kernel_build"
+	echo "* Making git *${kernelrev}* kernel debs."
+	nativebuild
+        ext_mod_build_infrastructure
+	cd $workdir/rpi-linux
         debcmd="make \
         ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
         -j $(($(nproc) + 1)) O=$workdir/kernel-build \
@@ -590,16 +614,20 @@ startfunc
     
         echo $debcmd
         $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
-        echo "* Copying out $KERNEL_VERSION kernel debs."
+        echo "* Copying out git *${kernelrev}* kernel debs."
         rm $workdir/linux-libc-dev*.deb
         cp $workdir/*.deb $apt_cache/
         cp $workdir/*.deb /output/ 
         chown $USER:$GROUP /output/*.deb
     fi
+    
+    waitfor "image_extract_and_mount"
     # Try installing the generated debs in chroot before we do anything else.
     cp $workdir/*.deb /mnt/tmp/
     
-    echo "* Installing $KERNEL_VERSION kernel debs to image."
+    waitfor "added_scripts"
+    
+    echo "* Installing git *${kernelrev}* kernel debs to image."
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
     #arbitrary_wait
@@ -970,10 +998,21 @@ endfunc
 }
 
 image_and_chroot_cleanup () {
+    waitfor "rpi_firmware"
+    waitfor "armstub8-gic"
+    waitfor "non-free_firmware"
+    waitfor "rpi_userland"
+    waitfor "andrei_gherzan_uboot_fork"
     waitfor "kernel_build"
     waitfor "kernel_install"
+    waitfor "kernel_debs"
     #waitfor "kernel_module_install"
     #waitfor "kernel_install_dtbs"
+    waitfor "rpi_config_txt_configuration"
+    waitfor "rpi_cmdline_txt_configuration"
+    waitfor "wifi_firmware_modification"
+    waitfor "first_boot_script_setup"
+    waitfor "added_scripts"
 startfunc    
     echo "* Finishing image setup."
     
@@ -1142,15 +1181,17 @@ non-free_firmware &
 rpi_userland &
 andrei_gherzan_uboot_fork &
 # KERNEL_VERSION is set here:
+kernelbuild_setup &
+kernel_debs &
 kernel_build &
 image_extract_and_mount
-arm64_chroot_setup
 rpi_config_txt_configuration &
 rpi_cmdline_txt_configuration &
 wifi_firmware_modification &
 first_boot_script_setup &
 added_scripts &
-kernel_install
+kernel_install &
+arm64_chroot_setup
 #kernel_module_install
 #kernel_install_dtbs &
 image_and_chroot_cleanup
@@ -1162,5 +1203,3 @@ export_log
 # This stops the tail process.
 rm $TMPLOG
 echo "**** Done."
-
-
