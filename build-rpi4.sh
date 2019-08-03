@@ -1043,7 +1043,7 @@ first_boot_scripts_setup () {
     waitfor "image_extract_and_mount"
 startfunc    
     echo "* Creating first start cleanup script."
-    cat <<-'EOF' > /mnt/etc/rc.local.temp
+    cat <<-'EOF' > /mnt/etc/rc.local
 	#!/bin/sh -e
 	#
 	# Print the IP address
