@@ -142,12 +142,12 @@ spinnerwaitfor () {
         3 ) j="/" ;;
     esac
     tput rc
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1} [$j]\r"
+    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
     sleep 1
     ((i=i+1))
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\n" "${FUNCNAME[1]} noticed: ${1} [X]\r" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 waitfor () {
