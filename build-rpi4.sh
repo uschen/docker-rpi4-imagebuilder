@@ -81,7 +81,7 @@ mkdir -p $apt_cache/partial
 
 # Make sure inotify-tools is installed.
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim \
-e2fsprogs pv -qq 2>/dev/null
+e2fsprogs qemu-user-static pv -qq 2>/dev/null
 
 # Utility script
 # Apt concurrency manager wrapper via
