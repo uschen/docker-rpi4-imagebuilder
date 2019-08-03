@@ -156,14 +156,14 @@ waitfor () {
     touch /flag/wait.${FUNCNAME[1]}_for_${1}
     waitmsg="${FUNCNAME[1]} waits for: ${1} "
     slashbox="[/]"
-    printf "%${COLUMNS}s\r" "$waitmsg" "${slashbox}"
+    printf "%${COLUMNS}s\r\n\r" "$waitmsg" "${slashbox}"
     while read waitforit; do 
     if [ "$waitforit" = done.${1} ]; 
         then break; \
     fi; 
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r\n\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 
