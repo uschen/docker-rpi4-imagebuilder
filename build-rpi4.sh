@@ -244,8 +244,10 @@ git_get () {
         #printf "%${COLUMNS}s\n"  "*${FUNCNAME[1]} Last Commit:" "${last_commit}"
         #git log -1 --quiet 2> /dev/null
         #ls $cache_path/$local_path
+    else
+        echo -e "${FUNCNAME[1]} getting files from cache volume. 😎\n"
     fi
-    echo -e "${FUNCNAME[1]} files copying from cache.  😎\n"
+    
     cd $src_cache/$local_path 
     last_commit=`git log --graph \
     --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) \
@@ -678,17 +680,19 @@ startfunc
    arbitrary_wait
    echo -e "Looking for cached $KERNEL_VERS kernel debs ."
     for f in $apt_cache/linux-image-*${kernelrev}*; do
-     [ -e "$f" ] && havedebs=1 || unset havedebs
+     [ -e "$f" ] && (echo -e "Preexisting linux-image deb on cache volume. 😎\n" ; havedebs=1) \
+     || unset havedebs
      break
     done
     for f in $apt_cache/linux-headers-*${kernelrev}*; do
-     [ -e "$f" ] && havedebs=1 || unset havedebs
+     [ -e "$f" ] && (echo -e "Preexisting linux-headers deb on cache volume. 😎\n" ; havedebs=1) \
+     || unset havedebs
      break
     done
     if [[ $havedebs ]]
     then
-    echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo \
-    kernel needs to be built."
+    # echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo \
+    # kernel needs to be built."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
     cp $workdir/*.deb /output/ 
