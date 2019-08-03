@@ -337,9 +337,8 @@ startfunc
     echo "* Mounting: ${new_image}.img"
     
     arbitrary_wait
-    kpartx -avs ${new_image}.img > /tmp/kpartx_output
-    read kpartx_a kpartx_b kpartx c < <(sed -n 's/p1//p' /tmp/kpartx_output)
-    loop_device=`echo $kpartx_c |sed -n 's/p1//p'`
+    loop_device=`kpartx -avs ${new_image}.img \
+    | sed -n 's/\(^.*map\ \)// ; s/p1\ (.*//p'`
     
     #e2fsck -f /dev/loop0p2
     #resize2fs /dev/loop0p2
