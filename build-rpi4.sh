@@ -1025,7 +1025,7 @@ EOF
     # never bother installing.
 
     mkdir -p /mnt/etc/kernel/preinst.d/
-    echo "* Creating /etc/kernel/preinst.d/rpi4_make_device_tree_folders"
+    echo "* Creating /etc/kernel/preinst.d/rpi4_make_device_tree_folders ."
     cat <<-'EOF' > /mnt/etc/kernel/preinst.d/rpi4_make_device_tree_folders
 	#!/bin/sh -eu
 	#
