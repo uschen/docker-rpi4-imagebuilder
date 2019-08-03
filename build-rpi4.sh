@@ -30,6 +30,7 @@ mkdir /flag
 GIT_DISCOVERY_ACROSS_FILESYSTEM=1
 
 # Needed for display
+echo "columns: $columns COLUMNS: $COLUMNS"
 COLUMNS="${columns:-80}"
 
 
