@@ -1,4 +1,4 @@
-FROM ubuntu:19.10
+FROM ubuntu:18.04
 
 RUN set -ex \
     && sed -i -- 's/# deb-src/deb-src/g' /etc/apt/sources.list \
@@ -51,7 +51,7 @@ RUN set -ex \
                xxd \
                xz-utils \         
     && apt-get build-dep -y linux-image-raspi2 \
-    && apt-get build-dep -y linux-image-5.2.0-8-generic \
+    && apt-get build-dep -y linux-image-$(uname -r) \
     && apt-get upgrade -y \
     && apt-get clean \
     && rm -rf /tmp/* /var/tmp/*
