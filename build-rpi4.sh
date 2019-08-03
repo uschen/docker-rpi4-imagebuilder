@@ -131,6 +131,7 @@ spinnerwaitfor () {
     # waitforit file is written in the function "endfunc"
     touch /flag/wait.${FUNCNAME[1]}_for_${1}
     #printf "%${COLUMNS}s\n" "${FUNCNAME[1]} waits for: ${1}    "
+    printf "%${COLUMNS}s\r\n\n\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
     while read waitforit; do 
     if [ "$waitforit" = done.${1} ]; 
         then break; \
@@ -147,7 +148,7 @@ spinnerwaitfor () {
     ((i=i+1))
     done \
    < <(inotifywait  -e create,open,access --format '%f' --quiet /flag --monitor)
-    printf "%${COLUMNS}s\r\n\n\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
+    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} noticed: ${1} [X]" && rm -f /flag/wait.${FUNCNAME[1]}_for_${1}
 }
 
 waitfor () {
