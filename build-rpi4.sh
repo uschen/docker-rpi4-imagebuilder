@@ -440,10 +440,12 @@ EOF
     # This setup is to see if we can get around the issues with kernel
     # module support binaries built in amd64 instead of arm64.
     #echo "* Downloading qemu-user-static"
+    # qemu-user-binfmt needs to be installed after reboot though otherwise there 
+    # are container problems.
     chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     -d install  \
-    qemu-user-binfmt qemu-user qemu libc6-amd64-cross -qq 2>/dev/null
+    qemu-user qemu libc6-amd64-cross -qq 2>/dev/null
     # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
     # from image to build container in case they are needed during this install.
     #mkdir -p /mnt/lib64/
@@ -613,6 +615,23 @@ startfunc
     yes "" | make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
     O=.$workdir/kernel-build/ \
     olddefconfig &>> /tmp/${FUNCNAME[0]}.compile.log
+    
+    KERNEL_VERS=`cat /tmp/KERNEL_VERS`
+        echo "* Making $KERNEL_VERS kernel debs."
+        # Enable this if we want certain kernel install files compiled in
+        # arm64 chroot
+        #ext_mod_build_infrastructure
+        cd $workdir/rpi-linux
+        debcmd="make \
+        ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+        -j $(($(nproc) + 1)) O=$workdir/kernel-build \
+        bindeb-pkg"
+    
+        echo $debcmd
+        $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
+    
+    
+    
     #LOCALVERSION=-`git -C $workdir/rpi-linux rev-parse --short HEAD` \
     
     #cd ..
@@ -737,18 +756,7 @@ startfunc
     else
         kernel_build &
         spinnerwaitfor "kernel_build"
-        echo "* Making $KERNEL_VERS kernel debs."
-        # Enable this if we want certain kernel install files compiled in
-        # arm64 chroot
-        #ext_mod_build_infrastructure
-        cd $workdir/rpi-linux
-        debcmd="make \
-        ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-        -j $(($(nproc) + 1)) O=$workdir/kernel-build \
-        bindeb-pkg"
-    
-        echo $debcmd
-        $debcmd &>> /tmp/${FUNCNAME[0]}.compile.log
+
         echo "* Copying out git *${kernelrev}* kernel debs."
         rm $workdir/linux-libc-dev*.deb
         cp $workdir/*.deb $apt_cache/
@@ -1168,11 +1176,11 @@ startfunc
     
     # binfmt-support wreaks havoc with container, so let it get 
     # installed at first boot.
-    #umount /mnt/var/cache/apt
-    #echo "Installing binfmt-support files for install at first boot."
-    #chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
-    #-o dir::cache::archives=/mnt/var/cache/apt/archives/ \
-    #-d install binfmt-support -qq 2>/dev/null
+    umount /mnt/var/cache/apt
+    echo "Installing binfmt-support files for install at first boot."
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
+    -d install qemu-user-binfmt -qq 2>/dev/null
 
 
     # I'm not sure where this is needed, but kernel install
