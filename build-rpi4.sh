@@ -154,9 +154,7 @@ waitfor () {
     local waitforit
     # waitforit file is written in the function "endfunc"
     touch /flag/wait.${FUNCNAME[1]}_for_${1}
-    waitmsg="${FUNCNAME[1]} waits for: ${1} "
-    slashbox="[/]"
-    printf "%${COLUMNS}s\r\n\r" "$waitmsg" "${slashbox}"
+    printf "%${COLUMNS}s\r\n\r" "${FUNCNAME[1]} waits for: ${1} [/]"
     while read waitforit; do 
     if [ "$waitforit" = done.${1} ]; 
         then break; \
