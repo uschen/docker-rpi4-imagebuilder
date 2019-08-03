@@ -589,7 +589,7 @@ startfunc
     echo "* Installing $KERNEL_VERSION kernel debs to image."
     chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
-    arbitrary_wait
+    #arbitrary_wait
     
 endfunc
 }
