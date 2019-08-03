@@ -670,6 +670,8 @@ startfunc
     echo -e "Using existing $KERNEL_VERS debs from cache volume.\nNo kernel needs to be built."
     cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
     cp $apt_cache/linux-headers-*${kernelrev}*arm64.deb $workdir/
+    cp $workdir/*.deb /output/ 
+    chown $USER:$GROUP /output/*.deb
     else
         kernel_build
 	#waitfor "kernel_build"
