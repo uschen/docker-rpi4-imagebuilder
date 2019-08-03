@@ -449,9 +449,9 @@ startfunc
     sublevel=`grep SUBLEVEL $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
     extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
     extraversion_nohyphen="${extraversion//-}"
-    PKGVER=$majorversion.$patchlevel.$sublevel
-    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
-    KERNEL_VERS=$PKGVER-$kernelrev
+    PKGVER="$majorversion.$patchlevel.$sublevel"
+    kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
+    KERNEL_VERS="$PKGVER-$kernelrev"
     #echo $kernelrev
     
     cd $workdir/rpi-linux
