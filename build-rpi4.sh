@@ -393,6 +393,21 @@ EOF
     -o dir::cache::archives=$apt_cache \
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
+    
+    # This setup is to see if we can get around the issues with kernel
+    # module support binaries built in amd64 instead of arm64.
+    #echo "* Downloading qemu-user-static"
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
+    -o dir::cache::archives=$apt_cache \
+    -d install  \
+    qemu-user-static -qq 2>/dev/null
+    # Now we have qemu-static & arm64 binaries installed, so we copy libraries over
+    # from image to build container in case they are needed during this install.
+    cp /mnt/usr/lib/aarch64-linux-gnu/libc.so.6 /lib64/
+    cp /mnt/lib/ld-linux-aarch64.so.1 /lib/
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-apt-wrapper install -y --no-install-recommends \
+               qemu-user-static $silence_apt_flags"
+               
     echo "* Apt upgrading image in chroot."
     #echo "* There may be some errors here due to" 
     #echo "* installation happening in a chroot."
