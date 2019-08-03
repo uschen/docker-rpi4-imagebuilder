@@ -144,7 +144,7 @@ spinnerwaitfor () {
         3 ) j="/" ;;
     esac
     tput rc
-    printf "%${COLUMNS}s\r\n\n\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
+    printf "%${COLUMNS}s\r" "${FUNCNAME[1]} waits for: ${1} [$j]"
     sleep 1
     ((i=i+1))
     done \
