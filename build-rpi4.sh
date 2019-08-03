@@ -382,7 +382,7 @@ startfunc
     mount --bind $apt_cache /mnt/var/cache/apt
  #   chmod -R 777 /mnt/var/lib/apt/
  #   setfacl -R -m u:_apt:rwx /mnt/var/lib/apt/ 
-    mkdir /mnt/ccache || ls -aFl /mnt
+    mkdir -p /mnt/ccache || ls -aFl /mnt
     mount --bind $CCACHE_DIR /mnt/ccache
     mount --bind /run /mnt/run
     mkdir -p /run/systemd/resolve
