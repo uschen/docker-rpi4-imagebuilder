@@ -1134,8 +1134,9 @@ image_unmount () {
 startfunc
     echo "* Unmounting modified ${new_image}.img"
     sync
-    umount /mnt/boot/firmware || (sleep 60 ; umount /mnt/boot/firmware)
+    umount /mnt/boot/firmware || (lsof +f -- /mnt/boot/firmware ; sleep 60 ; umount /mnt/boot/firmware)
     #umount /mnt || (mount | grep /mnt)
+    #e4defrag /mnt
     umount /mnt || (lsof +f -- /mnt ; sleep 60 ; umount /mnt)
     #guestunmount /mnt
 
