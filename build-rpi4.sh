@@ -34,9 +34,9 @@ shopt -s checkwinsize
 #size=$(stty size) 
 #lines=${size% *}
 #columns=${size#* }
-echo "columns: $columns COLUMNS: $COLUMNS" > /tmp/columns
+echo "COLS: $COLS COLUMNS: $COLUMNS" > /tmp/columns
 env > /tmp/env
-COLUMNS="${columns:-80}"
+COLUMNS="${COLS:-80}"
 
 
 
