@@ -109,6 +109,29 @@ done
 EOF
 chmod +x /usr/bin/chroot-apt-wrapper
 
+cat <<'EOF'> /usr/bin/chroot-dpkg-wrapper
+#!/bin/bash
+
+i=0
+tput sc
+while fuser /mnt/var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    case $(($i % 4)) in
+        0 ) j="-" ;;
+        1 ) j="\\" ;;
+        2 ) j="|" ;;
+        3 ) j="/" ;;
+    esac
+    tput rc
+    echo -en "\r[$j] Waiting for other dpkg instances to finish..." 
+    sleep 0.5
+    ((i=i+1))
+done 
+
+/usr/bin/dpkg "$@"
+EOF
+chmod +x /usr/bin/chroot-dpkg-wrapper
+
+
 
 # Utility Functions
 
@@ -414,6 +437,30 @@ done
 /usr/bin/apt-get "$@"
 EOF
     chmod +x /mnt/usr/local/bin/chroot-apt-wrapper
+
+cat <<'EOF'> /mnt/usr/local/bin/chroot-dpkg-wrapper
+#!/bin/bash
+
+i=0
+tput sc
+while fuser /var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    case $(($i % 4)) in
+        0 ) j="-" ;;
+        1 ) j="\\" ;;
+        2 ) j="|" ;;
+        3 ) j="/" ;;
+    esac
+    tput rc
+    echo -en "\r[$j] Waiting for other dpkg instances to finish..." 
+    sleep 0.5
+    ((i=i+1))
+done 
+
+/usr/bin/dpkg "$@"
+EOF
+chmod +x /mnt/usr/local/bin/chroot-dpkg-wrapper
+
+
 
     mkdir -p /mnt/build
     mount -o bind /build /mnt/build
@@ -760,9 +807,9 @@ startfunc
     cp $workdir/*.deb /output/ 
     chown $USER:$GROUP /output/*.deb
     else
-        kernel_build &
-        waitfor "kernel_build"
-        arbitrary_wait
+        kernel_build
+        #waitfor "kernel_build"
+        #arbitrary_wait
 
         echo "* Copying out git *${kernelrev}* kernel debs."
         rm $workdir/linux-libc-dev*.deb
@@ -776,9 +823,9 @@ startfunc
     cp $workdir/*.deb /mnt/tmp/
     
     waitfor "added_scripts"
-    
+    waitfor "arm64_chroot_setup"
     echo "* Installing $KERNEL_VERS debs to image."
-    chroot /mnt /bin/bash -c "dpkg -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
+    chroot /mnt /bin/bash -c "/usr/local/bin/chroot-dpkg-wrapper -i /tmp/*.deb" &>> /tmp/${FUNCNAME[0]}.install.log
     
     #arbitrary_wait
     
