@@ -83,6 +83,31 @@ mkdir -p $apt_cache/partial
 apt-get -o dir::cache::archives=$apt_cache install inotify-tools lsof xdelta3 vim \
 -qq 2>/dev/null
 
+# Utility script
+
+cat <<'EOF'> /usr/bin/chroot-apt-wrapper
+#!/bin/bash
+
+i=0
+tput sc
+while fuser /mnt/var/lib/dpkg/lock >/dev/null 2>&1 ; do
+    case $(($i % 4)) in
+        0 ) j="-" ;;
+        1 ) j="\\" ;;
+        2 ) j="|" ;;
+        3 ) j="/" ;;
+    esac
+    tput rc
+    echo -en "\r[$j] Waiting for other software managers to finish..." 
+    sleep 0.5
+    ((i=i+1))
+done 
+
+/usr/bin/apt-get "$@"
+EOF
+chmod +x /usr/bin/chroot-apt-wrapper
+
+
 # Utility Functions
 
 function abspath {
@@ -328,7 +353,7 @@ startfunc
     update 2>/dev/null | grep packages | cut -d '.' -f 1 
     echo "* Apt update done."
     echo "* Downloading software for apt upgrade."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     upgrade -d -qq 2>/dev/null
     echo "* Apt upgrade download done."
@@ -337,7 +362,7 @@ startfunc
     #| grep packages | cut -d '.' -f 1"
     #echo "* Chroot apt update done."
     echo "* Downloading wifi & networking tools."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     -d install wireless-tools wireless-regdb crda \
     net-tools network-manager -qq 2>/dev/null
@@ -358,7 +383,7 @@ nativebuild () {
     waitfor "arm64_chroot_setup"
 startfunc
     echo "* Downloading software for building portions of kernel natively on chroot."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=$apt_cache \
     install -d -qq --no-install-recommends \
                build-essential \
@@ -597,10 +622,10 @@ startfunc
     extraversion=`grep EXTRAVERSION $src_cache/rpi-linux/Makefile | head -1 | awk -F ' = ' '{print $2}'`
     extraversion_nohyphen="${extraversion//-}"
     PKGVER="$majorversion.$patchlevel.$sublevel"
-    echo "PKGVER: $PKGVER"
+    #echo "PKGVER: $PKGVER"
     kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD` > /dev/null
     KERNEL_VERS="$PKGVER-$kernelrev"
-    echo "KERNEL_VERS: $KERNEL_VERS"
+    #echo "KERNEL_VERS: $KERNEL_VERS"
     #kernelrev=`git -C $src_cache/rpi-linux rev-parse --short HEAD`
     #echo $kernelrev
    # Don't remake debs if they already exist in output.
@@ -1041,7 +1066,7 @@ startfunc
     # installed at first boot.
     umount /mnt/var/cache/apt
     echo "Installing binfmt-support files for install at first boot."
-    apt-get -o Dir=/mnt -o APT::Architecture=arm64 \
+    chroot-apt-wrapper -o Dir=/mnt -o APT::Architecture=arm64 \
     -o dir::cache::archives=/mnt/var/cache/apt/archives/ \
     -d install binfmt-support -qq 2>/dev/null
 
@@ -1049,7 +1074,8 @@ startfunc
     # I'm not sure where this is needed, but kernel install
     # craps out without this: /lib/firmware/`uname -r`/device-tree/
     # So we create it:
-    mkdir -p /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
+    #mkdir -p /mnt/lib/firmware/`cat $workdir/kernel-build/include/generated/utsrelease.h | sed -e 's/.*"\(.*\)".*/\1/'`/device-tree/
+    # Now handled by script on image.
     
     # Copy in kernel debs generated earlier to be installed at
     # first boot.
