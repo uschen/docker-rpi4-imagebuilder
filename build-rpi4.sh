@@ -432,6 +432,10 @@ endfunc
 kernel_build () {
     git_get "$kernelgitrepo" "rpi-linux" "$kernel_branch"
 startfunc    
+    
+    kernelrev=`git -C $apt_cache/rpi-linux rev-parse --short HEAD`
+    echo $kernelrev
+    
     cd $workdir/rpi-linux
         # Get rid of dirty localversion as per https://stackoverflow.com/questions/25090803/linux-kernel-kernel-version-string-appended-with-either-or-dirty
     #touch $workdir/rpi-linux/.scmversion
@@ -443,7 +447,7 @@ startfunc
     git update-index --refresh &>> /tmp/${FUNCNAME[0]}.compile.log || true
     git diff-index --quiet HEAD &>> /tmp/${FUNCNAME[0]}.compile.log || true
     
-    #kernelrev=`git -C $workdir/rpi-linux rev-parse --short HEAD`
+
     mkdir $workdir/kernel-build
     cd $workdir/rpi-linux
     
@@ -552,21 +556,23 @@ endfunc
 kernel_debs () {
 startfunc
 
+    kernelrev=`git -C $apt_cache/rpi-linux rev-parse --short HEAD`
+    echo $kernelrev
    # Don't remake debs if they already exist in output.
-   echo -e "Looking for cached ${KERNEL_VERSION} kernel debs ."
-    for f in $apt_cache/linux-image-${KERNEL_VERSION}*; do
+   echo -e "Looking for cached ${kernelrev} kernel debs ."
+    for f in $apt_cache/linux-image-*${kernelrev}*; do
      [ -e "$f" ] && havedebs=1 || unset havedebs
      break
     done
-    for f in $apt_cache/linux-headers-${KERNEL_VERSION}*; do
+    for f in $apt_cache/linux-headers-*${kernelrev}*; do
      [ -e "$f" ] && havedebs=1 || unset havedebs
      break
     done
     if [[ $havedebs ]]
     then
-    echo "Using existing $KERNEL_VERSION debs."
-    cp $apt_cache/linux-image-$KERNEL_VERSION*arm64.deb $workdir/
-    cp $apt_cache/linux-headers-$KERNEL_VERSION*arm64.deb $workdir/
+    echo "Using existing *${kernelrev}* debs."
+    cp $apt_cache/linux-image-*${kernelrev}*arm64.deb $workdir/
+    cp $apt_cache/linux-headers-$*${kernelrev}*arm64.deb $workdir/
     else
         echo "* Making $KERNEL_VERSION kernel debs."
         cd $workdir/rpi-linux
