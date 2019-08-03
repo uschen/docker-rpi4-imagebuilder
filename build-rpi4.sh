@@ -555,11 +555,11 @@ startfunc
    # Don't remake debs if they already exist in output.
    echo -e "Looking for cached ${KERNEL_VERSION} kernel debs ."
     for f in $apt_cache/linux-image-${KERNEL_VERSION}*; do
-     [ -e "$f" ] && unset havedebs || havedebs=1
+     [ -e "$f" ] && havedebs=1 || unset havedebs
      break
     done
     for f in $apt_cache/linux-headers-${KERNEL_VERSION}*; do
-     [ -e "$f" ] && unset havedebs || havedebs=1
+     [ -e "$f" ] && havedebs=1 || unset havedebs
      break
     done
     if [[ $havedebs ]]
