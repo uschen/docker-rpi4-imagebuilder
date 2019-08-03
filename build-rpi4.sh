@@ -1111,11 +1111,11 @@ startfunc
     cp $workdir/*.deb /mnt/var/cache/apt/archives/
     sync
     # To stop here "rm /flag/done.ok_to_unmount_image_after_build".
-    if [ ! -f /flag/done.ok_to_unmount_image_after_build ]; then
-        echo "** Container paused before image unmount. **"
-        echo 'Type in "touch /flag/done.ok_to_unmount_image_after_build"'
-        echo "in a shell into this container to continue."
-    fi 
+    #if [ ! -f /flag/done.ok_to_unmount_image_after_build ]; then
+    #    echo "** Container paused before image unmount. **"
+    #    echo 'Type in "touch /flag/done.ok_to_unmount_image_after_build"'
+    #    echo "in a shell into this container to continue."
+    #fi 
      
     waitfor "ok_to_umount_image_after_build"
     umount /mnt/build
@@ -1157,7 +1157,7 @@ endfunc
 compressed_image_export () {
 startfunc
 
-    
+    KERNEL_VERS=`cat /tmp/KERNEL_VERS`
     # Note that lz4 is much much faster than using xz.
     chown -R $USER:$GROUP /build
     cd $workdir
@@ -1169,14 +1169,14 @@ startfunc
      compress_flags=""
      [ "$i" == "lz4" ] && compress_flags="-m"
      compresscmd="$i -v -k $compress_flags ${new_image}.img"
-     cpcmd="cp $workdir/${new_image}.img.$i \
-     /output/${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i"
      echo $compresscmd
      $compresscmd
+     cp "$workdir/${new_image}.img.$i" \
+     "/output/${new_image}-$KERNEL_VERS_${now}.img.$i"
      #echo $cpcmd
-     $cpcmd
-     chown $USER:$GROUP /output/${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i
-     echo "${new_image}-`cat /tmp/KERNEL_VERS`_${now}.img.$i created." 
+     #$cpcmd
+     chown $USER:$GROUP /output/${new_image}-$KERNEL_VERS_${now}.img.$i
+     echo "${new_image}-$KERNEL_VERS_${now}.img.$i created." 
     done
 endfunc
 }    
@@ -1188,6 +1188,7 @@ startfunc
         xdelta3 -e -S none -I 0 -B 1812725760 -W 16777216 -vfs \
         $workdir/old_image.img $workdir/${new_image}.img \
         $workdir/patch.xdelta
+	KERNEL_VERS=`cat /tmp/KERNEL_VERS`
         for i in "${image_compressors[@]}"
         do
             echo "* Compressing patch.xdelta with $i and exporting."
@@ -1198,12 +1199,12 @@ startfunc
             xdelta_patchout_compresscmd="$i -v -k $compress_flags \
              $workdir/patch.xdelta"
             $xdelta_patchout_compresscmd
-            xdelta_patchout_cpcmd="cp $workdir/patch.xdelta.$i \
-     /output/eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i"
-            $xdelta_patchout_cpcmd
-            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i
+            cp "$workdir/patch.xdelta.$i" \
+     "/output/eoan-daily-preinstalled-server_$KERNEL_VERS_${now}.xdelta3.$i"
+            #$xdelta_patchout_cpcmd
+            chown $USER:$GROUP /output/eoan-daily-preinstalled-server_$KERNEL_VERS_${now}.xdelta3.$i
             echo "Xdelta3 file exported to:"
-            echo "eoan-daily-preinstalled-server_`cat /tmp/KERNEL_VERS`${now}.xdelta3.$i"
+            echo "/output/eoan-daily-preinstalled-server_$KERNEL_VERS_${now}.xdelta3.$i"
         done
 endfunc
 }
