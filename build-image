@@ -65,6 +65,9 @@ docker_args="-dt "
 [[ !    "$srcdir"        ]] && fatal "source directory not given"
 [[ !    "$image"         ]] && fatal "docker image name not given (-i IMAGE)"
 
+echo "* outdir: $outdir"
+echo "* srcdir: $srcdir"
+
 # Needed for loopback to work inside container.
 #docker_args+="--cap-add=CAP_MKNOD --device-cgroup-rule='b 7:* rmw' "
 docker_args+="-v /dev:/dev --privileged "
